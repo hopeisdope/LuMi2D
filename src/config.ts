@@ -43,9 +43,9 @@ export const CAR = {
  */
 export const JUMP = {
   /** Hoogte van de top van de sprong (wereld-eenheden). */
-  height: 170,
-  /** Totale tijd in de lucht (s). */
-  airTime: 0.8,
+  height: 190,
+  /** Totale tijd in de lucht (s). Lang en zweverig: geeft jonge kinderen ~0,7 s om op tijd te tikken. */
+  airTime: 1.1,
   /** Een tik tot zo lang (s) vóór de landing telt nog als sprong: vergevingsgezind voor kleine kinderen. */
   bufferTime: 0.15,
   /** Duur (s) van het inveren na de landing. */
@@ -78,12 +78,12 @@ export const OBSTACLES = {
   /** Obstakels zo ver achter de auto worden opgeruimd. */
   despawnBehind: 800,
   /** Vergevingsgezinde botsing: zoveel eenheden van elke kant van het obstakel tellen niet mee. */
-  hitboxInset: 8,
+  hitboxInset: 10,
   /** Afmetingen per soort; laag genoeg om er makkelijk overheen te springen. */
   kinds: {
-    cone: { width: 44, height: 52 },
-    rock: { width: 62, height: 36 },
-    crate: { width: 50, height: 46 },
+    cone: { width: 40, height: 44 },
+    rock: { width: 56, height: 30 },
+    crate: { width: 44, height: 38 },
   },
 } as const;
 
@@ -99,8 +99,8 @@ export const BUMP = {
 
 /** Botsingsvak van de auto, relatief aan de afmetingen (iets kleiner dan de tekening = vergevingsgezind). */
 export const CAR_HITBOX = {
-  /** Halve breedte als fractie van de autobreedte (wielen staan op ±0,28). */
-  halfWidthRatio: 0.3,
+  /** Halve breedte als fractie van de autobreedte: iets smaller dan de wielbasis (±0,28), dus vergevingsgezind. */
+  halfWidthRatio: 0.24,
   /** Hoogte als fractie van de autohoogte. */
   heightRatio: 1,
 } as const;

@@ -10,6 +10,7 @@ Concise state for reloading into a fresh session. Details are in `WORKLIST.md`.
 - Phase 3: obstacles in `world/Obstacles.ts` (fixed pool of 8, spawn by distance with seeded random `world/random.ts`).
   Collision = gentle bump: car wobbles, speed drops to 35% and recovers; no game over. Each cleared obstacle = 1 star
   (`world.score`). Obstacles on/off via `world.obstaclesEnabled` (default `OBSTACLES.enabled`).
+- Jump window is ~0.7 s (was 0.3 s, too short per user): `JUMP` 190 high / 1.1 s, `CAR_HITBOX.halfWidthRatio` 0.24.
 - `world.events.jumped/landed/bumped/scored` are set per frame — the hook for sound/feedback later.
 - `createWorld(seed)` / `resetWorld(world, seed)` take an optional seed for reproducible tests.
 - Hosting: Netlify via `netlify.toml`; the repo still has to be linked in the Netlify UI (production branch `main`).
