@@ -31,6 +31,8 @@ Bediening: tik om te starten, tik ergens op het scherm om te springen, pauzeknop
 Spring over pionnen, stenen en kistjes: elk obstakel waar je overheen springt levert een ster op.
 Pas op voor de egel die over de weg wandelt: spring eroverheen voor een ster!
 Botsen is niet erg: de auto hobbelt even en rijdt verder.
+Spring op een paars platform en pak de bliksem: dan rijd je even supersnel met turbo.
+Verzamel drie regenboogkleuren en de auto maakt vanzelf een magische regenboogrit langs een rij sterren.
 Kies je auto op het startscherm of in het pauzemenu.
 Via het tandwiel op het startscherm zet je pionnen & stenen, egels en geluid aan of uit en kies je een wereld
 (Weide, Dino, Ruimte of Zoetroze).
@@ -48,6 +50,7 @@ src/
   input/InputManager.ts   pointer/touch/toetsenbord → abstracte InputActions
   world/World.ts, Car.ts  pure game-logica (geen rendering)
   world/Obstacles.ts      obstakels en egels: pool, spawnen, bewegen, botsingen, sterren
+  world/Collectibles.ts   platforms, turbo, regenboogstukjes en de regenboogrit
   world/random.ts         seedbare randomgenerator
   render/Screen.ts        canvas-schaling (vaste virtuele hoogte, letterbox)
   render/*Renderer.ts     achtergrond (parallax), auto, UI

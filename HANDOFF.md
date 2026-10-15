@@ -18,7 +18,10 @@ Concise state for reloading into a fresh session. Details are in `WORKLIST.md`.
 - PWA: production build emits `sw.js` (precache of all build + public files, cache name per build). Tested offline reload in Chromium.
 - Worlds: data in `src/themes.ts` (colours + `decor`/`farLayer`/`celestial`), drawn by `BackgroundRenderer`. Cars: `CARS` in `config.ts`, shapes in `CarRenderer.drawBody` (also used for the picker). Look only — physics identical.
 - Icons: `src/render/icons.ts` (vector, no emoji); every text/button in the UI has an icon or picture.
-- `world.events.jumped/landed/bumped/scored` are set per frame — the hook for sound/feedback later.
+- Part 3: `world/Collectibles.ts` (platform + collectible pools, turbo/shield/ride timers). Course generation in
+  `Obstacles.ts#spawnAhead` also places platforms (`PLATFORMS.chance`) and rainbow pieces (`RAINBOW.chance`).
+  Platforms are one-way (land from above only) in `Car.updateCar`; the ride uses `Car.floatCar`.
+- `world.events.jumped/landed/bumped/scored/boosted/rainbowPiece/rainbowRide` are set per frame — the hook for sound/feedback later.
 - `createWorld(seed)` / `resetWorld(world, seed)` take an optional seed for reproducible tests.
 - Hosting: Netlify via `netlify.toml`; the repo still has to be linked in the Netlify UI (production branch `main`).
 - Typecheck and build pass; tested in Chromium (Playwright) with iPad viewports, not yet on a real device.

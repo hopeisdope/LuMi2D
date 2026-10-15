@@ -128,6 +128,9 @@ export class Game {
     else if (e.jumped) this.sound.play('jump');
     else if (e.landed) this.sound.play('land');
     if (e.scored) this.sound.play('star');
+    if (e.boosted) this.sound.play('boost');
+    if (e.rainbowRide) this.sound.play('rainbowRide');
+    else if (e.rainbowPiece) this.sound.play('rainbowPiece');
   }
 
   private readonly render = (): void => {

@@ -69,6 +69,32 @@ export interface Car {
   bumpTimer: number;
 }
 
+/** Zwevend platform waar de auto op kan springen (alleen van bovenaf; eronderdoor rijden kan). */
+export interface Platform {
+  active: boolean;
+  /** Wereldpositie van de linkerrand. */
+  x: number;
+  width: number;
+  /** Y van het bovenvlak. */
+  top: number;
+}
+
+/** Iets om te pakken: turbo, regenboogstukje of ster (regenboogrit). */
+export type CollectibleKind = 'boost' | 'rainbow' | 'star';
+
+export interface Collectible {
+  active: boolean;
+  kind: CollectibleKind;
+  /** Wereldpositie van het midden. */
+  x: number;
+  y: number;
+  /** Kleur van een regenboogstukje (0 = rood, 1 = geel, 2 = blauw). */
+  colorIndex: number;
+  collected: boolean;
+  /** Wereldtijd van het pakken (voor de animatie). */
+  collectedTime: number;
+}
+
 export type ObstacleKind = 'cone' | 'rock' | 'crate' | 'hedgehog';
 
 /**
@@ -120,6 +146,18 @@ export interface WorldState {
   nextObstacleAt: number;
   /** Deterministische randomgenerator (seedbaar, handig voor tests). */
   random: () => number;
+  /** Vaste pool met platforms. */
+  platforms: Platform[];
+  /** Vaste pool met dingen om te pakken. */
+  collectibles: Collectible[];
+  /** Resterende turbotijd (s); 0 = geen turbo. */
+  boostTimer: number;
+  /** Resterende onkwetsbare tijd (s) na de regenboogrit, zodat de landing altijd veilig is. */
+  shieldTimer: number;
+  /** Aantal verzamelde regenboogkleuren (0–3). */
+  rainbowPieces: number;
+  /** Resterende tijd (s) van de regenboogrit; 0 = geen rit. */
+  rainbowRide: number;
   car: Car;
   /** Gebeurtenissen van het laatste update-frame (voor later: geluid en feedback). */
   events: WorldEvents;
@@ -133,6 +171,12 @@ export interface WorldEvents {
   bumped: boolean;
   /** Er is een ster verdiend. */
   scored: boolean;
+  /** Turbo gepakt. */
+  boosted: boolean;
+  /** Regenboogstukje gepakt. */
+  rainbowPiece: boolean;
+  /** Regenboogrit gestart. */
+  rainbowRide: boolean;
 }
 
 /** Icoon naast de tekst van een knop (voor kinderen die nog niet lezen). */
