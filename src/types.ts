@@ -25,10 +25,11 @@ export interface Viewport {
 
 /**
  * Abstracte acties die de input-laag levert. De game-logica kent alleen acties,
- * geen touch/muis/toetsenbord. In fase 2 komt hier bv. 'jump' bij.
+ * geen touch/muis/toetsenbord. Wat een tik betekent (knop of springen) bepaalt de game.
  */
 export type InputAction =
   | { type: 'tap'; x: number; y: number }
+  | { type: 'jump' }
   | { type: 'togglePause' }
   | { type: 'confirm' };
 
@@ -37,9 +38,13 @@ export interface Car {
   x: number;
   /** Y van de onderkant van de wielen. */
   y: number;
-  /** Verticale snelheid — voorbereid op springen (fase 2). */
+  /** Verticale snelheid (negatief = omhoog). */
   vy: number;
   onGround: boolean;
+  /** Resterende tijd (s) waarin een eerder gevraagde sprong nog wordt uitgevoerd bij de landing. */
+  jumpBuffer: number;
+  /** Aflopende timer (s) na de landing; gebruikt voor het inveren (visueel). */
+  landingTimer: number;
   width: number;
   height: number;
   wheelRadius: number;
@@ -56,7 +61,17 @@ export interface WorldState {
   distance: number;
   /** Verstreken speeltijd in seconden. */
   time: number;
+  /** Aantal sprongen in deze ronde (o.a. voor de springhint; later voor feedback). */
+  jumpCount: number;
   car: Car;
+  /** Gebeurtenissen van het laatste update-frame (voor later: geluid en feedback). */
+  events: WorldEvents;
+}
+
+/** Vlaggen die elk frame opnieuw worden gezet; geen allocaties per gebeurtenis. */
+export interface WorldEvents {
+  jumped: boolean;
+  landed: boolean;
 }
 
 /** Een knop in de canvas-UI. */

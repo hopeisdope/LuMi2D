@@ -56,8 +56,8 @@ export class InputManager {
 
   private readonly onPointerDown = (event: PointerEvent): void => {
     event.preventDefault();
-    // Alleen de primaire knop / eerste vinger telt als tik.
-    if (!event.isPrimary || event.button > 0) return;
+    // Elke vinger telt (ook als er al een hand op het scherm rust); bij de muis alleen de linkerknop.
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
     const rect = this.target.getBoundingClientRect();
     this.push({ type: 'tap', x: event.clientX - rect.left, y: event.clientY - rect.top });
   };
@@ -69,6 +69,11 @@ export class InputManager {
       case 'KeyP':
         event.preventDefault();
         this.push({ type: 'togglePause' });
+        break;
+      case 'ArrowUp':
+      case 'KeyW':
+        event.preventDefault();
+        this.push({ type: 'jump' });
         break;
       case 'Space':
       case 'Enter':

@@ -37,6 +37,31 @@ export const CAR = {
   bobFrequency: 9,
 } as const;
 
+/**
+ * Springen. Vastgelegd als hoogte en luchttijd (makkelijk af te stemmen);
+ * zwaartekracht en afzetsnelheid worden daaruit afgeleid.
+ */
+export const JUMP = {
+  /** Hoogte van de top van de sprong (wereld-eenheden). */
+  height: 170,
+  /** Totale tijd in de lucht (s). */
+  airTime: 0.8,
+  /** Een tik tot zo lang (s) vóór de landing telt nog als sprong: vergevingsgezind voor kleine kinderen. */
+  bufferTime: 0.15,
+  /** Duur (s) van het inveren na de landing. */
+  landingTime: 0.18,
+  /** Hoeveel de carrosserie inveert bij de landing (fractie van de hoogte). */
+  landingSquash: 0.12,
+  /** Maximale kanteling (radialen) tijdens de sprong: neus omhoog bij stijgen. */
+  maxTilt: 0.12,
+} as const;
+
+/** Afgeleide sprongfysica: h = v²/2g en t = 2v/g. */
+export const JUMP_PHYSICS = {
+  gravity: (8 * JUMP.height) / (JUMP.airTime * JUMP.airTime),
+  velocity: (4 * JUMP.height) / JUMP.airTime,
+} as const;
+
 /** Instelbare voortbeweging; later uit te breiden met moeilijkheidsgraad. */
 export const SPEED = {
   /** Basissnelheid in wereld-eenheden per seconde. */

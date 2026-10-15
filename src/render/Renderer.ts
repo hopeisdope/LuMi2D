@@ -1,4 +1,7 @@
 import { CAR, COLORS } from '../config';
+
+/** Wacht even met de springhint, zodat de auto eerst zichtbaar wegrijdt. */
+const JUMP_HINT_DELAY = 0.8;
 import type { GameState, Viewport, WorldState } from '../types';
 import type { Layout } from '../ui/Layout';
 import { BackgroundRenderer } from './BackgroundRenderer';
@@ -33,7 +36,8 @@ export class Renderer {
     this.background.render(view, world.distance, idleTime);
     // De auto staat op een vaste schermpositie; de wereld scrolt eronder door.
     this.car.render(world.car, view.width * CAR.screenXRatio, world.time, state === 'playing' && world.speed > 0);
-    this.ui.render(state, view, layout, idleTime);
+    const showJumpHint = state === 'playing' && world.jumpCount === 0 && world.time > JUMP_HINT_DELAY;
+    this.ui.render(state, view, layout, idleTime, showJumpHint);
 
     ctx.restore();
   }
