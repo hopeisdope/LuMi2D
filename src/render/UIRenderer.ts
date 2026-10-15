@@ -1,7 +1,12 @@
-import { BRAND, LOGO_COLORS, TYPOGRAPHY, UI_STYLE } from '../brand/brand';
-import { COLORS, UI } from '../config';
-import type { Button, GameState, Settings, Viewport, WorldState } from '../types';
+import { BRAND, LOGO_COLORS, PALETTE, TYPOGRAPHY, UI_STYLE } from '../brand/brand';
+import { CARS, COLORS, UI } from '../config';
+import { CAR_IDS, THEME_IDS } from '../settings/Settings';
+import { THEMES, type Theme } from '../themes';
+import type { Button, GameState, ObstacleKind, Rect, Settings, Viewport, WorldState } from '../types';
 import type { Layout } from '../ui/Layout';
+import { CarRenderer } from './CarRenderer';
+import { drawIcon, type IconName } from './icons';
+import type { ObstacleRenderer } from './ObstacleRenderer';
 import { roundRectPath, starPath } from './shapes';
 
 const font = (size: number): string => `${TYPOGRAPHY.weight} ${size}px ${TYPOGRAPHY.fontFamily}`;
@@ -20,13 +25,24 @@ const JUMP_HINT = 'Tik om te springen!';
 const LOGO_LETTERS: readonly string[] = Array.from(BRAND.name);
 const LOGO_LETTER_SPACING = 4;
 
-/** Tekent start-, pauze- en menu-UI op de canvas in de LuMi2d-huisstijl. */
+/**
+ * Tekent alle menu's en de HUD op de canvas in de LuMi2d-huisstijl. Elke tekst heeft een
+ * icoon of plaatje erbij, zodat kinderen die nog niet lezen alles kunnen bedienen.
+ */
 export class UIRenderer {
   /** Breedte per logoletter; wordt bij de eerste tekenbeurt gemeten en daarna hergebruikt. */
   private readonly logoWidths = new Float64Array(LOGO_LETTERS.length);
   private logoTotalWidth = -1;
+  /** Gemeten tekstbreedtes (per lettertype + tekst), zodat measureText niet elk frame nodig is. */
+  private readonly textWidths = new Map<string, number>();
+  private readonly carPreview: CarRenderer;
 
-  constructor(private readonly ctx: CanvasRenderingContext2D) {}
+  constructor(
+    private readonly ctx: CanvasRenderingContext2D,
+    private readonly obstacleIcons: ObstacleRenderer,
+  ) {
+    this.carPreview = new CarRenderer(ctx);
+  }
 
   render(
     state: GameState,
@@ -38,32 +54,34 @@ export class UIRenderer {
     showJumpHint: boolean,
   ): void {
     const cx = view.width / 2;
-    const cy = view.height / 2;
     switch (state) {
       case 'ready':
         this.dim(view);
-        this.logo(cx, cy - 110, time);
-        this.text(BRAND.tagline, cx, cy - 30, SUBTITLE_FONT);
+        this.logo(cx, 88, time);
+        this.iconText('hand', BRAND.tagline, cx, 150, SUBTITLE_FONT, false, time);
+        this.carPicker(layout.startCarCards, settings, time);
         this.button(layout.start);
         this.iconButton(layout.settings, 'gear');
         break;
       case 'settings':
         this.dim(view);
-        this.text('Instellingen', cx, layout.toggleObstacles.rect.y - 52, HEADING_FONT);
-        this.toggleRow(layout.toggleObstacles, settings.obstacles);
-        this.toggleRow(layout.toggleEnemies, settings.enemies);
-        this.toggleRow(layout.toggleSound, settings.sound);
+        this.iconText('gear', 'Instellingen', cx, 48, SUBTITLE_FONT, true);
+        this.toggleRow(layout.toggleObstacles, settings.obstacles, 'cone');
+        this.toggleRow(layout.toggleEnemies, settings.enemies, 'hedgehog');
+        this.toggleRow(layout.toggleSound, settings.sound, settings.sound ? 'soundOn' : 'soundOff');
+        this.worldPicker(layout.worldCards, settings);
         this.button(layout.done);
         break;
       case 'playing':
         if (showJumpHint) this.jumpHint(cx, view.height * 0.3, time);
         this.scoreCounter(world);
-        this.pauseButton(layout.pause);
+        this.iconButton(layout.pause, 'pause');
         break;
       case 'paused':
         this.dim(view);
         this.scoreCounter(world);
-        this.text('Pauze', cx, cy - 120, HEADING_FONT);
+        this.iconText('pause', 'Pauze', cx, 70, HEADING_FONT, false);
+        this.carPicker(layout.pauseCarCards, settings, time);
         this.button(layout.resume);
         this.button(layout.restart);
         break;
@@ -155,15 +173,26 @@ export class UIRenderer {
     return this.cachedScoreLabel;
   }
 
-  /** Zacht pulserende uitnodiging om te springen, tot het kind voor het eerst springt. */
+  /** Zacht pulserende uitnodiging om te springen (met tikkende hand), tot het kind voor het eerst springt. */
   private jumpHint(x: number, y: number, time: number): void {
     const { ctx } = this;
     const scale = 1 + Math.sin(time * 5) * 0.05;
     ctx.save();
     ctx.translate(x, y);
     ctx.scale(scale, scale);
-    this.text(JUMP_HINT, 0, 0, SUBTITLE_FONT, true);
+    this.iconText('hand', JUMP_HINT, 0, 0, SUBTITLE_FONT, true, time);
     ctx.restore();
+  }
+
+  private measure(value: string, fontSpec: string): number {
+    const key = fontSpec + '|' + value;
+    let w = this.textWidths.get(key);
+    if (w === undefined) {
+      this.ctx.font = fontSpec;
+      w = this.ctx.measureText(value).width;
+      this.textWidths.set(key, w);
+    }
+    return w;
   }
 
   /** Witte tekst met schaduw; `outlined` voegt een donkere rand toe voor tekst los op de lucht. */
@@ -184,6 +213,31 @@ export class UIRenderer {
     ctx.fillText(value, x, y);
   }
 
+  /** Icoon + tekst als gecentreerde groep. Het icoon krijgt een donker rondje zodat het overal goed zichtbaar is. */
+  private iconText(
+    icon: IconName,
+    value: string,
+    cx: number,
+    cy: number,
+    fontSpec: string,
+    outlined: boolean,
+    time = 0,
+  ): void {
+    const { ctx } = this;
+    const iconSize = fontSpec === HEADING_FONT ? 56 : 40;
+    const gap = 14;
+    const textW = this.measure(value, fontSpec);
+    const total = iconSize + gap + textW;
+    const iconX = cx - total / 2 + iconSize / 2;
+    ctx.fillStyle = UI_STYLE.text.outline;
+    ctx.beginPath();
+    ctx.arc(iconX, cy, iconSize / 2 + 4, 0, Math.PI * 2);
+    ctx.fill();
+    drawIcon(ctx, icon, iconX, cy, iconSize * 0.72, UI_STYLE.text.fill, time);
+    this.text(value, cx - total / 2 + iconSize + gap + textW / 2, cy, fontSpec, outlined);
+  }
+
+  /** Grote oranje knop met icoon en tekst. */
   private button(button: Button): void {
     const { ctx } = this;
     const { x, y, width, height } = button.rect;
@@ -196,19 +250,26 @@ export class UIRenderer {
     ctx.beginPath();
     roundRectPath(ctx, x, y, width, height, style.radius);
     ctx.fill();
-    this.text(button.label, x + width / 2, y + height / 2, BUTTON_FONT);
+
+    const cx = x + width / 2;
+    const cy = y + height / 2;
+    if (!button.icon) {
+      this.text(button.label, cx, cy, BUTTON_FONT);
+      return;
+    }
+    const iconSize = Math.min(44, height * 0.55);
+    const gap = 14;
+    const textW = this.measure(button.label, BUTTON_FONT);
+    const total = iconSize + gap + textW;
+    drawIcon(ctx, button.icon, cx - total / 2 + iconSize / 2, cy, iconSize, style.text);
+    this.text(button.label, cx - total / 2 + iconSize + gap + textW / 2, cy, BUTTON_FONT);
   }
 
-  private pauseButton(button: Button): void {
-    this.iconButton(button, 'pause');
-  }
-
-  /** Vierkante oranje knop met een wit icoon (pauze of tandwiel). */
-  private iconButton(button: Button, icon: 'pause' | 'gear'): void {
+  /** Vierkante oranje knop met alleen een wit icoon (pauze, tandwiel). */
+  private iconButton(button: Button, icon: IconName): void {
     const { ctx } = this;
     const { x, y, width, height } = button.rect;
     const style = UI_STYLE.button;
-    // Opvallend oranje met donkere rand: blijft zichtbaar tegen wolken en lucht.
     ctx.fillStyle = style.shadow;
     ctx.beginPath();
     roundRectPath(ctx, x, y + 4, width, height, style.smallRadius);
@@ -217,40 +278,11 @@ export class UIRenderer {
     ctx.beginPath();
     roundRectPath(ctx, x, y, width, height, style.smallRadius);
     ctx.fill();
-
-    ctx.fillStyle = style.text;
-    if (icon === 'pause') {
-      const barW = width * 0.16;
-      const barH = height * 0.5;
-      const top = y + (height - barH) / 2;
-      ctx.fillRect(x + width * 0.3, top, barW, barH);
-      ctx.fillRect(x + width * 0.54, top, barW, barH);
-    } else {
-      this.gear(x + width / 2, y + height / 2, width * 0.3, style.fill);
-    }
+    drawIcon(ctx, icon, x + width / 2, y + height / 2, width * 0.55, style.text);
   }
 
-  /** Tandwiel: acht tanden rond een cirkel met een gat in de kleur van de knop. */
-  private gear(cx: number, cy: number, r: number, holeColor: string): void {
-    const { ctx } = this;
-    ctx.save();
-    ctx.translate(cx, cy);
-    for (let i = 0; i < 8; i++) {
-      ctx.rotate(Math.PI / 4);
-      ctx.fillRect(-r * 0.22, -r * 1.25, r * 0.44, r * 0.6);
-    }
-    ctx.beginPath();
-    ctx.arc(0, 0, r, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = holeColor;
-    ctx.beginPath();
-    ctx.arc(0, 0, r * 0.42, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-  }
-
-  /** Instellingenrij: label links, grote aan/uit-schakelaar rechts. De hele rij is aantikbaar. */
-  private toggleRow(button: Button, on: boolean): void {
+  /** Instellingenrij: plaatje + label links, grote aan/uit-schakelaar met ✓/✗ rechts. De hele rij is aantikbaar. */
+  private toggleRow(button: Button, on: boolean, picture: ObstacleKind | IconName): void {
     const { ctx } = this;
     const { x, y, width, height } = button.rect;
     ctx.fillStyle = UI_STYLE.panel;
@@ -258,16 +290,25 @@ export class UIRenderer {
     roundRectPath(ctx, x, y, width, height, UI_STYLE.button.radius);
     ctx.fill();
 
+    // Plaatje: het obstakel zelf, of een icoon.
+    const px = x + 40;
+    const py = y + height / 2;
+    if (picture === 'cone' || picture === 'rock' || picture === 'crate' || picture === 'hedgehog') {
+      this.obstacleIcons.drawIcon(picture, px, py, height * 0.68);
+    } else {
+      drawIcon(ctx, picture, px, py, height * 0.6, UI_STYLE.text.outline);
+    }
+
     ctx.font = SUBTITLE_FONT;
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = UI_STYLE.text.outline;
-    ctx.fillText(button.label, x + 28, y + height / 2 + 1);
+    ctx.fillText(button.label, x + 78, y + height / 2 + 1);
 
-    // Schakelaar
+    // Schakelaar: kleur, AAN/UIT en een ✓ of ✗ in het knopje.
     const sw = 116;
-    const sh = 54;
-    const sx = x + width - sw - 18;
+    const sh = 50;
+    const sx = x + width - sw - 14;
     const sy = y + (height - sh) / 2;
     ctx.fillStyle = on ? COLORS.toggleOn : COLORS.toggleOff;
     ctx.beginPath();
@@ -279,9 +320,119 @@ export class UIRenderer {
     ctx.beginPath();
     ctx.arc(knobX, sy + sh / 2, knobR, 0, Math.PI * 2);
     ctx.fill();
+    drawIcon(ctx, on ? 'check' : 'cross', knobX, sy + sh / 2, knobR * 1.1, on ? COLORS.toggleOn : COLORS.toggleOff);
     ctx.font = TOGGLE_FONT;
     ctx.textAlign = 'center';
+    ctx.fillStyle = UI_STYLE.text.fill;
     ctx.fillText(on ? 'AAN' : 'UIT', on ? sx + (sw - sh) / 2 + 4 : sx + sh + (sw - sh) / 2 - 4, sy + sh / 2 + 1);
   }
 
+  /** Kaartje van een kiezer: wit, de gekozen optie met een dikke oranje rand. */
+  private card(r: Rect, selected: boolean): void {
+    const { ctx } = this;
+    ctx.fillStyle = selected ? PALETTE.white : 'rgba(255, 255, 255, 0.7)';
+    ctx.beginPath();
+    roundRectPath(ctx, r.x, r.y, r.width, r.height, 18);
+    ctx.fill();
+    if (selected) {
+      ctx.strokeStyle = UI_STYLE.button.fill;
+      ctx.lineWidth = 6;
+      ctx.stroke();
+    }
+  }
+
+  private carPicker(cards: readonly Rect[], settings: Settings, time: number): void {
+    const { ctx } = this;
+    for (let i = 0; i < cards.length; i++) {
+      const r = cards[i];
+      const id = CAR_IDS[i];
+      const selected = settings.car === id;
+      this.card(r, selected);
+      ctx.save();
+      ctx.translate(r.x + r.width / 2, r.y + r.height - 14);
+      const scale = selected ? 0.66 + Math.sin(time * 4) * 0.02 : 0.6;
+      ctx.scale(scale, scale);
+      this.carPreview.drawBody(CARS[id], 150, 70, 22, selected ? time * 6 : 0);
+      ctx.restore();
+    }
+  }
+
+  private worldPicker(cards: readonly Rect[], settings: Settings): void {
+    for (let i = 0; i < cards.length; i++) {
+      const id = THEME_IDS[i];
+      this.worldCard(cards[i], THEMES[id], settings.theme === id);
+    }
+  }
+
+  /** Mini-landschapje van een wereld met de naam eronder. */
+  private worldCard(r: Rect, theme: Theme, selected: boolean): void {
+    const { ctx } = this;
+    this.card(r, selected);
+    const pad = 7;
+    const sx = r.x + pad;
+    const sy = r.y + pad;
+    const sw = r.width - pad * 2;
+    const sh = r.height - 34;
+
+    ctx.save();
+    ctx.beginPath();
+    roundRectPath(ctx, sx, sy, sw, sh, 12);
+    ctx.clip();
+    ctx.fillStyle = theme.skyTop;
+    ctx.fillRect(sx, sy, sw, sh * 0.5);
+    ctx.fillStyle = theme.skyBottom;
+    ctx.fillRect(sx, sy + sh * 0.5, sw, sh * 0.5);
+    if (theme.stars) {
+      ctx.fillStyle = PALETTE.white;
+      for (let i = 0; i < 7; i++) ctx.fillRect(sx + 8 + ((i * 37) % (sw - 16)), sy + 6 + ((i * 13) % 22), 2, 2);
+    }
+    // Hemellichaam
+    ctx.fillStyle = theme.celestial.color;
+    ctx.beginPath();
+    ctx.arc(sx + sw - 20, sy + 16, 9, 0, Math.PI * 2);
+    ctx.fill();
+    if (theme.celestial.ring) {
+      ctx.strokeStyle = theme.celestial.ring;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.ellipse(sx + sw - 20, sy + 16, 15, 4, -0.35, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    // Vulkaan of heuvel
+    if (theme.farLayer === 'volcano') {
+      ctx.fillStyle = theme.farHills;
+      ctx.beginPath();
+      ctx.moveTo(sx + 10, sy + sh);
+      ctx.lineTo(sx + 36, sy + 18);
+      ctx.lineTo(sx + 48, sy + 18);
+      ctx.lineTo(sx + 76, sy + sh);
+      ctx.fill();
+      ctx.fillStyle = '#ff7043';
+      ctx.fillRect(sx + 36, sy + 18, 12, 5);
+    }
+    ctx.fillStyle = theme.nearHills;
+    ctx.beginPath();
+    ctx.ellipse(sx + sw * 0.35, sy + sh, sw * 0.5, sh * 0.42, 0, Math.PI, Math.PI * 2);
+    ctx.fill();
+    // Weg en berm
+    ctx.fillStyle = theme.road;
+    ctx.fillRect(sx, sy + sh - 12, sw, 8);
+    ctx.fillStyle = theme.grass;
+    ctx.fillRect(sx, sy + sh - 4, sw, 4);
+    if (theme.decor === 'candy') {
+      ctx.fillStyle = PALETTE.white;
+      ctx.fillRect(sx + sw - 30, sy + sh - 30, 3, 18);
+      ctx.fillStyle = theme.decorA;
+      ctx.beginPath();
+      ctx.arc(sx + sw - 28.5, sy + sh - 32, 8, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+
+    ctx.font = TOGGLE_FONT;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = UI_STYLE.text.outline;
+    ctx.fillText(theme.label, r.x + r.width / 2, r.y + r.height - 13);
+  }
 }

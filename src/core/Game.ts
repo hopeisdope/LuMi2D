@@ -2,9 +2,9 @@ import type { Sound } from '../audio/Sound';
 import type { InputManager } from '../input/InputManager';
 import type { Renderer } from '../render/Renderer';
 import type { Screen } from '../render/Screen';
-import { loadSettings, saveSettings } from '../settings/Settings';
+import { CAR_IDS, loadSettings, saveSettings, THEME_IDS } from '../settings/Settings';
 import type { GameState, InputAction, Settings, Vec2, WorldState } from '../types';
-import { hitTest, Layout } from '../ui/Layout';
+import { hitCard, hitTest, Layout } from '../ui/Layout';
 import { createWorld, jump, resetWorld, updateWorld } from '../world/World';
 import { GameLoop } from './GameLoop';
 
@@ -86,6 +86,14 @@ export class Game {
     saveSettings(this.settings);
   }
 
+  /** Kiest een auto of wereld en bewaart de keuze. */
+  private choose(kind: 'car' | 'theme', index: number): void {
+    if (kind === 'car') this.settings.car = CAR_IDS[index];
+    else this.settings.theme = THEME_IDS[index];
+    saveSettings(this.settings);
+    this.sound.play('tap');
+  }
+
   openSettings(): void {
     if (this.state !== 'ready') return;
     this.state = 'settings';
@@ -150,17 +158,27 @@ export class Game {
   private handleTap(cssX: number, cssY: number): void {
     const p = this.screen.toWorld(cssX, cssY, this.tapPoint);
     switch (this.state) {
-      case 'ready':
-        // Tandwiel opent de instellingen; overal elders tikken start de game (makkelijk voor jonge kinderen).
+      case 'ready': {
+        // Auto-kaartje kiest een auto; tandwiel opent de instellingen; overal elders tikken start de game (makkelijk voor jonge kinderen).
+        const car = hitCard(this.layout.startCarCards, p.x, p.y);
+        if (car >= 0) {
+          this.choose('car', car);
+          break;
+        }
         this.sound.play('tap');
         if (hitTest(this.layout.settings.rect, p.x, p.y)) this.openSettings();
         else this.start();
         break;
+      }
       case 'settings':
         // Alleen de knoppen reageren; elders tikken doet niets, zodat er niet per ongeluk iets wijzigt.
         if (hitTest(this.layout.toggleObstacles.rect, p.x, p.y, 0)) this.toggleSetting('obstacles');
         else if (hitTest(this.layout.toggleEnemies.rect, p.x, p.y, 0)) this.toggleSetting('enemies');
         else if (hitTest(this.layout.toggleSound.rect, p.x, p.y, 0)) this.toggleSetting('sound');
+        else if (hitCard(this.layout.worldCards, p.x, p.y) >= 0) {
+          this.choose('theme', hitCard(this.layout.worldCards, p.x, p.y));
+          break;
+        }
         else if (hitTest(this.layout.done.rect, p.x, p.y, 0)) this.closeSettings();
         else break;
         this.sound.play('tap');
@@ -173,6 +191,10 @@ export class Game {
         } else jump(this.world);
         break;
       case 'paused':
+        if (hitCard(this.layout.pauseCarCards, p.x, p.y) >= 0) {
+          this.choose('car', hitCard(this.layout.pauseCarCards, p.x, p.y));
+          break;
+        }
         if (hitTest(this.layout.resume.rect, p.x, p.y, 0)) this.resume();
         else if (hitTest(this.layout.restart.rect, p.x, p.y, 0)) this.restart();
         else break;

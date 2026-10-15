@@ -1,5 +1,5 @@
 import { COLORS, WORLD } from '../config';
-import type { Obstacle, WorldState } from '../types';
+import type { Obstacle, ObstacleKind, WorldState } from '../types';
 import { roundRectPath } from './shapes';
 
 /** Duur (s) van de tuimelanimatie na een botsing. */
@@ -19,6 +19,32 @@ export class ObstacleRenderer {
       if (sx < -150 || sx > viewWidth + 150) continue;
       this.drawObstacle(o, sx, world.time);
     }
+  }
+
+  /** Klein plaatje van een obstakelsoort, voor iconen in de instellingen. (cx, cy) = midden. */
+  drawIcon(kind: ObstacleKind, cx: number, cy: number, size: number, time = 0): void {
+    const { ctx } = this;
+    const w = kind === 'hedgehog' ? 58 : 44;
+    const h = kind === 'hedgehog' ? 36 : 52;
+    const scale = size / Math.max(w, h);
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(scale, scale);
+    switch (kind) {
+      case 'cone':
+        this.cone(w, h);
+        break;
+      case 'rock':
+        this.rock(w, h);
+        break;
+      case 'crate':
+        this.crate(w, h);
+        break;
+      case 'hedgehog':
+        this.hedgehog(w, h, time, false);
+        break;
+    }
+    ctx.restore();
   }
 
   private drawObstacle(o: Obstacle, sx: number, time: number): void {

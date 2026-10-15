@@ -44,6 +44,7 @@ Test hosting: Netlify, configured in `netlify.toml` (repo linked in the Netlify 
 - Input goes through `InputManager` as abstract actions; new controls (e.g. jump) are new action types.
 - Use delta time for all movement; avoid allocations in the update/render loop.
 - Touch-first: no hover or mouse-only controls; large tap targets for children.
+- Every text, button and instruction gets an icon or picture (`src/render/icons.ts`) for children who can't read yet.
 - Storage: only `localStorage` key `lumi2d.settings.v1` for settings (toggles, car, world) via `src/settings/Settings.ts`;
   always validate on load and fall back to defaults. Never store anything personal or sensitive.
 - Sound is synthesized with Web Audio in `src/audio/Sound.ts` (no audio files); it unlocks on the first tap.
