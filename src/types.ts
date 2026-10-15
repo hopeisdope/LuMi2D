@@ -1,3 +1,18 @@
+/** Te kiezen auto's (alleen uiterlijk; alle auto's rijden en springen hetzelfde). */
+export type CarId = 'classic' | 'racer' | 'jeep' | 'bubble';
+
+/** Te kiezen werelden (thema's). */
+export type ThemeId = 'meadow' | 'dino' | 'space' | 'candy';
+
+/** Instellingen die tussen bezoeken bewaard blijven (localStorage). */
+export interface Settings {
+  obstacles: boolean;
+  enemies: boolean;
+  sound: boolean;
+  car: CarId;
+  theme: ThemeId;
+}
+
 /** Toestanden van de game. Uitbreidbaar met bv. 'gameOver' in een latere fase. */
 export type GameState = 'ready' | 'settings' | 'playing' | 'paused';
 
@@ -122,7 +137,7 @@ export interface WorldEvents {
 
 /** Een knop in de canvas-UI. */
 export interface Button {
-  id: 'start' | 'pause' | 'resume' | 'restart' | 'settings' | 'toggleObstacles' | 'toggleEnemies' | 'done';
+  id: 'start' | 'pause' | 'resume' | 'restart' | 'settings' | 'toggleObstacles' | 'toggleEnemies' | 'toggleSound' | 'done';
   rect: Rect;
   label: string;
 }

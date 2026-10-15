@@ -17,6 +17,7 @@ export class Layout {
     rect: { x: 0, y: 0, width: 0, height: 0 },
   };
   readonly toggleEnemies: Button = { id: 'toggleEnemies', label: 'Egels', rect: { x: 0, y: 0, width: 0, height: 0 } };
+  readonly toggleSound: Button = { id: 'toggleSound', label: 'Geluid', rect: { x: 0, y: 0, width: 0, height: 0 } };
   readonly done: Button = { id: 'done', label: 'Klaar', rect: { x: 0, y: 0, width: 0, height: 0 } };
 
   update(view: Viewport): void {
@@ -33,12 +34,14 @@ export class Layout {
     // Tandwiel op het startscherm, op dezelfde plek als de pauzeknop tijdens het spelen.
     set(this.settings.rect, view.width - size - margin, margin, size, size);
 
-    // Instellingenscherm: twee grote aan/uit-rijen en een Klaar-knop.
+    // Instellingenscherm: drie grote aan/uit-rijen en een Klaar-knop.
     const row = UI.settingsRow;
-    const rowsTop = cy - row.height - row.gap / 2 - 20;
-    set(this.toggleObstacles.rect, cx - row.width / 2, rowsTop, row.width, row.height);
-    set(this.toggleEnemies.rect, cx - row.width / 2, rowsTop + row.height + row.gap, row.width, row.height);
-    set(this.done.rect, cx - bw / 2, rowsTop + 2 * (row.height + row.gap) + 10, bw, bh);
+    const rowsTop = UI.settingsTop;
+    const rowX = cx - row.width / 2;
+    set(this.toggleObstacles.rect, rowX, rowsTop, row.width, row.height);
+    set(this.toggleEnemies.rect, rowX, rowsTop + (row.height + row.gap), row.width, row.height);
+    set(this.toggleSound.rect, rowX, rowsTop + 2 * (row.height + row.gap), row.width, row.height);
+    set(this.done.rect, cx - bw / 2, rowsTop + 3 * (row.height + row.gap) + 12, bw, bh);
   }
 }
 

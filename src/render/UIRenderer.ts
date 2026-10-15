@@ -1,6 +1,6 @@
 import { BRAND, LOGO_COLORS, TYPOGRAPHY, UI_STYLE } from '../brand/brand';
 import { COLORS, UI } from '../config';
-import type { Button, GameState, Viewport, WorldState } from '../types';
+import type { Button, GameState, Settings, Viewport, WorldState } from '../types';
 import type { Layout } from '../ui/Layout';
 import { roundRectPath, starPath } from './shapes';
 
@@ -34,6 +34,7 @@ export class UIRenderer {
     layout: Layout,
     time: number,
     world: WorldState,
+    settings: Settings,
     showJumpHint: boolean,
   ): void {
     const cx = view.width / 2;
@@ -48,9 +49,10 @@ export class UIRenderer {
         break;
       case 'settings':
         this.dim(view);
-        this.text('Instellingen', cx, layout.toggleObstacles.rect.y - 60, HEADING_FONT);
-        this.toggleRow(layout.toggleObstacles, world.obstaclesEnabled);
-        this.toggleRow(layout.toggleEnemies, world.enemiesEnabled);
+        this.text('Instellingen', cx, layout.toggleObstacles.rect.y - 52, HEADING_FONT);
+        this.toggleRow(layout.toggleObstacles, settings.obstacles);
+        this.toggleRow(layout.toggleEnemies, settings.enemies);
+        this.toggleRow(layout.toggleSound, settings.sound);
         this.button(layout.done);
         break;
       case 'playing':

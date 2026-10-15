@@ -10,16 +10,17 @@ Read at the start of every session; update when something is done or added.
 
 ## Next
 
+- [ ] Part 2: worlds (meadow, dino, space, candy), car picker on start/pause screen, icons next to all texts
+- [ ] Part 3: platforms with speed power-up, rainbow pieces and rainbow ride
+- [ ] Part 4: friends along the road (wave/cheer, sometimes a star or surprise)
 - [ ] Configurable auto-movement, difficulty and increasing speed
-- [ ] Sound effects and child-friendly feedback
-- [ ] PWA: manifest, service worker, offline, add to home screen
 
 ## Open questions
 
-- Should settings be remembered between visits (localStorage)? Currently not, per "no data storage" in `CLAUDE.md`.
 
 ## Done
 
+- [x] Part 1: settings saved in localStorage, synthesized sounds (on/off in settings), PWA (manifest, icons, favicon, offline service worker)
 - [x] Phase 4: walking hedgehog enemy (bump = it hops away; jump over = star) and a settings screen (gear on start screen) with obstacles/hedgehogs on/off
 - [x] Wider jump window: 0.3 s → 0.7 s (floatier jump 190/1.1 s, narrower car hitbox, slightly lower obstacles)
 - [x] Phase 3: obstacles (cone, rock, crate) from a fixed pool, forgiving collision with a gentle bump (no game over), a star per cleared obstacle, star counter and pop animation
