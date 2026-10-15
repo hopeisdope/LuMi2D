@@ -106,6 +106,51 @@ export const ENEMIES = {
   },
 } as const;
 
+/** Zwevende platforms (altijd aan; ze maken het spel alleen leuker, nooit moeilijker). */
+export const PLATFORMS = {
+  poolSize: 3,
+  width: 260,
+  /** Hoogte boven de weg: hoog genoeg om er met de auto onderdoor te rijden, laag genoeg om op te springen. */
+  height: 120,
+  thickness: 22,
+  /** Kans per nieuw parcoursdeel op een platform met turbo. */
+  chance: 0.12,
+  /** Hoe ver de auto over de rand mag hangen en toch blijft staan of landt (vergevingsgezind). */
+  edgeMargin: 30,
+} as const;
+
+/** Turbo: tijdelijk sneller rijden en obstakels zonder hobbel wegknallen. */
+export const BOOST = {
+  duration: 4,
+  speedFactor: 1.6,
+  /** Hoogte van de power-up boven het platform. */
+  hover: 46,
+} as const;
+
+/** Regenboog: drie kleuren verzamelen → automatische zweefrit over een rij sterren. */
+export const RAINBOW = {
+  /** Kans per nieuw parcoursdeel op een regenboogstukje (zolang er nog kleuren nodig zijn). */
+  chance: 0.14,
+  /** Hoogte van een stukje boven de weg: springen nodig. */
+  height: 140,
+  rideDuration: 5,
+  /** Rijsnelheid tijdens de rit als fractie van de basissnelheid. */
+  rideSpeedFactor: 1.3,
+  /** Zweefhoogte van de auto boven de weg. */
+  rideHeight: 200,
+  /** Afstand tussen de sterren tijdens de rit. */
+  starSpacing: 90,
+  /** Onkwetsbaar na de rit, zodat de landing altijd veilig is. */
+  shieldAfterRide: 1.5,
+  colors: ['#e53935', '#ffd93b', '#29a9f0'],
+} as const;
+
+export const COLLECTIBLES = {
+  poolSize: 40,
+  /** Straal voor het pakken (ruim, zodat het makkelijk lukt). */
+  radius: 26,
+} as const;
+
 /** Wat er gebeurt bij een botsing: geen game over, alleen een vriendelijke hobbel. */
 export const BUMP = {
   /** Duur (s) van het wiebelen; zo lang kan de auto niet opnieuw botsen. */
@@ -177,6 +222,11 @@ export const COLORS = {
   hedgehogNose: '#222222',
   toggleOn: PALETTE.green,
   toggleOff: '#b0bec5',
+  platform: '#9c4dcc',
+  platformTop: '#c77dff',
+  platformDots: '#ffffff',
+  boost: PALETTE.orange,
+  boostBolt: PALETTE.yellow,
   star: PALETTE.yellow,
   starOutline: PALETTE.orangeDark,
 } as const;

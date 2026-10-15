@@ -1,5 +1,5 @@
 import { BRAND, LOGO_COLORS, PALETTE, TYPOGRAPHY, UI_STYLE } from '../brand/brand';
-import { CARS, COLORS, UI } from '../config';
+import { BOOST, CARS, COLORS, RAINBOW, UI } from '../config';
 import { CAR_IDS, THEME_IDS } from '../settings/Settings';
 import { THEMES, type Theme } from '../themes';
 import type { Button, GameState, ObstacleKind, Rect, Settings, Viewport, WorldState } from '../types';
@@ -75,6 +75,7 @@ export class UIRenderer {
       case 'playing':
         if (showJumpHint) this.jumpHint(cx, view.height * 0.3, time);
         this.scoreCounter(world);
+        this.rainbowMeter(world, cx, 46);
         this.iconButton(layout.pause, 'pause');
         break;
       case 'paused':
@@ -159,6 +160,58 @@ export class UIRenderer {
     ctx.strokeText(this.scoreLabel(world.score), tx, cy + 2);
     ctx.fillStyle = UI_STYLE.text.fill;
     ctx.fillText(this.scoreLabel(world.score), tx, cy + 2);
+  }
+
+  /**
+   * Drie boogjes bovenin het midden die vollopen met de verzamelde regenboogkleuren, plus een
+   * bliksem met aflopende ring zolang de turbo duurt. Alleen beeld, geen tekst nodig.
+   */
+  private rainbowMeter(world: WorldState, cx: number, cy: number): void {
+    const { ctx } = this;
+    const riding = world.rainbowRide > 0;
+    const slotGap = 52;
+    ctx.save();
+    ctx.lineCap = 'round';
+    for (let i = 0; i < 3; i++) {
+      const x = cx + (i - 1) * slotGap;
+      const filled = riding || i < world.rainbowPieces;
+      const wiggle = riding ? Math.sin(world.time * 10 + i) * 3 : 0;
+      ctx.strokeStyle = UI_STYLE.text.outline;
+      ctx.lineWidth = 16;
+      ctx.beginPath();
+      ctx.arc(x, cy + 8 + wiggle, 15, Math.PI, Math.PI * 2);
+      ctx.stroke();
+      ctx.strokeStyle = filled ? RAINBOW.colors[i] : 'rgba(255, 255, 255, 0.45)';
+      ctx.lineWidth = 9;
+      ctx.beginPath();
+      ctx.arc(x, cy + 8 + wiggle, 15, Math.PI, Math.PI * 2);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    if (world.boostTimer > 0) {
+      const x = cx + 2 * slotGap + 10;
+      const k = world.boostTimer / BOOST.duration;
+      ctx.fillStyle = UI_STYLE.text.outline;
+      ctx.beginPath();
+      ctx.arc(x, cy, 22, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = COLORS.boostBolt;
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.arc(x, cy, 19, -Math.PI / 2, -Math.PI / 2 + k * Math.PI * 2);
+      ctx.stroke();
+      ctx.fillStyle = COLORS.boostBolt;
+      ctx.beginPath();
+      ctx.moveTo(x + 3, cy - 12);
+      ctx.lineTo(x - 7, cy + 2);
+      ctx.lineTo(x - 1, cy + 2);
+      ctx.lineTo(x - 4, cy + 12);
+      ctx.lineTo(x + 7, cy - 3);
+      ctx.lineTo(x + 1, cy - 3);
+      ctx.closePath();
+      ctx.fill();
+    }
   }
 
   /** Cache van de laatst getekende score: geen nieuwe string per frame. */

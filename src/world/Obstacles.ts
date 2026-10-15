@@ -1,5 +1,6 @@
-import { BUMP, CAR_HITBOX, ENEMIES, OBSTACLES, WORLD } from '../config';
+import { BUMP, CAR_HITBOX, ENEMIES, OBSTACLES, PLATFORMS, RAINBOW, WORLD } from '../config';
 import type { Obstacle, ObstacleKind, WorldState } from '../types';
+import { canSpawnRainbowPiece, spawnPlatformWithBoost, spawnRainbowPiece } from './Collectibles';
 
 /** Stilstaande obstakelsoorten. */
 const STATIC_KINDS = ['cone', 'rock', 'crate'] as const;
@@ -61,23 +62,44 @@ function spawn(world: WorldState, x: number, enemy: boolean): void {
   // Pool vol: dit obstakel overslaan (komt in de praktijk niet voor bij deze afstanden).
 }
 
-/** Laat nieuwe obstakels en vijanden verschijnen, ver vóór de auto (buiten beeld). */
+/**
+ * Bouwt het parcours vóór de auto (buiten beeld): obstakels, egels, platforms met turbo
+ * en regenboogstukjes. Platforms en regenboog komen ook als obstakels en egels uit staan.
+ */
 function spawnAhead(world: WorldState): void {
   const car = world.car;
   const canObstacle = world.obstaclesEnabled;
   const canEnemy = world.enemiesEnabled;
 
-  if (!canObstacle && !canEnemy) {
-    // Alles uit: het spawnpunt schuift mee, zodat aanzetten niet direct een rij obstakels geeft.
-    if (world.nextObstacleAt < car.x + OBSTACLES.spawnAhead) world.nextObstacleAt = car.x + OBSTACLES.spawnAhead;
+  // Tijdens de regenboogrit verschijnt er niets nieuws; daarna begint het parcours weer buiten beeld.
+  if (world.rainbowRide > 0) {
+    const resumeAt = car.x + OBSTACLES.spawnAhead + RAINBOW.rideDuration * 400;
+    if (world.nextObstacleAt < resumeAt) world.nextObstacleAt = resumeAt;
     return;
   }
 
   while (car.x + OBSTACLES.spawnAhead >= world.nextObstacleAt) {
-    const enemy = canEnemy && (!canObstacle || world.random() < ENEMIES.chance);
-    const x = world.nextObstacleAt + (enemy ? ENEMIES.extraGap : 0);
-    spawn(world, x, enemy);
+    const x0 = world.nextObstacleAt;
     const gap = OBSTACLES.minGap + world.random() * (OBSTACLES.maxGap - OBSTACLES.minGap);
+    const roll = world.random();
+
+    if (roll < PLATFORMS.chance && spawnPlatformWithBoost(world, x0)) {
+      world.nextObstacleAt = x0 + PLATFORMS.width + gap;
+      continue;
+    }
+    if (roll < PLATFORMS.chance + RAINBOW.chance && canSpawnRainbowPiece(world)) {
+      spawnRainbowPiece(world, x0);
+      world.nextObstacleAt = x0 + gap;
+      continue;
+    }
+    if (!canObstacle && !canEnemy) {
+      // Geen obstakels of egels: alleen ruimte laten voor de volgende verrassing.
+      world.nextObstacleAt = x0 + gap;
+      continue;
+    }
+    const enemy = canEnemy && (!canObstacle || world.random() < ENEMIES.chance);
+    const x = x0 + (enemy ? ENEMIES.extraGap : 0);
+    spawn(world, x, enemy);
     world.nextObstacleAt = x + gap;
   }
 }
@@ -128,8 +150,10 @@ export function updateObstacles(world: WorldState, dt: number): void {
     if (!overlaps) continue;
 
     // Botsing: obstakel tuimelt weg / egel schrikt en rent weg; de auto wiebelt en remt even af.
+    // Met turbo of schild knalt het obstakel weg zonder hobbel.
     o.hit = true;
     o.hitTime = world.time;
+    if (world.boostTimer > 0 || world.shieldTimer > 0) continue;
     if (car.bumpTimer <= 0) {
       car.bumpTimer = BUMP.duration;
       world.speed = Math.min(world.speed, world.targetSpeed * BUMP.speedFactor);

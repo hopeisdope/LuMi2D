@@ -10,7 +10,6 @@ Read at the start of every session; update when something is done or added.
 
 ## Next
 
-- [ ] Part 3: platforms with speed power-up, rainbow pieces and rainbow ride
 - [ ] Part 4: friends along the road (wave/cheer, sometimes a star or surprise)
 - [ ] Configurable auto-movement, difficulty and increasing speed
 
@@ -19,6 +18,7 @@ Read at the start of every session; update when something is done or added.
 
 ## Done
 
+- [x] Part 3: floating platforms with turbo power-up (faster + smash obstacles), rainbow pieces (red/yellow/blue) and an automatic rainbow ride over a row of stars
 - [x] Part 2: four worlds (Weide, Dino, Ruimte, Zoetroze) chosen in settings, four cars chosen on start/pause screen, icons next to all texts and buttons
 - [x] Part 1: settings saved in localStorage, synthesized sounds (on/off in settings), PWA (manifest, icons, favicon, offline service worker)
 - [x] Phase 4: walking hedgehog enemy (bump = it hops away; jump over = star) and a settings screen (gear on start screen) with obstacles/hedgehogs on/off
