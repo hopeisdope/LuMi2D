@@ -17,6 +17,8 @@ Read at the start of every session; update when something is done or added.
 
 ## Open questions
 
+- Hosting for device testing: GitHub Pages needs a public repo or GitHub Pro (repo is private). Workflow `.github/workflows/pages.yml` is ready; enable Pages with source "GitHub Actions" and merge to `main`.
+
 ## Done
 
 - [x] Branding: name LuMi2d, colourful logo on the start screen, `src/brand/` with palette, typography and UI style
