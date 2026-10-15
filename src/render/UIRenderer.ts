@@ -10,6 +10,7 @@ const HEADING_FONT = font(TYPOGRAPHY.size.heading);
 const SUBTITLE_FONT = font(TYPOGRAPHY.size.subtitle);
 const BUTTON_FONT = font(TYPOGRAPHY.size.button);
 const SCORE_FONT = font(TYPOGRAPHY.size.score);
+const TOGGLE_FONT = font(TYPOGRAPHY.size.toggle);
 /** Duur (s) van het opveren van de sterrenteller bij een nieuwe ster. */
 const SCORE_PULSE_TIME = 0.3;
 
@@ -43,6 +44,14 @@ export class UIRenderer {
         this.logo(cx, cy - 110, time);
         this.text(BRAND.tagline, cx, cy - 30, SUBTITLE_FONT);
         this.button(layout.start);
+        this.iconButton(layout.settings, 'gear');
+        break;
+      case 'settings':
+        this.dim(view);
+        this.text('Instellingen', cx, layout.toggleObstacles.rect.y - 60, HEADING_FONT);
+        this.toggleRow(layout.toggleObstacles, world.obstaclesEnabled);
+        this.toggleRow(layout.toggleEnemies, world.enemiesEnabled);
+        this.button(layout.done);
         break;
       case 'playing':
         if (showJumpHint) this.jumpHint(cx, view.height * 0.3, time);
@@ -189,6 +198,11 @@ export class UIRenderer {
   }
 
   private pauseButton(button: Button): void {
+    this.iconButton(button, 'pause');
+  }
+
+  /** Vierkante oranje knop met een wit icoon (pauze of tandwiel). */
+  private iconButton(button: Button, icon: 'pause' | 'gear'): void {
     const { ctx } = this;
     const { x, y, width, height } = button.rect;
     const style = UI_STYLE.button;
@@ -201,12 +215,71 @@ export class UIRenderer {
     ctx.beginPath();
     roundRectPath(ctx, x, y, width, height, style.smallRadius);
     ctx.fill();
-    // Twee pauzestrepen
+
     ctx.fillStyle = style.text;
-    const barW = width * 0.16;
-    const barH = height * 0.5;
-    const top = y + (height - barH) / 2;
-    ctx.fillRect(x + width * 0.3, top, barW, barH);
-    ctx.fillRect(x + width * 0.54, top, barW, barH);
+    if (icon === 'pause') {
+      const barW = width * 0.16;
+      const barH = height * 0.5;
+      const top = y + (height - barH) / 2;
+      ctx.fillRect(x + width * 0.3, top, barW, barH);
+      ctx.fillRect(x + width * 0.54, top, barW, barH);
+    } else {
+      this.gear(x + width / 2, y + height / 2, width * 0.3, style.fill);
+    }
   }
+
+  /** Tandwiel: acht tanden rond een cirkel met een gat in de kleur van de knop. */
+  private gear(cx: number, cy: number, r: number, holeColor: string): void {
+    const { ctx } = this;
+    ctx.save();
+    ctx.translate(cx, cy);
+    for (let i = 0; i < 8; i++) {
+      ctx.rotate(Math.PI / 4);
+      ctx.fillRect(-r * 0.22, -r * 1.25, r * 0.44, r * 0.6);
+    }
+    ctx.beginPath();
+    ctx.arc(0, 0, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = holeColor;
+    ctx.beginPath();
+    ctx.arc(0, 0, r * 0.42, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  /** Instellingenrij: label links, grote aan/uit-schakelaar rechts. De hele rij is aantikbaar. */
+  private toggleRow(button: Button, on: boolean): void {
+    const { ctx } = this;
+    const { x, y, width, height } = button.rect;
+    ctx.fillStyle = UI_STYLE.panel;
+    ctx.beginPath();
+    roundRectPath(ctx, x, y, width, height, UI_STYLE.button.radius);
+    ctx.fill();
+
+    ctx.font = SUBTITLE_FONT;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = UI_STYLE.text.outline;
+    ctx.fillText(button.label, x + 28, y + height / 2 + 1);
+
+    // Schakelaar
+    const sw = 116;
+    const sh = 54;
+    const sx = x + width - sw - 18;
+    const sy = y + (height - sh) / 2;
+    ctx.fillStyle = on ? COLORS.toggleOn : COLORS.toggleOff;
+    ctx.beginPath();
+    roundRectPath(ctx, sx, sy, sw, sh, sh / 2);
+    ctx.fill();
+    const knobR = sh / 2 - 5;
+    const knobX = on ? sx + sw - sh / 2 : sx + sh / 2;
+    ctx.fillStyle = UI_STYLE.text.fill;
+    ctx.beginPath();
+    ctx.arc(knobX, sy + sh / 2, knobR, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.font = TOGGLE_FONT;
+    ctx.textAlign = 'center';
+    ctx.fillText(on ? 'AAN' : 'UIT', on ? sx + (sw - sh) / 2 + 4 : sx + sh + (sw - sh) / 2 - 4, sy + sh / 2 + 1);
+  }
+
 }

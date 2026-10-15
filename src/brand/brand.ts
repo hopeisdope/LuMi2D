@@ -51,6 +51,7 @@ export const TYPOGRAPHY = {
     subtitle: 30,
     button: 36,
     score: 44,
+    toggle: 22,
   },
 } as const;
 
@@ -71,5 +72,7 @@ export const UI_STYLE = {
     outline: PALETTE.navy,
   },
   overlayDim: 'rgba(20, 40, 80, 0.45)',
+  /** Achtergrond van een instellingenrij. */
+  panel: 'rgba(255, 255, 255, 0.94)',
   themeColor: PALETTE.blue,
 } as const;

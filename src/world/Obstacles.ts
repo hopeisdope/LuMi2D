@@ -1,12 +1,24 @@
-import { BUMP, CAR_HITBOX, OBSTACLES, WORLD } from '../config';
+import { BUMP, CAR_HITBOX, ENEMIES, OBSTACLES, WORLD } from '../config';
 import type { Obstacle, ObstacleKind, WorldState } from '../types';
 
-const KINDS: readonly ObstacleKind[] = ['cone', 'rock', 'crate'];
+/** Stilstaande obstakelsoorten. */
+const STATIC_KINDS = ['cone', 'rock', 'crate'] as const;
 
 export function createObstaclePool(): Obstacle[] {
   const pool: Obstacle[] = [];
   for (let i = 0; i < OBSTACLES.poolSize; i++) {
-    pool.push({ active: false, kind: 'cone', x: 0, width: 0, height: 0, cleared: false, hit: false, hitTime: 0 });
+    pool.push({
+      active: false,
+      kind: 'cone',
+      enemy: false,
+      vx: 0,
+      x: 0,
+      width: 0,
+      height: 0,
+      cleared: false,
+      hit: false,
+      hitTime: 0,
+    });
   }
   return pool;
 }
@@ -16,18 +28,31 @@ export function resetObstacles(world: WorldState): void {
   world.nextObstacleAt = OBSTACLES.firstDistance;
 }
 
-function spawn(world: WorldState, x: number): void {
+function spawn(world: WorldState, x: number, enemy: boolean): void {
   const pool = world.obstacles;
   for (let i = 0; i < pool.length; i++) {
     const o = pool[i];
     if (o.active) continue;
-    const kind = KINDS[Math.floor(world.random() * KINDS.length)];
-    const size = OBSTACLES.kinds[kind];
+    let kind: ObstacleKind;
+    let width: number;
+    let height: number;
+    if (enemy) {
+      kind = 'hedgehog';
+      width = ENEMIES.kinds.hedgehog.width;
+      height = ENEMIES.kinds.hedgehog.height;
+    } else {
+      const k = STATIC_KINDS[Math.floor(world.random() * STATIC_KINDS.length)];
+      kind = k;
+      width = OBSTACLES.kinds[k].width;
+      height = OBSTACLES.kinds[k].height;
+    }
     o.active = true;
     o.kind = kind;
+    o.enemy = enemy;
+    o.vx = enemy ? -ENEMIES.speed : 0;
     o.x = x;
-    o.width = size.width;
-    o.height = size.height;
+    o.width = width;
+    o.height = height;
     o.cleared = false;
     o.hit = false;
     o.hitTime = 0;
@@ -36,24 +61,34 @@ function spawn(world: WorldState, x: number): void {
   // Pool vol: dit obstakel overslaan (komt in de praktijk niet voor bij deze afstanden).
 }
 
+/** Laat nieuwe obstakels en vijanden verschijnen, ver vóór de auto (buiten beeld). */
+function spawnAhead(world: WorldState): void {
+  const car = world.car;
+  const canObstacle = world.obstaclesEnabled;
+  const canEnemy = world.enemiesEnabled;
+
+  if (!canObstacle && !canEnemy) {
+    // Alles uit: het spawnpunt schuift mee, zodat aanzetten niet direct een rij obstakels geeft.
+    if (world.nextObstacleAt < car.x + OBSTACLES.spawnAhead) world.nextObstacleAt = car.x + OBSTACLES.spawnAhead;
+    return;
+  }
+
+  while (car.x + OBSTACLES.spawnAhead >= world.nextObstacleAt) {
+    const enemy = canEnemy && (!canObstacle || world.random() < ENEMIES.chance);
+    const x = world.nextObstacleAt + (enemy ? ENEMIES.extraGap : 0);
+    spawn(world, x, enemy);
+    const gap = OBSTACLES.minGap + world.random() * (OBSTACLES.maxGap - OBSTACLES.minGap);
+    world.nextObstacleAt = x + gap;
+  }
+}
+
 /**
- * Obstakels laten verschijnen, opruimen, botsingen en sterren afhandelen.
+ * Obstakels en vijanden bewegen, laten verschijnen, opruimen, botsingen en sterren afhandelen.
  * Wordt na de auto-update aangeroepen, zodat de positie van dit frame telt.
  */
-export function updateObstacles(world: WorldState): void {
+export function updateObstacles(world: WorldState, dt: number): void {
   const car = world.car;
-
-  // Nieuwe obstakels vóór de auto, buiten beeld.
-  if (world.obstaclesEnabled) {
-    while (car.x + OBSTACLES.spawnAhead >= world.nextObstacleAt) {
-      spawn(world, world.nextObstacleAt);
-      const gap = OBSTACLES.minGap + world.random() * (OBSTACLES.maxGap - OBSTACLES.minGap);
-      world.nextObstacleAt += gap;
-    }
-  } else if (world.nextObstacleAt < car.x + OBSTACLES.spawnAhead) {
-    // Uitgeschakeld: het spawnpunt schuift mee, zodat aanzetten niet direct een rij obstakels geeft.
-    world.nextObstacleAt = car.x + OBSTACLES.spawnAhead;
-  }
+  spawnAhead(world);
 
   // Botsingsvak van de auto (iets kleiner dan de tekening).
   const carHalf = car.width * CAR_HITBOX.halfWidthRatio;
@@ -65,6 +100,9 @@ export function updateObstacles(world: WorldState): void {
   for (let i = 0; i < pool.length; i++) {
     const o = pool[i];
     if (!o.active) continue;
+
+    // Vijanden wandelen zelf; na een botsing neemt de vlucht-animatie het over.
+    if (!o.hit) o.x += o.vx * dt;
 
     if (o.x < car.x - OBSTACLES.despawnBehind) {
       o.active = false;
@@ -89,7 +127,7 @@ export function updateObstacles(world: WorldState): void {
     const overlaps = carRight > left && carLeft < right && carBottom > top;
     if (!overlaps) continue;
 
-    // Botsing: het obstakel tuimelt weg, de auto wiebelt en remt even af. Geen game over.
+    // Botsing: obstakel tuimelt weg / egel schrikt en rent weg; de auto wiebelt en remt even af.
     o.hit = true;
     o.hitTime = world.time;
     if (car.bumpTimer <= 0) {
