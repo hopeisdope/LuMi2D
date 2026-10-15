@@ -3,7 +3,7 @@ import type { Renderer } from '../render/Renderer';
 import type { Screen } from '../render/Screen';
 import type { GameState, InputAction, Vec2, WorldState } from '../types';
 import { hitTest, Layout } from '../ui/Layout';
-import { createWorld, resetWorld, updateWorld } from '../world/World';
+import { createWorld, jump, resetWorld, updateWorld } from '../world/World';
 import { GameLoop } from './GameLoop';
 
 /**
@@ -91,8 +91,12 @@ export class Game {
       case 'togglePause':
         this.togglePause();
         break;
+      case 'jump':
+        if (this.state === 'playing') jump(this.world);
+        break;
       case 'confirm':
         if (this.state === 'ready') this.start();
+        else if (this.state === 'playing') jump(this.world);
         else if (this.state === 'paused') this.resume();
         break;
       case 'tap':
@@ -109,8 +113,9 @@ export class Game {
         this.start();
         break;
       case 'playing':
+        // Pauzeknop heeft voorrang; overal elders tikken = springen.
         if (hitTest(this.layout.pause.rect, p.x, p.y)) this.pause();
-        // Fase 2: elders tikken = springen.
+        else jump(this.world);
         break;
       case 'paused':
         if (hitTest(this.layout.resume.rect, p.x, p.y, 0)) this.resume();

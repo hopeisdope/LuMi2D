@@ -1,8 +1,8 @@
-import { CAR, COLORS } from '../config';
+import { CAR, COLORS, JUMP, JUMP_PHYSICS, WORLD } from '../config';
 import type { Car } from '../types';
 import { roundRectPath } from './shapes';
 
-/** Tekent de auto met eenvoudige vormen. (screenX, car.y) = midden-onderkant van de wielen. */
+/** Tekent de auto met eenvoudige vormen. (screenX, car.y) = midden-onderkant van de wielen. Leest alleen state. */
 export class CarRenderer {
   constructor(private readonly ctx: CanvasRenderingContext2D) {}
 
@@ -11,18 +11,36 @@ export class CarRenderer {
     const w = car.width;
     const h = car.height;
     const r = car.wheelRadius;
-    const left = screenX - w / 2;
-    const groundY = car.y;
-    const bob = moving ? Math.sin(time * CAR.bobFrequency) * CAR.bobAmplitude : 0;
+
+    // Schaduw blijft op de grond en wordt kleiner naarmate de auto hoger is.
+    const lift = Math.min(1, Math.max(0, (WORLD.groundY - car.y) / JUMP.height));
+    const shadowScale = 1 - lift * 0.5;
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+    ctx.beginPath();
+    ctx.ellipse(screenX, WORLD.groundY + 2, w * 0.5 * shadowScale, 7 * shadowScale, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Kanteling in de lucht (neus omhoog bij stijgen) en inveren na de landing.
+    const tilt = car.onGround ? 0 : (car.vy / JUMP_PHYSICS.velocity) * JUMP.maxTilt;
+    const squash = car.landingTimer > 0 ? Math.sin((car.landingTimer / JUMP.landingTime) * Math.PI) * JUMP.landingSquash : 0;
+
+    ctx.save();
+    // Lokaal assenstelsel: oorsprong = midden-onderkant van de wielen.
+    ctx.translate(screenX, car.y);
+    if (tilt !== 0) {
+      // Draaien rond het midden van de auto i.p.v. de onderkant.
+      ctx.translate(0, -h * 0.5);
+      ctx.rotate(tilt);
+      ctx.translate(0, h * 0.5);
+    }
+    if (squash !== 0) ctx.scale(1 + squash * 0.5, 1 - squash);
+
+    const left = -w / 2;
+    const groundY = 0;
+    const bob = moving && car.onGround ? Math.sin(time * CAR.bobFrequency) * CAR.bobAmplitude : 0;
     const bodyBottom = groundY - r * 0.9 + bob;
     const bodyTop = bodyBottom - h * 0.5;
     const cabinTop = bodyTop - h * 0.5;
-
-    // Schaduw
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
-    ctx.beginPath();
-    ctx.ellipse(screenX, groundY + 2, w * 0.5, 7, 0, 0, Math.PI * 2);
-    ctx.fill();
 
     // Cabine
     ctx.fillStyle = COLORS.carBodyDark;
@@ -70,6 +88,7 @@ export class CarRenderer {
     // Wielen
     this.drawWheel(left + w * 0.22, groundY - r, r, car.wheelAngle);
     this.drawWheel(left + w * 0.78, groundY - r, r, car.wheelAngle);
+    ctx.restore();
   }
 
   private drawWheel(cx: number, cy: number, r: number, angle: number): void {

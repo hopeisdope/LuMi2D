@@ -9,6 +9,8 @@ const HEADING_FONT = font(TYPOGRAPHY.size.heading);
 const SUBTITLE_FONT = font(TYPOGRAPHY.size.subtitle);
 const BUTTON_FONT = font(TYPOGRAPHY.size.button);
 
+const JUMP_HINT = 'Tik om te springen!';
+
 /** Letters van het logo, één keer opgesplitst. */
 const LOGO_LETTERS: readonly string[] = Array.from(BRAND.name);
 const LOGO_LETTER_SPACING = 4;
@@ -21,7 +23,7 @@ export class UIRenderer {
 
   constructor(private readonly ctx: CanvasRenderingContext2D) {}
 
-  render(state: GameState, view: Viewport, layout: Layout, time: number): void {
+  render(state: GameState, view: Viewport, layout: Layout, time: number, showJumpHint: boolean): void {
     const cx = view.width / 2;
     const cy = view.height / 2;
     switch (state) {
@@ -32,6 +34,7 @@ export class UIRenderer {
         this.button(layout.start);
         break;
       case 'playing':
+        if (showJumpHint) this.jumpHint(cx, view.height * 0.3, time);
         this.pauseButton(layout.pause);
         break;
       case 'paused':
@@ -81,13 +84,31 @@ export class UIRenderer {
     }
   }
 
-  private text(value: string, x: number, y: number, fontSpec: string): void {
+  /** Zacht pulserende uitnodiging om te springen, tot het kind voor het eerst springt. */
+  private jumpHint(x: number, y: number, time: number): void {
+    const { ctx } = this;
+    const scale = 1 + Math.sin(time * 5) * 0.05;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(scale, scale);
+    this.text(JUMP_HINT, 0, 0, SUBTITLE_FONT, true);
+    ctx.restore();
+  }
+
+  /** Witte tekst met schaduw; `outlined` voegt een donkere rand toe voor tekst los op de lucht. */
+  private text(value: string, x: number, y: number, fontSpec: string, outlined = false): void {
     const { ctx } = this;
     ctx.font = fontSpec;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = UI_STYLE.text.shadow;
     ctx.fillText(value, x + 3, y + 4);
+    if (outlined) {
+      ctx.lineJoin = 'round';
+      ctx.lineWidth = 8;
+      ctx.strokeStyle = UI_STYLE.text.outline;
+      ctx.strokeText(value, x, y);
+    }
     ctx.fillStyle = UI_STYLE.text.fill;
     ctx.fillText(value, x, y);
   }
