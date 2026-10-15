@@ -15,6 +15,11 @@ npm run build      # typecheck + production build naar dist/
 npm run preview    # production build serveren
 ```
 
+## Hosting (test)
+
+Netlify bouwt en host de game via `netlify.toml` (`npm run build` → `dist/`, Node 22).
+Koppel de GitHub-repo eenmalig in Netlify; elke push op de productietak wordt automatisch gepubliceerd.
+
 Bediening: tik om te starten, pauzeknop rechtsboven. Op toetsenbord: Spatie/Enter = start/verder, Esc/P = pauze.
 
 ## Structuur

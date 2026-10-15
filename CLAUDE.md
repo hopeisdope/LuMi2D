@@ -23,6 +23,8 @@ npm install && npm run dev   # Vite dev server on port 5173 (--host, reachable f
 npm run typecheck && npm run build   # no test framework yet; typecheck + production build are the checks
 ```
 
+Test hosting: Netlify, configured in `netlify.toml` (repo linked in the Netlify UI).
+
 ## Conventions
 - The name is always written **LuMi2d** (capital L and M, lowercase d); take it from `BRAND.name`, never hard-code it.
 - Branding lives in `src/brand/brand.ts` as renderer-agnostic data (no Canvas, no 2D gameplay), so a possible

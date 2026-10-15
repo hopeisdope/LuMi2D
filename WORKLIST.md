@@ -4,6 +4,7 @@ Read at the start of every session; update when something is done or added.
 
 ## Now
 
+- [ ] Connect the repo to Netlify (production branch `main`, branch deploy for `fase-1-basis`) and test via the Netlify URL
 - [ ] Test phase 1 on a real iPad and iPad mini in Safari (smoothness, touch, no zoom/scroll)
 
 ## Next
@@ -17,7 +18,6 @@ Read at the start of every session; update when something is done or added.
 
 ## Open questions
 
-- Hosting for device testing: GitHub Pages needs a public repo or GitHub Pro (repo is private). Workflow `.github/workflows/pages.yml` is ready; enable Pages with source "GitHub Actions" and merge to `main`.
 
 ## Done
 

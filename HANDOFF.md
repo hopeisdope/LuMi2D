@@ -8,6 +8,8 @@ Concise state for reloading into a fresh session. Details are in `WORKLIST.md`.
 
 - Branding applied: name LuMi2d, per-letter colourful logo; identity in `src/brand/brand.ts` (data only).
 
+- Hosting for device tests: Netlify via `netlify.toml`; the repo still has to be linked in the Netlify UI.
+
 ## Watch out for
 - Possible future LuMi3D: keep brand data renderer-agnostic, but build no shared infrastructure yet.
 - TypeScript 7 and Vite 8 are installed (latest at the time).

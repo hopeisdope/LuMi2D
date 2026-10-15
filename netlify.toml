@@ -1,0 +1,19 @@
+# Netlify-configuratie voor LuMi2d (testhosting).
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# Gebouwde assets hebben een hash in de bestandsnaam: mogen lang gecachet worden.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# index.html altijd vers ophalen, zodat een nieuwe versie direct zichtbaar is op de iPad.
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache"
