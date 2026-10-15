@@ -21,12 +21,14 @@ Concise state for reloading into a fresh session. Details are in `WORKLIST.md`.
 - Part 3: `world/Collectibles.ts` (platform + collectible pools, turbo/shield/ride timers). Course generation in
   `Obstacles.ts#spawnAhead` also places platforms (`PLATFORMS.chance`) and rainbow pieces (`RAINBOW.chance`).
   Platforms are one-way (land from above only) in `Car.updateCar`; the ride uses `Car.floatCar`.
+- Part 4: `world/Friends.ts` (own spawner, independent of the course); kinds per world in `THEMES[*].friends`, drawn by `FriendRenderer` (parametric critters). `world.theme` is set from settings in `Game.applySettings()`.
 - `world.events.jumped/landed/bumped/scored/boosted/rainbowPiece/rainbowRide` are set per frame — the hook for sound/feedback later.
 - `createWorld(seed)` / `resetWorld(world, seed)` take an optional seed for reproducible tests.
 - Hosting: Netlify via `netlify.toml`; the repo still has to be linked in the Netlify UI (production branch `main`).
 - Typecheck and build pass; tested in Chromium (Playwright) with iPad viewports, not yet on a real device.
 
 ## Watch out for
+- Perf measurement in headless Chromium needs a forced flush (`getImageData`) — canvas work is deferred otherwise. Without GPU every world costs ~20 ms/frame at 2x; real iPads use GPU canvas.
 - Finished work always gets merged into `main` (see Git workflow in `CLAUDE.md`).
 - Every finger counts as a tap (no `isPrimary` filter), so a resting palm doesn't block jumping.
 - Possible future LuMi3D: keep brand data renderer-agnostic, but build no shared infrastructure yet.

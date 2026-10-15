@@ -5,6 +5,7 @@ import type { Layout } from '../ui/Layout';
 import { BackgroundRenderer } from './BackgroundRenderer';
 import { CarRenderer } from './CarRenderer';
 import { EffectsRenderer } from './EffectsRenderer';
+import { FriendRenderer } from './FriendRenderer';
 import { ItemsRenderer } from './ItemsRenderer';
 import { ObstacleRenderer } from './ObstacleRenderer';
 import type { Screen } from './Screen';
@@ -20,6 +21,7 @@ export class Renderer {
   private readonly car: CarRenderer;
   private readonly effects: EffectsRenderer;
   private readonly items: ItemsRenderer;
+  private readonly friends: FriendRenderer;
   private readonly ui: UIRenderer;
 
   constructor(private readonly screen: Screen) {
@@ -28,6 +30,7 @@ export class Renderer {
     this.car = new CarRenderer(screen.ctx);
     this.effects = new EffectsRenderer(screen.ctx);
     this.items = new ItemsRenderer(screen.ctx);
+    this.friends = new FriendRenderer(screen.ctx);
     this.ui = new UIRenderer(screen.ctx, this.obstacles);
     screen.onResize(() => this.background.invalidate());
   }
@@ -47,12 +50,14 @@ export class Renderer {
     // De auto staat op een vaste schermpositie; de wereld scrolt eronder door.
     const carScreenX = view.width * CAR.screenXRatio;
     this.background.render(view, world.distance, idleTime, theme);
+    this.friends.render(world, carScreenX, view.width);
     this.items.renderPlatforms(world, carScreenX, view.width);
     this.obstacles.render(world, carScreenX, view.width);
     this.items.renderCollectibles(world, carScreenX, view.width);
     this.effects.renderBehind(world, carScreenX);
     this.car.render(world.car, carScreenX, world.time, state === 'playing' && world.speed > 0, CARS[settings.car]);
     this.effects.render(world, carScreenX);
+    this.friends.renderGifts(world, carScreenX);
 
     const showJumpHint = state === 'playing' && world.jumpCount === 0 && world.time > JUMP_HINT_DELAY;
     this.ui.render(state, view, layout, idleTime, world, settings, showJumpHint);
