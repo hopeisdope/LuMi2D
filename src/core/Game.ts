@@ -76,6 +76,7 @@ export class Game {
   private applySettings(): void {
     this.world.obstaclesEnabled = this.settings.obstacles;
     this.world.enemiesEnabled = this.settings.enemies;
+    this.world.theme = this.settings.theme;
     this.sound.enabled = this.settings.sound;
   }
 
@@ -90,6 +91,7 @@ export class Game {
   private choose(kind: 'car' | 'theme', index: number): void {
     if (kind === 'car') this.settings.car = CAR_IDS[index];
     else this.settings.theme = THEME_IDS[index];
+    this.applySettings();
     saveSettings(this.settings);
     this.sound.play('tap');
   }
@@ -131,6 +133,8 @@ export class Game {
     if (e.boosted) this.sound.play('boost');
     if (e.rainbowRide) this.sound.play('rainbowRide');
     else if (e.rainbowPiece) this.sound.play('rainbowPiece');
+    if (e.friendGift) this.sound.play('gift');
+    else if (e.friendCheer) this.sound.play('cheer');
   }
 
   private readonly render = (): void => {

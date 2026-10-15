@@ -1,8 +1,9 @@
-import { BOOST, ENEMIES, OBSTACLES, RAINBOW, SPEED, WORLD } from '../config';
+import { BOOST, ENEMIES, FRIENDS, OBSTACLES, RAINBOW, SPEED, WORLD } from '../config';
 import type { WorldState } from '../types';
 import { createCar, floatCar, requestJump, resetCar, updateCar } from './Car';
 import { createCollectiblePool, createPlatformPool, resetCollectibles, updateCollectibles } from './Collectibles';
 import { createObstaclePool, resetObstacles, updateObstacles } from './Obstacles';
+import { createFriendPool, resetFriends, updateFriends } from './Friends';
 import { createRandom, randomSeed } from './random';
 
 /**
@@ -29,6 +30,9 @@ export function createWorld(seed: number = randomSeed()): WorldState {
     shieldTimer: 0,
     rainbowPieces: 0,
     rainbowRide: 0,
+    theme: 'meadow',
+    friends: createFriendPool(),
+    nextFriendAt: FRIENDS.firstDistance,
     car: createCar(),
     events: {
       jumped: false,
@@ -38,11 +42,13 @@ export function createWorld(seed: number = randomSeed()): WorldState {
       boosted: false,
       rainbowPiece: false,
       rainbowRide: false,
+      friendCheer: false,
+      friendGift: false,
     },
   };
 }
 
-/** Nieuwe ronde. De instellingen (obstakels/vijanden aan/uit) blijven behouden. */
+/** Nieuwe ronde. De instellingen (obstakels/vijanden aan/uit, wereld) blijven behouden. */
 export function resetWorld(world: WorldState, seed: number = randomSeed()): void {
   world.speed = 0;
   world.targetSpeed = SPEED.base;
@@ -56,6 +62,7 @@ export function resetWorld(world: WorldState, seed: number = randomSeed()): void
   resetCar(world.car);
   resetObstacles(world);
   resetCollectibles(world);
+  resetFriends(world);
 }
 
 /** Laat de auto springen (of bewaart de vraag kort als hij nog in de lucht is). */
@@ -71,6 +78,8 @@ function clearEvents(world: WorldState): void {
   world.events.boosted = false;
   world.events.rainbowPiece = false;
   world.events.rainbowRide = false;
+  world.events.friendCheer = false;
+  world.events.friendGift = false;
 }
 
 export function updateWorld(world: WorldState, dt: number): void {
@@ -104,4 +113,5 @@ export function updateWorld(world: WorldState, dt: number): void {
 
   updateObstacles(world, dt);
   updateCollectibles(world, dt);
+  updateFriends(world);
 }

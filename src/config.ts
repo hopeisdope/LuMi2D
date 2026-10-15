@@ -151,6 +151,25 @@ export const COLLECTIBLES = {
   radius: 26,
 } as const;
 
+/** Vriendjes langs de weg: zwaaien en juichen, en geven soms een ster of verrassing. */
+export const FRIENDS = {
+  poolSize: 4,
+  firstDistance: 700,
+  minGap: 1100,
+  maxGap: 1900,
+  /** Zo ver vóór het vriendje begint het te zwaaien en juichen. */
+  cheerDistance: 260,
+  /** Kans dat een vriendje iets geeft. */
+  giftChance: 0.35,
+  /** Deel van de cadeaus dat een verrassing is (confetti + extra sterren) i.p.v. één ster. */
+  surpriseShare: 0.3,
+  surpriseStars: 3,
+  /** Duur (s) van het zwaaien/juichen en van de cadeau-animaties. */
+  cheerTime: 2,
+  giftFlightTime: 0.6,
+  confettiTime: 1.2,
+} as const;
+
 /** Wat er gebeurt bij een botsing: geen game over, alleen een vriendelijke hobbel. */
 export const BUMP = {
   /** Duur (s) van het wiebelen; zo lang kan de auto niet opnieuw botsen. */

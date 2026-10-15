@@ -95,6 +95,25 @@ export interface Collectible {
   collectedTime: number;
 }
 
+/** Vriendjes langs de weg; welke er komen hangt af van de wereld. */
+export type FriendKind = 'bunny' | 'bear' | 'dinoGreen' | 'dinoOrange' | 'alien' | 'robot' | 'unicorn' | 'kitty';
+
+/** Wat een vriendje soms geeft als de auto langskomt. */
+export type FriendGift = 'none' | 'star' | 'surprise';
+
+/** Een vriendje in de berm. Objecten worden hergebruikt uit een vaste pool. */
+export interface Friend {
+  active: boolean;
+  kind: FriendKind;
+  /** Wereldpositie. */
+  x: number;
+  gift: FriendGift;
+  /** Zwaait/juicht al (de auto is dichtbij); -1 = nog niet. */
+  cheerTime: number;
+  /** Cadeau al gegeven; -1 = nog niet. */
+  giftTime: number;
+}
+
 export type ObstacleKind = 'cone' | 'rock' | 'crate' | 'hedgehog';
 
 /**
@@ -158,6 +177,12 @@ export interface WorldState {
   rainbowPieces: number;
   /** Resterende tijd (s) van de regenboogrit; 0 = geen rit. */
   rainbowRide: number;
+  /** Gekozen wereld: bepaalt welke vriendjes er langs de weg staan. */
+  theme: ThemeId;
+  /** Vaste pool met vriendjes. */
+  friends: Friend[];
+  /** Afstand waarop het volgende vriendje verschijnt. */
+  nextFriendAt: number;
   car: Car;
   /** Gebeurtenissen van het laatste update-frame (voor later: geluid en feedback). */
   events: WorldEvents;
@@ -177,6 +202,10 @@ export interface WorldEvents {
   rainbowPiece: boolean;
   /** Regenboogrit gestart. */
   rainbowRide: boolean;
+  /** Een vriendje begint te zwaaien/juichen. */
+  friendCheer: boolean;
+  /** Een vriendje geeft een ster of verrassing. */
+  friendGift: boolean;
 }
 
 /** Icoon naast de tekst van een knop (voor kinderen die nog niet lezen). */

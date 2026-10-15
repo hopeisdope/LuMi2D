@@ -1,5 +1,5 @@
 import { PALETTE } from './brand/brand';
-import type { ThemeId } from './types';
+import type { FriendKind, ThemeId } from './types';
 
 /**
  * Werelden (thema's) van de 2D-game: alleen data. De renderer leest deze kleuren en
@@ -28,6 +28,8 @@ export interface Theme {
   decor: 'tufts' | 'ferns' | 'craters' | 'candy';
   decorA: string;
   decorB: string;
+  /** Vriendjes die in deze wereld langs de weg staan. */
+  friends: readonly FriendKind[];
 }
 
 export const THEMES: Readonly<Record<ThemeId, Theme>> = {
@@ -49,6 +51,7 @@ export const THEMES: Readonly<Record<ThemeId, Theme>> = {
     decor: 'tufts',
     decorA: PALETTE.greenDark,
     decorB: '#a0703c',
+    friends: ['bunny', 'bear'],
   },
   dino: {
     id: 'dino',
@@ -68,6 +71,7 @@ export const THEMES: Readonly<Record<ThemeId, Theme>> = {
     decor: 'ferns',
     decorA: '#2f6b1f',
     decorB: '#fff3c4',
+    friends: ['dinoGreen', 'dinoOrange'],
   },
   space: {
     id: 'space',
@@ -87,6 +91,7 @@ export const THEMES: Readonly<Record<ThemeId, Theme>> = {
     decor: 'craters',
     decorA: '#7d789c',
     decorB: '#c5c1dd',
+    friends: ['alien', 'robot'],
   },
   candy: {
     id: 'candy',
@@ -106,5 +111,6 @@ export const THEMES: Readonly<Record<ThemeId, Theme>> = {
     decor: 'candy',
     decorA: '#ff4f9a',
     decorB: '#7ad3ff',
+    friends: ['unicorn', 'kitty'],
   },
 };

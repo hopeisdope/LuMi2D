@@ -6,11 +6,10 @@ Read at the start of every session; update when something is done or added.
 
 - [ ] Tune jump height/airtime and obstacle sizes/gaps (`JUMP`, `OBSTACLES` in `config.ts`) with children on a real iPad — jump window widened to ~0.7 s, check if that feels right
 - [ ] Connect the repo to Netlify (production branch `main`) and test via the Netlify URL
-- [ ] Test phases 1–2 on a real iPad and iPad mini in Safari (smoothness, touch, no zoom/scroll)
+- [ ] Test on a real iPad and iPad mini in Safari: smoothness (headless Chromium without GPU can't measure this), touch, sound, install via "Zet op beginscherm", offline
 
 ## Next
 
-- [ ] Part 4: friends along the road (wave/cheer, sometimes a star or surprise)
 - [ ] Configurable auto-movement, difficulty and increasing speed
 
 ## Open questions
@@ -18,6 +17,7 @@ Read at the start of every session; update when something is done or added.
 
 ## Done
 
+- [x] Part 4: friends along the road per world (wave and cheer, ~1 in 3 gives a star or a surprise with confetti and 3 stars)
 - [x] Part 3: floating platforms with turbo power-up (faster + smash obstacles), rainbow pieces (red/yellow/blue) and an automatic rainbow ride over a row of stars
 - [x] Part 2: four worlds (Weide, Dino, Ruimte, Zoetroze) chosen in settings, four cars chosen on start/pause screen, icons next to all texts and buttons
 - [x] Part 1: settings saved in localStorage, synthesized sounds (on/off in settings), PWA (manifest, icons, favicon, offline service worker)
