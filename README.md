@@ -15,6 +15,13 @@ npm run build      # typecheck + production build naar dist/
 npm run preview    # production build serveren
 ```
 
+## Installeren op de iPad (PWA)
+
+Open de site in Safari → Deel → "Zet op beginscherm". Daarna start LuMi2d schermvullend als app en werkt
+het ook zonder internet (na één keer online openen). Instellingen worden op het apparaat bewaard.
+
+Iconen opnieuw maken na een wijziging van `public/icons/icon.svg`: `node scripts/generate-icons.mjs` (vereist Playwright).
+
 ## Hosting (test)
 
 Netlify bouwt en host de game via `netlify.toml` (`npm run build` → `dist/`, Node 22).

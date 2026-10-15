@@ -14,6 +14,8 @@ Concise state for reloading into a fresh session. Details are in `WORKLIST.md`.
 - Phase 4: enemies share the obstacle pool (`Obstacle.enemy`, `vx`); hedgehog walks toward the car at `ENEMIES.speed`
   and gets `ENEMIES.extraGap` so spacing stays ≥ `OBSTACLES.minGap`. Settings state `settings` (gear on the start
   screen) toggles `world.obstaclesEnabled` / `world.enemiesEnabled`; not persisted (no data storage).
+- Settings (`Settings` type) live in `Game`, loaded/saved via `src/settings/Settings.ts`; `applySettings()` pushes them to world and sound.
+- PWA: production build emits `sw.js` (precache of all build + public files, cache name per build). Tested offline reload in Chromium.
 - `world.events.jumped/landed/bumped/scored` are set per frame — the hook for sound/feedback later.
 - `createWorld(seed)` / `resetWorld(world, seed)` take an optional seed for reproducible tests.
 - Hosting: Netlify via `netlify.toml`; the repo still has to be linked in the Netlify UI (production branch `main`).

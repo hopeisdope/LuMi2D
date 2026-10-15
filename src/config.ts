@@ -184,6 +184,8 @@ export const COLORS = {
 export const UI = {
   pauseButton: { size: 72, margin: 20 },
   score: { margin: 22, starSize: 30 },
-  settingsRow: { width: 480, height: 84, gap: 20 },
+  settingsRow: { width: 480, height: 74, gap: 14 },
+  /** Bovenkant van de eerste instellingenrij. */
+  settingsTop: 110,
   menuButton: { width: 280, height: 84, gap: 24 },
 } as const;

@@ -1,7 +1,9 @@
+import type { Sound } from '../audio/Sound';
 import type { InputManager } from '../input/InputManager';
 import type { Renderer } from '../render/Renderer';
 import type { Screen } from '../render/Screen';
-import type { GameState, InputAction, Vec2, WorldState } from '../types';
+import { loadSettings, saveSettings } from '../settings/Settings';
+import type { GameState, InputAction, Settings, Vec2, WorldState } from '../types';
 import { hitTest, Layout } from '../ui/Layout';
 import { createWorld, jump, resetWorld, updateWorld } from '../world/World';
 import { GameLoop } from './GameLoop';
@@ -18,13 +20,17 @@ export class Game {
   /** Tijd voor sfeeranimaties (wolken); staat stil tijdens pauze. */
   private ambientTime = 0;
   private readonly tapPoint: Vec2 = { x: 0, y: 0 };
+  /** Bewaarde instellingen (localStorage); gelden voor elke nieuwe ronde. */
+  private readonly settings: Settings = loadSettings();
 
   constructor(
     private readonly screen: Screen,
     private readonly input: InputManager,
     private readonly renderer: Renderer,
+    private readonly sound: Sound,
     onError: (error: unknown) => void,
   ) {
+    this.applySettings();
     this.loop = new GameLoop(this.update, this.render, onError);
     this.layout.update(screen.viewport);
     screen.onResize(() => {
@@ -66,6 +72,20 @@ export class Game {
     this.state = 'playing';
   }
 
+  /** Zet de instellingen door naar wereld en geluid. */
+  private applySettings(): void {
+    this.world.obstaclesEnabled = this.settings.obstacles;
+    this.world.enemiesEnabled = this.settings.enemies;
+    this.sound.enabled = this.settings.sound;
+  }
+
+  /** Wijzigt een aan/uit-instelling, past hem direct toe en bewaart hem. */
+  private toggleSetting(key: 'obstacles' | 'enemies' | 'sound'): void {
+    this.settings[key] = !this.settings[key];
+    this.applySettings();
+    saveSettings(this.settings);
+  }
+
   openSettings(): void {
     if (this.state !== 'ready') return;
     this.state = 'settings';
@@ -86,14 +106,24 @@ export class Game {
 
     if (this.state === 'playing') {
       updateWorld(this.world, dt);
+      this.playWorldSounds();
       this.ambientTime += dt;
     } else if (this.state === 'ready' || this.state === 'settings') {
       this.ambientTime += dt;
     }
   };
 
+  /** Geluid bij de gebeurtenissen van dit frame. */
+  private playWorldSounds(): void {
+    const e = this.world.events;
+    if (e.bumped) this.sound.play('bump');
+    else if (e.jumped) this.sound.play('jump');
+    else if (e.landed) this.sound.play('land');
+    if (e.scored) this.sound.play('star');
+  }
+
   private readonly render = (): void => {
-    this.renderer.render(this.state, this.world, this.layout, this.ambientTime);
+    this.renderer.render(this.state, this.world, this.layout, this.ambientTime, this.settings);
   };
 
   private readonly handleAction = (action: InputAction): void => {
@@ -122,27 +152,31 @@ export class Game {
     switch (this.state) {
       case 'ready':
         // Tandwiel opent de instellingen; overal elders tikken start de game (makkelijk voor jonge kinderen).
+        this.sound.play('tap');
         if (hitTest(this.layout.settings.rect, p.x, p.y)) this.openSettings();
         else this.start();
         break;
       case 'settings':
         // Alleen de knoppen reageren; elders tikken doet niets, zodat er niet per ongeluk iets wijzigt.
-        if (hitTest(this.layout.toggleObstacles.rect, p.x, p.y, 0)) {
-          this.world.obstaclesEnabled = !this.world.obstaclesEnabled;
-        } else if (hitTest(this.layout.toggleEnemies.rect, p.x, p.y, 0)) {
-          this.world.enemiesEnabled = !this.world.enemiesEnabled;
-        } else if (hitTest(this.layout.done.rect, p.x, p.y, 0)) {
-          this.closeSettings();
-        }
+        if (hitTest(this.layout.toggleObstacles.rect, p.x, p.y, 0)) this.toggleSetting('obstacles');
+        else if (hitTest(this.layout.toggleEnemies.rect, p.x, p.y, 0)) this.toggleSetting('enemies');
+        else if (hitTest(this.layout.toggleSound.rect, p.x, p.y, 0)) this.toggleSetting('sound');
+        else if (hitTest(this.layout.done.rect, p.x, p.y, 0)) this.closeSettings();
+        else break;
+        this.sound.play('tap');
         break;
       case 'playing':
         // Pauzeknop heeft voorrang; overal elders tikken = springen.
-        if (hitTest(this.layout.pause.rect, p.x, p.y)) this.pause();
-        else jump(this.world);
+        if (hitTest(this.layout.pause.rect, p.x, p.y)) {
+          this.sound.play('tap');
+          this.pause();
+        } else jump(this.world);
         break;
       case 'paused':
         if (hitTest(this.layout.resume.rect, p.x, p.y, 0)) this.resume();
         else if (hitTest(this.layout.restart.rect, p.x, p.y, 0)) this.restart();
+        else break;
+        this.sound.play('tap');
         break;
     }
   }

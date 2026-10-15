@@ -14,7 +14,8 @@ Read `WORKLIST.md` first. Keep `HANDOFF.md` current at the end of long sessions.
 - Structure: `config.ts` (constants), `types.ts`, `core/` (loop, state machine),
   `input/` (raw events → `InputAction`), `world/` (pure game logic),
   `render/` (read-only drawing), `ui/` (button layout + hit-tests),
-  `brand/` (name, palette, typography, UI style — plain data only).
+  `brand/` (name, palette, typography, UI style — plain data only), `settings/` (persisted settings),
+  `audio/` (synthesized sounds).
 
 ## Commands
 
@@ -43,7 +44,11 @@ Test hosting: Netlify, configured in `netlify.toml` (repo linked in the Netlify 
 - Input goes through `InputManager` as abstract actions; new controls (e.g. jump) are new action types.
 - Use delta time for all movement; avoid allocations in the update/render loop.
 - Touch-first: no hover or mouse-only controls; large tap targets for children.
-- No data storage; nothing sensitive in the project.
+- Storage: only `localStorage` key `lumi2d.settings.v1` for settings (toggles, car, world) via `src/settings/Settings.ts`;
+  always validate on load and fall back to defaults. Never store anything personal or sensitive.
+- Sound is synthesized with Web Audio in `src/audio/Sound.ts` (no audio files); it unlocks on the first tap.
+- PWA: `public/manifest.webmanifest`, icons in `public/icons/` (regenerate with `scripts/generate-icons.mjs`),
+  service worker generated at build time from `sw-template.js` by the plugin in `vite.config.ts` (production only).
 
 ## Debugging
 - Dev build exposes `window.game` in the browser console (state, world, layout).

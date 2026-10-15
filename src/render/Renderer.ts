@@ -1,5 +1,5 @@
 import { CAR, COLORS } from '../config';
-import type { GameState, Viewport, WorldState } from '../types';
+import type { GameState, Settings, Viewport, WorldState } from '../types';
 import type { Layout } from '../ui/Layout';
 import { BackgroundRenderer } from './BackgroundRenderer';
 import { CarRenderer } from './CarRenderer';
@@ -28,7 +28,7 @@ export class Renderer {
     screen.onResize(() => this.background.invalidate());
   }
 
-  render(state: GameState, world: WorldState, layout: Layout, idleTime: number): void {
+  render(state: GameState, world: WorldState, layout: Layout, idleTime: number, settings: Settings): void {
     const view: Viewport = this.screen.viewport;
     this.screen.beginFrame(COLORS.grassEdge);
 
@@ -47,7 +47,7 @@ export class Renderer {
     this.effects.render(world, carScreenX);
 
     const showJumpHint = state === 'playing' && world.jumpCount === 0 && world.time > JUMP_HINT_DELAY;
-    this.ui.render(state, view, layout, idleTime, world, showJumpHint);
+    this.ui.render(state, view, layout, idleTime, world, settings, showJumpHint);
 
     ctx.restore();
   }
