@@ -1,4 +1,5 @@
 import { PALETTE } from './brand/brand';
+import type { CarId } from './types';
 
 /**
  * Configuratie van de 2D-game (scherm, wereld, auto, scène).
@@ -184,8 +185,27 @@ export const COLORS = {
 export const UI = {
   pauseButton: { size: 72, margin: 20 },
   score: { margin: 22, starSize: 30 },
-  settingsRow: { width: 480, height: 74, gap: 14 },
+  settingsRow: { width: 480, height: 62, gap: 10 },
   /** Bovenkant van de eerste instellingenrij. */
-  settingsTop: 110,
+  settingsTop: 88,
+  /** Kaartjes van de auto- en wereldkiezer. */
+  pickerCard: { width: 118, height: 90, gap: 16 },
   menuButton: { width: 280, height: 84, gap: 24 },
 } as const;
+
+/** Uiterlijk van de te kiezen auto's. Alleen het uiterlijk verschilt; rijden en springen is gelijk. */
+export interface CarStyle {
+  id: CarId;
+  shape: 'classic' | 'racer' | 'jeep' | 'bubble';
+  body: string;
+  bodyDark: string;
+  window: string;
+  accent: string;
+}
+
+export const CARS: Readonly<Record<CarId, CarStyle>> = {
+  classic: { id: 'classic', shape: 'classic', body: PALETTE.red, bodyDark: PALETTE.redDark, window: '#bde7ff', accent: '#fff59d' },
+  racer: { id: 'racer', shape: 'racer', body: '#1e88e5', bodyDark: '#0d47a1', window: '#bde7ff', accent: PALETTE.white },
+  jeep: { id: 'jeep', shape: 'jeep', body: '#43a047', bodyDark: '#1b5e20', window: '#bde7ff', accent: '#ffca28' },
+  bubble: { id: 'bubble', shape: 'bubble', body: PALETTE.purple, bodyDark: '#6a1b9a', window: '#e1f5fe', accent: '#ff80ab' },
+};

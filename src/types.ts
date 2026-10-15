@@ -135,8 +135,12 @@ export interface WorldEvents {
   scored: boolean;
 }
 
+/** Icoon naast de tekst van een knop (voor kinderen die nog niet lezen). */
+export type ButtonIcon = 'play' | 'restart' | 'check';
+
 /** Een knop in de canvas-UI. */
 export interface Button {
+  icon?: ButtonIcon;
   id: 'start' | 'pause' | 'resume' | 'restart' | 'settings' | 'toggleObstacles' | 'toggleEnemies' | 'toggleSound' | 'done';
   rect: Rect;
   label: string;

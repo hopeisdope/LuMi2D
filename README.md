@@ -31,7 +31,9 @@ Bediening: tik om te starten, tik ergens op het scherm om te springen, pauzeknop
 Spring over pionnen, stenen en kistjes: elk obstakel waar je overheen springt levert een ster op.
 Pas op voor de egel die over de weg wandelt: spring eroverheen voor een ster!
 Botsen is niet erg: de auto hobbelt even en rijdt verder.
-Via het tandwiel op het startscherm zet je pionnen & stenen en egels aan of uit.
+Kies je auto op het startscherm of in het pauzemenu.
+Via het tandwiel op het startscherm zet je pionnen & stenen, egels en geluid aan of uit en kies je een wereld
+(Weide, Dino, Ruimte of Zoetroze).
 Op toetsenbord: Spatie/Enter = start/springen/verder, ↑/W = springen, Esc/P = pauze.
 
 ## Structuur

@@ -1,4 +1,5 @@
-import { CAR, COLORS } from '../config';
+import { CAR, CARS } from '../config';
+import { THEMES } from '../themes';
 import type { GameState, Settings, Viewport, WorldState } from '../types';
 import type { Layout } from '../ui/Layout';
 import { BackgroundRenderer } from './BackgroundRenderer';
@@ -24,13 +25,14 @@ export class Renderer {
     this.obstacles = new ObstacleRenderer(screen.ctx);
     this.car = new CarRenderer(screen.ctx);
     this.effects = new EffectsRenderer(screen.ctx);
-    this.ui = new UIRenderer(screen.ctx);
+    this.ui = new UIRenderer(screen.ctx, this.obstacles);
     screen.onResize(() => this.background.invalidate());
   }
 
   render(state: GameState, world: WorldState, layout: Layout, idleTime: number, settings: Settings): void {
     const view: Viewport = this.screen.viewport;
-    this.screen.beginFrame(COLORS.grassEdge);
+    const theme = THEMES[settings.theme];
+    this.screen.beginFrame(theme.grassEdge);
 
     const ctx = this.screen.ctx;
     ctx.save();
@@ -41,9 +43,9 @@ export class Renderer {
 
     // De auto staat op een vaste schermpositie; de wereld scrolt eronder door.
     const carScreenX = view.width * CAR.screenXRatio;
-    this.background.render(view, world.distance, idleTime);
+    this.background.render(view, world.distance, idleTime, theme);
     this.obstacles.render(world, carScreenX, view.width);
-    this.car.render(world.car, carScreenX, world.time, state === 'playing' && world.speed > 0);
+    this.car.render(world.car, carScreenX, world.time, state === 'playing' && world.speed > 0, CARS[settings.car]);
     this.effects.render(world, carScreenX);
 
     const showJumpHint = state === 'playing' && world.jumpCount === 0 && world.time > JUMP_HINT_DELAY;
