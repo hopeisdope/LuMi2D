@@ -33,7 +33,7 @@ export class Renderer {
     this.background.render(view, world.distance, idleTime);
     // De auto staat op een vaste schermpositie; de wereld scrolt eronder door.
     this.car.render(world.car, view.width * CAR.screenXRatio, world.time, state === 'playing' && world.speed > 0);
-    this.ui.render(state, view, layout);
+    this.ui.render(state, view, layout, idleTime);
 
     ctx.restore();
   }

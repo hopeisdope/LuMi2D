@@ -1,4 +1,6 @@
-# LuMi2D
+# LuMi2d
+
+The first game in a possible LuMi family of children's games.
 
 Eenvoudige 2D side-scroller racegame voor jonge kinderen (HTML5 Canvas + TypeScript + Vite).
 Doelplatform: iPad / iPad mini in Safari (landscape), later als PWA.
@@ -20,7 +22,7 @@ Bediening: tik om te starten, pauzeknop rechtsboven. Op toetsenbord: Spatie/Ente
 ```
 src/
   main.ts                 bootstrap + foutafhandeling
-  config.ts               alle constanten (afmetingen, snelheid, kleuren, parallax)
+  config.ts               2D-constanten (afmetingen, snelheid, scènekleuren, parallax)
   types.ts                types: GameState, WorldState, Car, InputAction, Viewport, ...
   core/GameLoop.ts        requestAnimationFrame-loop met begrensde delta time
   core/Game.ts            toestandsmachine ready → playing ⇄ paused, input → acties
@@ -29,4 +31,5 @@ src/
   render/Screen.ts        canvas-schaling (vaste virtuele hoogte, letterbox)
   render/*Renderer.ts     achtergrond (parallax), auto, UI
   ui/Layout.ts            knopposities en hit-tests
+  brand/brand.ts          huisstijl: naam, palet, typografie, UI-stijl (alleen data, los van rendering)
 ```

@@ -1,5 +1,9 @@
+import { PALETTE } from './brand/brand';
+
 /**
- * Centrale configuratie. Alle afmetingen zijn in "wereld-eenheden" binnen een
+ * Configuratie van de 2D-game (scherm, wereld, auto, scène).
+ * Merkidentiteit (naam, palet, typografie, UI-stijl) staat in brand/brand.ts.
+ * Alle afmetingen zijn in "wereld-eenheden" binnen een
  * virtueel scherm met vaste hoogte; de breedte volgt de beeldverhouding.
  */
 export const VIEW = {
@@ -49,33 +53,29 @@ export const PARALLAX = {
   ground: 1,
 } as const;
 
+/** Scènekleuren van de 2D-wereld, afgeleid van het merkpalet waar dat kan. */
 export const COLORS = {
   skyTop: '#5fb8f0',
-  skyBottom: '#c8ecff',
-  sun: '#ffd93b',
-  cloud: '#ffffff',
+  skyBottom: PALETTE.blueLight,
+  sun: PALETTE.yellow,
+  cloud: PALETTE.white,
   farHills: '#8fd18a',
   nearHills: '#5cb85c',
-  grass: '#4caf50',
-  grassEdge: '#2e7d32',
+  grass: PALETTE.green,
+  grassEdge: PALETTE.greenDark,
   road: '#6d6d6d',
-  roadLine: '#ffffff',
+  roadLine: PALETTE.white,
   dirt: '#a0703c',
-  carBody: '#e53935',
-  carBodyDark: '#b71c1c',
+  carBody: PALETTE.red,
+  carBodyDark: PALETTE.redDark,
   carWindow: '#bde7ff',
   carWheel: '#222222',
   carHub: '#d0d0d0',
   carLight: '#fff59d',
-  uiText: '#ffffff',
-  uiTextShadow: 'rgba(0, 0, 0, 0.35)',
-  uiButton: '#ff9800',
-  uiButtonDark: '#e65100',
-  uiDim: 'rgba(20, 40, 80, 0.45)',
 } as const;
 
+/** Posities en afmetingen van UI-elementen op het virtuele 2D-scherm. */
 export const UI = {
   pauseButton: { size: 72, margin: 20 },
   menuButton: { width: 280, height: 84, gap: 24 },
-  fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
 } as const;

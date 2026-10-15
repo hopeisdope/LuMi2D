@@ -19,4 +19,6 @@ Read at the start of every session; update when something is done or added.
 
 ## Done
 
+- [x] Branding: name LuMi2d, colourful logo on the start screen, `src/brand/` with palette, typography and UI style
+
 - [x] Phase 1: Vite + TypeScript project, game loop, parallax background, car, start/pause/resume/restart, scaling (branch `fase-1-basis`)
