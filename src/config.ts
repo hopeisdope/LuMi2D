@@ -62,6 +62,54 @@ export const JUMP_PHYSICS = {
   velocity: (4 * JUMP.height) / JUMP.airTime,
 } as const;
 
+/** Obstakels op de weg. Afstanden in wereld-eenheden. */
+export const OBSTACLES = {
+  /** Standaard aan; later te wijzigen via instellingen. */
+  enabled: true,
+  /** Maximaal aantal tegelijk (vaste pool, geen allocaties tijdens het spelen). */
+  poolSize: 8,
+  /** Afstand tot het eerste obstakel: eerst rustig wegrijden en de springhint zien. */
+  firstDistance: 1100,
+  /** Ruimte tussen obstakels: altijd genoeg om te landen en opnieuw te springen. */
+  minGap: 650,
+  maxGap: 1100,
+  /** Hoe ver vóór de auto een obstakel verschijnt (buiten beeld, ook op brede schermen). */
+  spawnAhead: 1400,
+  /** Obstakels zo ver achter de auto worden opgeruimd. */
+  despawnBehind: 800,
+  /** Vergevingsgezinde botsing: zoveel eenheden van elke kant van het obstakel tellen niet mee. */
+  hitboxInset: 8,
+  /** Afmetingen per soort; laag genoeg om er makkelijk overheen te springen. */
+  kinds: {
+    cone: { width: 44, height: 52 },
+    rock: { width: 62, height: 36 },
+    crate: { width: 50, height: 46 },
+  },
+} as const;
+
+/** Wat er gebeurt bij een botsing: geen game over, alleen een vriendelijke hobbel. */
+export const BUMP = {
+  /** Duur (s) van het wiebelen; zo lang kan de auto niet opnieuw botsen. */
+  duration: 0.7,
+  /** Snelheid direct na de botsing als fractie van de doelsnelheid; daarna trekt de auto weer op. */
+  speedFactor: 0.35,
+  /** Maximale wiebelhoek (radialen). */
+  wobble: 0.1,
+} as const;
+
+/** Botsingsvak van de auto, relatief aan de afmetingen (iets kleiner dan de tekening = vergevingsgezind). */
+export const CAR_HITBOX = {
+  /** Halve breedte als fractie van de autobreedte (wielen staan op ±0,28). */
+  halfWidthRatio: 0.3,
+  /** Hoogte als fractie van de autohoogte. */
+  heightRatio: 1,
+} as const;
+
+export const SCORE = {
+  /** Duur (s) van de ster die boven de auto opstijgt. */
+  popDuration: 0.9,
+} as const;
+
 /** Instelbare voortbeweging; later uit te breiden met moeilijkheidsgraad. */
 export const SPEED = {
   /** Basissnelheid in wereld-eenheden per seconde. */
@@ -97,10 +145,20 @@ export const COLORS = {
   carWheel: '#222222',
   carHub: '#d0d0d0',
   carLight: '#fff59d',
+  cone: PALETTE.orange,
+  coneDark: PALETTE.orangeDark,
+  coneStripe: PALETTE.white,
+  rock: '#8d8d99',
+  rockLight: '#b4b4c0',
+  crate: '#d9a35b',
+  crateDark: '#9c6a2c',
+  star: PALETTE.yellow,
+  starOutline: PALETTE.orangeDark,
 } as const;
 
 /** Posities en afmetingen van UI-elementen op het virtuele 2D-scherm. */
 export const UI = {
   pauseButton: { size: 72, margin: 20 },
+  score: { margin: 22, starSize: 30 },
   menuButton: { width: 280, height: 84, gap: 24 },
 } as const;

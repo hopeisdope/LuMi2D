@@ -1,4 +1,4 @@
-import { CAR, COLORS, JUMP, JUMP_PHYSICS, WORLD } from '../config';
+import { BUMP, CAR, COLORS, JUMP, JUMP_PHYSICS, WORLD } from '../config';
 import type { Car } from '../types';
 import { roundRectPath } from './shapes';
 
@@ -21,7 +21,12 @@ export class CarRenderer {
     ctx.fill();
 
     // Kanteling in de lucht (neus omhoog bij stijgen) en inveren na de landing.
-    const tilt = car.onGround ? 0 : (car.vy / JUMP_PHYSICS.velocity) * JUMP.maxTilt;
+    let tilt = car.onGround ? 0 : (car.vy / JUMP_PHYSICS.velocity) * JUMP.maxTilt;
+    if (car.bumpTimer > 0) {
+      // Wiebelen na een botsing, uitdovend.
+      const k = car.bumpTimer / BUMP.duration;
+      tilt += Math.sin(car.bumpTimer * 28) * BUMP.wobble * k;
+    }
     const squash = car.landingTimer > 0 ? Math.sin((car.landingTimer / JUMP.landingTime) * Math.PI) * JUMP.landingSquash : 0;
 
     ctx.save();

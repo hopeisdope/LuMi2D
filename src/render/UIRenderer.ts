@@ -1,13 +1,17 @@
 import { BRAND, LOGO_COLORS, TYPOGRAPHY, UI_STYLE } from '../brand/brand';
-import type { Button, GameState, Viewport } from '../types';
+import { COLORS, UI } from '../config';
+import type { Button, GameState, Viewport, WorldState } from '../types';
 import type { Layout } from '../ui/Layout';
-import { roundRectPath } from './shapes';
+import { roundRectPath, starPath } from './shapes';
 
 const font = (size: number): string => `${TYPOGRAPHY.weight} ${size}px ${TYPOGRAPHY.fontFamily}`;
 const LOGO_FONT = font(TYPOGRAPHY.size.logo);
 const HEADING_FONT = font(TYPOGRAPHY.size.heading);
 const SUBTITLE_FONT = font(TYPOGRAPHY.size.subtitle);
 const BUTTON_FONT = font(TYPOGRAPHY.size.button);
+const SCORE_FONT = font(TYPOGRAPHY.size.score);
+/** Duur (s) van het opveren van de sterrenteller bij een nieuwe ster. */
+const SCORE_PULSE_TIME = 0.3;
 
 const JUMP_HINT = 'Tik om te springen!';
 
@@ -23,7 +27,14 @@ export class UIRenderer {
 
   constructor(private readonly ctx: CanvasRenderingContext2D) {}
 
-  render(state: GameState, view: Viewport, layout: Layout, time: number, showJumpHint: boolean): void {
+  render(
+    state: GameState,
+    view: Viewport,
+    layout: Layout,
+    time: number,
+    world: WorldState,
+    showJumpHint: boolean,
+  ): void {
     const cx = view.width / 2;
     const cy = view.height / 2;
     switch (state) {
@@ -35,10 +46,12 @@ export class UIRenderer {
         break;
       case 'playing':
         if (showJumpHint) this.jumpHint(cx, view.height * 0.3, time);
+        this.scoreCounter(world);
         this.pauseButton(layout.pause);
         break;
       case 'paused':
         this.dim(view);
+        this.scoreCounter(world);
         this.text('Pauze', cx, cy - 120, HEADING_FONT);
         this.button(layout.resume);
         this.button(layout.restart);
@@ -82,6 +95,53 @@ export class UIRenderer {
       ctx.fillText(letter, x, y);
       x += this.logoWidths[i] + LOGO_LETTER_SPACING;
     }
+  }
+
+  /** Sterrenteller linksboven; veert kort op bij een nieuwe ster. */
+  private scoreCounter(world: WorldState): void {
+    const { ctx } = this;
+    const { margin } = UI.score;
+    const size = UI.score.starSize;
+    const cx = margin + size;
+    const cy = margin + size;
+    const since = world.lastScoreTime < 0 ? Infinity : world.time - world.lastScoreTime;
+    const pulse = since < SCORE_PULSE_TIME ? 1 + 0.3 * (1 - since / SCORE_PULSE_TIME) : 1;
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(pulse, pulse);
+    ctx.fillStyle = COLORS.star;
+    ctx.strokeStyle = COLORS.starOutline;
+    ctx.lineWidth = 5;
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    starPath(ctx, 0, 0, size, size * 0.48);
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.font = SCORE_FONT;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    const tx = cx + size + 12;
+    ctx.lineJoin = 'round';
+    ctx.lineWidth = 8;
+    ctx.strokeStyle = UI_STYLE.text.outline;
+    ctx.strokeText(this.scoreLabel(world.score), tx, cy + 2);
+    ctx.fillStyle = UI_STYLE.text.fill;
+    ctx.fillText(this.scoreLabel(world.score), tx, cy + 2);
+  }
+
+  /** Cache van de laatst getekende score: geen nieuwe string per frame. */
+  private cachedScore = -1;
+  private cachedScoreLabel = '0';
+
+  private scoreLabel(score: number): string {
+    if (score !== this.cachedScore) {
+      this.cachedScore = score;
+      this.cachedScoreLabel = String(score);
+    }
+    return this.cachedScoreLabel;
   }
 
   /** Zacht pulserende uitnodiging om te springen, tot het kind voor het eerst springt. */

@@ -50,6 +50,7 @@ export const TYPOGRAPHY = {
     heading: 72,
     subtitle: 30,
     button: 36,
+    score: 44,
   },
 } as const;
 

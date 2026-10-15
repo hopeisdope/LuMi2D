@@ -50,6 +50,27 @@ export interface Car {
   wheelRadius: number;
   /** Rotatie van de wielen in radialen (visueel). */
   wheelAngle: number;
+  /** Aflopende timer (s) na een botsing: de auto wiebelt en kan even niet opnieuw botsen. */
+  bumpTimer: number;
+}
+
+export type ObstacleKind = 'cone' | 'rock' | 'crate';
+
+/** Een obstakel op de weg. Objecten worden hergebruikt uit een vaste pool. */
+export interface Obstacle {
+  /** Hoort dit pool-object op dit moment bij de wereld? */
+  active: boolean;
+  kind: ObstacleKind;
+  /** Wereldpositie van het midden van de onderkant. */
+  x: number;
+  width: number;
+  height: number;
+  /** De auto is er zonder botsing overheen gekomen (ster verdiend). */
+  cleared: boolean;
+  /** De auto is ertegenaan gebotst; het obstakel tuimelt weg. */
+  hit: boolean;
+  /** Wereldtijd van de botsing (voor de tuimelanimatie). */
+  hitTime: number;
 }
 
 export interface WorldState {
@@ -63,6 +84,18 @@ export interface WorldState {
   time: number;
   /** Aantal sprongen in deze ronde (o.a. voor de springhint; later voor feedback). */
   jumpCount: number;
+  /** Verdiende sterren: één per obstakel waar de auto zonder botsing overheen springt. */
+  score: number;
+  /** Wereldtijd van de laatst verdiende ster (voor de ster-animatie); -1 = nog geen. */
+  lastScoreTime: number;
+  /** Obstakels aan/uit; later instelbaar via een instellingenscherm. */
+  obstaclesEnabled: boolean;
+  /** Vaste pool met obstakels; inactieve objecten worden hergebruikt. */
+  obstacles: Obstacle[];
+  /** Afstand waarop het volgende obstakel verschijnt. */
+  nextObstacleAt: number;
+  /** Deterministische randomgenerator (seedbaar, handig voor tests). */
+  random: () => number;
   car: Car;
   /** Gebeurtenissen van het laatste update-frame (voor later: geluid en feedback). */
   events: WorldEvents;
@@ -72,6 +105,10 @@ export interface WorldState {
 export interface WorldEvents {
   jumped: boolean;
   landed: boolean;
+  /** De auto botste tegen een obstakel. */
+  bumped: boolean;
+  /** Er is een ster verdiend. */
+  scored: boolean;
 }
 
 /** Een knop in de canvas-UI. */
