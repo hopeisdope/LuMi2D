@@ -1,23 +1,29 @@
 import { CAR, COLORS } from '../config';
-
-/** Wacht even met de springhint, zodat de auto eerst zichtbaar wegrijdt. */
-const JUMP_HINT_DELAY = 0.8;
 import type { GameState, Viewport, WorldState } from '../types';
 import type { Layout } from '../ui/Layout';
 import { BackgroundRenderer } from './BackgroundRenderer';
 import { CarRenderer } from './CarRenderer';
+import { EffectsRenderer } from './EffectsRenderer';
+import { ObstacleRenderer } from './ObstacleRenderer';
 import type { Screen } from './Screen';
 import { UIRenderer } from './UIRenderer';
+
+/** Wacht even met de springhint, zodat de auto eerst zichtbaar wegrijdt. */
+const JUMP_HINT_DELAY = 0.8;
 
 /** Combineert de deel-renderers. Leest alleen state; wijzigt nooit game-logica. */
 export class Renderer {
   private readonly background: BackgroundRenderer;
+  private readonly obstacles: ObstacleRenderer;
   private readonly car: CarRenderer;
+  private readonly effects: EffectsRenderer;
   private readonly ui: UIRenderer;
 
   constructor(private readonly screen: Screen) {
     this.background = new BackgroundRenderer(screen.ctx);
+    this.obstacles = new ObstacleRenderer(screen.ctx);
     this.car = new CarRenderer(screen.ctx);
+    this.effects = new EffectsRenderer(screen.ctx);
     this.ui = new UIRenderer(screen.ctx);
     screen.onResize(() => this.background.invalidate());
   }
@@ -33,11 +39,15 @@ export class Renderer {
     ctx.rect(0, 0, view.width, view.height);
     ctx.clip();
 
-    this.background.render(view, world.distance, idleTime);
     // De auto staat op een vaste schermpositie; de wereld scrolt eronder door.
-    this.car.render(world.car, view.width * CAR.screenXRatio, world.time, state === 'playing' && world.speed > 0);
+    const carScreenX = view.width * CAR.screenXRatio;
+    this.background.render(view, world.distance, idleTime);
+    this.obstacles.render(world, carScreenX, view.width);
+    this.car.render(world.car, carScreenX, world.time, state === 'playing' && world.speed > 0);
+    this.effects.render(world, carScreenX);
+
     const showJumpHint = state === 'playing' && world.jumpCount === 0 && world.time > JUMP_HINT_DELAY;
-    this.ui.render(state, view, layout, idleTime, showJumpHint);
+    this.ui.render(state, view, layout, idleTime, world, showJumpHint);
 
     ctx.restore();
   }

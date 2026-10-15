@@ -21,6 +21,8 @@ Netlify bouwt en host de game via `netlify.toml` (`npm run build` → `dist/`, N
 Koppel de GitHub-repo eenmalig in Netlify; elke push op de productietak wordt automatisch gepubliceerd.
 
 Bediening: tik om te starten, tik ergens op het scherm om te springen, pauzeknop rechtsboven.
+Spring over pionnen, stenen en kistjes: elk obstakel waar je overheen springt levert een ster op.
+Botsen is niet erg: de auto hobbelt even en rijdt verder.
 Op toetsenbord: Spatie/Enter = start/springen/verder, ↑/W = springen, Esc/P = pauze.
 
 ## Structuur
@@ -34,6 +36,8 @@ src/
   core/Game.ts            toestandsmachine ready → playing ⇄ paused, input → acties
   input/InputManager.ts   pointer/touch/toetsenbord → abstracte InputActions
   world/World.ts, Car.ts  pure game-logica (geen rendering)
+  world/Obstacles.ts      obstakels: pool, spawnen, botsingen, sterren
+  world/random.ts         seedbare randomgenerator
   render/Screen.ts        canvas-schaling (vaste virtuele hoogte, letterbox)
   render/*Renderer.ts     achtergrond (parallax), auto, UI
   ui/Layout.ts            knopposities en hit-tests

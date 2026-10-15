@@ -19,3 +19,17 @@ export function roundRectPath(
   ctx.arcTo(x, y, x + r, y, r);
   ctx.closePath();
 }
+
+/** Vijfpuntige ster als pad rond (cx, cy). */
+export function starPath(ctx: CanvasRenderingContext2D, cx: number, cy: number, outer: number, inner: number): void {
+  const step = Math.PI / 5;
+  for (let i = 0; i < 10; i++) {
+    const r = i % 2 === 0 ? outer : inner;
+    const a = -Math.PI / 2 + i * step;
+    const x = cx + Math.cos(a) * r;
+    const y = cy + Math.sin(a) * r;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+}

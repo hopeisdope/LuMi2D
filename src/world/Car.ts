@@ -13,6 +13,7 @@ export function createCar(): Car {
     height: CAR.height,
     wheelRadius: CAR.wheelRadius,
     wheelAngle: 0,
+    bumpTimer: 0,
   };
 }
 
@@ -24,6 +25,7 @@ export function resetCar(car: Car): void {
   car.jumpBuffer = 0;
   car.landingTimer = 0;
   car.wheelAngle = 0;
+  car.bumpTimer = 0;
 }
 
 /**
@@ -43,6 +45,7 @@ export function updateCar(car: Car, speed: number, dt: number, events: WorldEven
   car.wheelAngle = (car.wheelAngle + distance / car.wheelRadius) % (Math.PI * 2);
 
   if (car.landingTimer > 0) car.landingTimer = Math.max(0, car.landingTimer - dt);
+  if (car.bumpTimer > 0) car.bumpTimer = Math.max(0, car.bumpTimer - dt);
 
   if (car.jumpBuffer > 0) {
     if (car.onGround) {
