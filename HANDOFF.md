@@ -14,6 +14,7 @@ Concise state for reloading into a fresh session. Details are in `WORKLIST.md`.
 - `world.events.jumped/landed` are set per frame — the hook for sound/feedback later.
 
 ## Watch out for
+- Finished work always gets merged into `main` (see Git workflow in `CLAUDE.md`).
 - Every finger counts as a tap (no `isPrimary` filter), so a resting palm doesn't block jumping.
 - Possible future LuMi3D: keep brand data renderer-agnostic, but build no shared infrastructure yet.
 - TypeScript 7 and Vite 8 are installed (latest at the time).
