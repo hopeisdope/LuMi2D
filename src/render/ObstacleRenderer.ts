@@ -28,7 +28,16 @@ export class ObstacleRenderer {
     let angle = 0;
     let alpha = 1;
 
-    if (o.hit) {
+    let fleeing = false;
+    if (o.hit && o.enemy) {
+      // Egel schrikt: maakt hupjes en rent snel weg (geen tuimelen), vervaagt.
+      const t = time - o.hitTime;
+      if (t > TUMBLE_TIME) return;
+      fleeing = true;
+      x += t * 560;
+      y -= Math.abs(Math.sin(t * 14)) * 22;
+      alpha = 1 - t / TUMBLE_TIME;
+    } else if (o.hit) {
       // Weggetikt: vliegt in een boogje naar voren, draait en vervaagt.
       const t = time - o.hitTime;
       if (t > TUMBLE_TIME) return;
@@ -60,6 +69,10 @@ export class ObstacleRenderer {
         break;
       case 'crate':
         this.crate(w, h);
+        break;
+      case 'hedgehog':
+        // Kijkt naar de auto (links); rent na een botsing de andere kant op.
+        this.hedgehog(w, h, time, fleeing);
         break;
     }
     ctx.restore();
@@ -112,6 +125,63 @@ export class ObstacleRenderer {
     ctx.beginPath();
     ctx.ellipse(-w * 0.12, -h * 0.15, w * 0.14, h * 0.12, -0.4, 0, Math.PI * 2);
     ctx.fill();
+  }
+
+  /** Vriendelijke egel: stekelrug, lichte snuit, oogje en trappelende pootjes. */
+  private hedgehog(w: number, h: number, time: number, fleeing: boolean): void {
+    const { ctx } = this;
+    ctx.save();
+    if (fleeing) ctx.scale(-1, 1);
+    const bottom = h / 2;
+
+    // Pootjes (trappelen tijdens het lopen, sneller bij het wegrennen)
+    const step = Math.sin(time * (fleeing ? 30 : 12)) * 4;
+    ctx.fillStyle = COLORS.hedgehogSpikes;
+    ctx.beginPath();
+    ctx.ellipse(-w * 0.22 + step, bottom - 3, 6, 4, 0, 0, Math.PI * 2);
+    ctx.ellipse(w * 0.2 - step, bottom - 3, 6, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Stekelrug: zigzag langs een halve ellips
+    const cx = w * 0.06;
+    const rx = w * 0.46;
+    const ry = h * 0.95;
+    const spikes = 9;
+    ctx.fillStyle = COLORS.hedgehogSpikes;
+    ctx.beginPath();
+    ctx.moveTo(cx - rx, bottom - 4);
+    for (let i = 0; i <= spikes * 2; i++) {
+      const a = Math.PI + (i / (spikes * 2)) * Math.PI;
+      const r = i % 2 === 1 ? 1.18 : 1;
+      ctx.lineTo(cx + Math.cos(a) * rx * r, bottom - 4 + Math.sin(a) * ry * r);
+    }
+    ctx.closePath();
+    ctx.fill();
+
+    // Lichaam
+    ctx.fillStyle = COLORS.hedgehog;
+    ctx.beginPath();
+    ctx.ellipse(cx, bottom - 4, rx * 0.82, ry * 0.75, 0, Math.PI, Math.PI * 2);
+    ctx.closePath();
+    ctx.fill();
+
+    // Snuit, neus en oog (links = kijkrichting)
+    ctx.fillStyle = COLORS.hedgehogFace;
+    ctx.beginPath();
+    ctx.ellipse(-w * 0.38, bottom - h * 0.32, w * 0.17, h * 0.24, -0.15, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = COLORS.hedgehogNose;
+    ctx.beginPath();
+    ctx.arc(-w * 0.54, bottom - h * 0.36, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(-w * 0.34, bottom - h * 0.5, 3.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = COLORS.coneStripe;
+    ctx.beginPath();
+    ctx.arc(-w * 0.33, bottom - h * 0.53, 1.3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
   }
 
   private crate(w: number, h: number): void {

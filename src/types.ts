@@ -1,5 +1,5 @@
 /** Toestanden van de game. Uitbreidbaar met bv. 'gameOver' in een latere fase. */
-export type GameState = 'ready' | 'playing' | 'paused';
+export type GameState = 'ready' | 'settings' | 'playing' | 'paused';
 
 export interface Vec2 {
   x: number;
@@ -54,13 +54,20 @@ export interface Car {
   bumpTimer: number;
 }
 
-export type ObstacleKind = 'cone' | 'rock' | 'crate';
+export type ObstacleKind = 'cone' | 'rock' | 'crate' | 'hedgehog';
 
-/** Een obstakel op de weg. Objecten worden hergebruikt uit een vaste pool. */
+/**
+ * Een obstakel of vijand op de weg. Objecten worden hergebruikt uit een vaste pool.
+ * Vijanden zijn obstakels die zelf bewegen (vx ≠ 0).
+ */
 export interface Obstacle {
   /** Hoort dit pool-object op dit moment bij de wereld? */
   active: boolean;
   kind: ObstacleKind;
+  /** Bewegende vijand (bv. egel) i.p.v. stilstaand obstakel. */
+  enemy: boolean;
+  /** Eigen snelheid in wereld-eenheden per seconde (negatief = naar de auto toe). */
+  vx: number;
   /** Wereldpositie van het midden van de onderkant. */
   x: number;
   width: number;
@@ -88,8 +95,10 @@ export interface WorldState {
   score: number;
   /** Wereldtijd van de laatst verdiende ster (voor de ster-animatie); -1 = nog geen. */
   lastScoreTime: number;
-  /** Obstakels aan/uit; later instelbaar via een instellingenscherm. */
+  /** Stilstaande obstakels aan/uit (instellingenscherm). */
   obstaclesEnabled: boolean;
+  /** Bewegende vijanden aan/uit (instellingenscherm). */
+  enemiesEnabled: boolean;
   /** Vaste pool met obstakels; inactieve objecten worden hergebruikt. */
   obstacles: Obstacle[];
   /** Afstand waarop het volgende obstakel verschijnt. */
@@ -113,7 +122,7 @@ export interface WorldEvents {
 
 /** Een knop in de canvas-UI. */
 export interface Button {
-  id: 'start' | 'pause' | 'resume' | 'restart';
+  id: 'start' | 'pause' | 'resume' | 'restart' | 'settings' | 'toggleObstacles' | 'toggleEnemies' | 'done';
   rect: Rect;
   label: string;
 }

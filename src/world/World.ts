@@ -1,4 +1,4 @@
-import { OBSTACLES, SPEED } from '../config';
+import { ENEMIES, OBSTACLES, SPEED } from '../config';
 import type { WorldState } from '../types';
 import { createCar, requestJump, resetCar, updateCar } from './Car';
 import { createObstaclePool, resetObstacles, updateObstacles } from './Obstacles';
@@ -18,6 +18,7 @@ export function createWorld(seed: number = randomSeed()): WorldState {
     score: 0,
     lastScoreTime: -1,
     obstaclesEnabled: OBSTACLES.enabled,
+    enemiesEnabled: ENEMIES.enabled,
     obstacles: createObstaclePool(),
     nextObstacleAt: OBSTACLES.firstDistance,
     random: createRandom(seed),
@@ -26,7 +27,7 @@ export function createWorld(seed: number = randomSeed()): WorldState {
   };
 }
 
-/** Nieuwe ronde. De instelling obstakels aan/uit blijft behouden. */
+/** Nieuwe ronde. De instellingen (obstakels/vijanden aan/uit) blijven behouden. */
 export function resetWorld(world: WorldState, seed: number = randomSeed()): void {
   world.speed = 0;
   world.targetSpeed = SPEED.base;
@@ -70,5 +71,5 @@ export function updateWorld(world: WorldState, dt: number): void {
   if (world.events.jumped) world.jumpCount++;
   world.distance = world.car.x;
 
-  updateObstacles(world);
+  updateObstacles(world, dt);
 }

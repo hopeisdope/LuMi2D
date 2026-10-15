@@ -22,7 +22,9 @@ Koppel de GitHub-repo eenmalig in Netlify; elke push op de productietak wordt au
 
 Bediening: tik om te starten, tik ergens op het scherm om te springen, pauzeknop rechtsboven.
 Spring over pionnen, stenen en kistjes: elk obstakel waar je overheen springt levert een ster op.
+Pas op voor de egel die over de weg wandelt: spring eroverheen voor een ster!
 Botsen is niet erg: de auto hobbelt even en rijdt verder.
+Via het tandwiel op het startscherm zet je pionnen & stenen en egels aan of uit.
 Op toetsenbord: Spatie/Enter = start/springen/verder, ↑/W = springen, Esc/P = pauze.
 
 ## Structuur
@@ -36,7 +38,7 @@ src/
   core/Game.ts            toestandsmachine ready → playing ⇄ paused, input → acties
   input/InputManager.ts   pointer/touch/toetsenbord → abstracte InputActions
   world/World.ts, Car.ts  pure game-logica (geen rendering)
-  world/Obstacles.ts      obstakels: pool, spawnen, botsingen, sterren
+  world/Obstacles.ts      obstakels en egels: pool, spawnen, bewegen, botsingen, sterren
   world/random.ts         seedbare randomgenerator
   render/Screen.ts        canvas-schaling (vaste virtuele hoogte, letterbox)
   render/*Renderer.ts     achtergrond (parallax), auto, UI

@@ -7,7 +7,7 @@ import { createWorld, jump, resetWorld, updateWorld } from '../world/World';
 import { GameLoop } from './GameLoop';
 
 /**
- * Regisseert de game: toestandsmachine (ready → playing ⇄ paused),
+ * Regisseert de game: toestandsmachine (ready ⇄ settings, ready → playing ⇄ paused),
  * verwerkt input-acties en roept wereld-update en rendering aan.
  */
 export class Game {
@@ -66,6 +66,16 @@ export class Game {
     this.state = 'playing';
   }
 
+  openSettings(): void {
+    if (this.state !== 'ready') return;
+    this.state = 'settings';
+  }
+
+  closeSettings(): void {
+    if (this.state !== 'settings') return;
+    this.state = 'ready';
+  }
+
   togglePause(): void {
     if (this.state === 'playing') this.pause();
     else if (this.state === 'paused') this.resume();
@@ -77,7 +87,7 @@ export class Game {
     if (this.state === 'playing') {
       updateWorld(this.world, dt);
       this.ambientTime += dt;
-    } else if (this.state === 'ready') {
+    } else if (this.state === 'ready' || this.state === 'settings') {
       this.ambientTime += dt;
     }
   };
@@ -89,13 +99,15 @@ export class Game {
   private readonly handleAction = (action: InputAction): void => {
     switch (action.type) {
       case 'togglePause':
-        this.togglePause();
+        if (this.state === 'settings') this.closeSettings();
+        else this.togglePause();
         break;
       case 'jump':
         if (this.state === 'playing') jump(this.world);
         break;
       case 'confirm':
         if (this.state === 'ready') this.start();
+        else if (this.state === 'settings') this.closeSettings();
         else if (this.state === 'playing') jump(this.world);
         else if (this.state === 'paused') this.resume();
         break;
@@ -109,8 +121,19 @@ export class Game {
     const p = this.screen.toWorld(cssX, cssY, this.tapPoint);
     switch (this.state) {
       case 'ready':
-        // Overal tikken start de game: makkelijk voor jonge kinderen.
-        this.start();
+        // Tandwiel opent de instellingen; overal elders tikken start de game (makkelijk voor jonge kinderen).
+        if (hitTest(this.layout.settings.rect, p.x, p.y)) this.openSettings();
+        else this.start();
+        break;
+      case 'settings':
+        // Alleen de knoppen reageren; elders tikken doet niets, zodat er niet per ongeluk iets wijzigt.
+        if (hitTest(this.layout.toggleObstacles.rect, p.x, p.y, 0)) {
+          this.world.obstaclesEnabled = !this.world.obstaclesEnabled;
+        } else if (hitTest(this.layout.toggleEnemies.rect, p.x, p.y, 0)) {
+          this.world.enemiesEnabled = !this.world.enemiesEnabled;
+        } else if (hitTest(this.layout.done.rect, p.x, p.y, 0)) {
+          this.closeSettings();
+        }
         break;
       case 'playing':
         // Pauzeknop heeft voorrang; overal elders tikken = springen.

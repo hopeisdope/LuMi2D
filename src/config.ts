@@ -87,6 +87,24 @@ export const OBSTACLES = {
   },
 } as const;
 
+/** Bewegende vijanden: een vriendelijke egel die naar de auto toe wandelt. */
+export const ENEMIES = {
+  /** Standaard aan; te wijzigen via het instellingenscherm. */
+  enabled: true,
+  /** Kans dat een nieuw obstakel een egel is (als beide soorten aan staan). */
+  chance: 0.35,
+  /** Wandelsnelheid naar de auto toe (wereld-eenheden per seconde). */
+  speed: 45,
+  /**
+   * Extra ruimte vóór een egel: hij loopt de auto tegemoet en komt zo dichter bij het
+   * vorige obstakel; dit houdt genoeg ruimte om te landen en opnieuw te springen.
+   */
+  extraGap: 250,
+  kinds: {
+    hedgehog: { width: 58, height: 36 },
+  },
+} as const;
+
 /** Wat er gebeurt bij een botsing: geen game over, alleen een vriendelijke hobbel. */
 export const BUMP = {
   /** Duur (s) van het wiebelen; zo lang kan de auto niet opnieuw botsen. */
@@ -152,6 +170,12 @@ export const COLORS = {
   rockLight: '#b4b4c0',
   crate: '#d9a35b',
   crateDark: '#9c6a2c',
+  hedgehog: '#7a5230',
+  hedgehogSpikes: '#4e3420',
+  hedgehogFace: '#e8c39e',
+  hedgehogNose: '#222222',
+  toggleOn: PALETTE.green,
+  toggleOff: '#b0bec5',
   star: PALETTE.yellow,
   starOutline: PALETTE.orangeDark,
 } as const;
@@ -160,5 +184,6 @@ export const COLORS = {
 export const UI = {
   pauseButton: { size: 72, margin: 20 },
   score: { margin: 22, starSize: 30 },
+  settingsRow: { width: 480, height: 84, gap: 20 },
   menuButton: { width: 280, height: 84, gap: 24 },
 } as const;
