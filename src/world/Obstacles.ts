@@ -3,6 +3,7 @@ import type { Obstacle, ObstacleKind, WorldState } from '../types';
 import { canSpawnRainbowPiece, spawnPlatformWithBoost, spawnRainbowPiece } from './Collectibles';
 import { spawnCoach } from './Friends';
 import { bounceDistance, spawnPad } from './Pads';
+import { trySpawnScene } from './Scenes';
 
 /** Stilstaande obstakelsoorten. */
 const STATIC_KINDS = ['cone', 'rock', 'crate'] as const;
@@ -90,6 +91,12 @@ function spawnAhead(world: WorldState): void {
       return;
     }
     const gap = OBSTACLES.minGap + world.random() * (OBSTACLES.maxGap - OBSTACLES.minGap);
+    const sceneLength = trySpawnScene(world, x0);
+    if (sceneLength > 0) {
+      // Verrassingstafereel: een stuk vrije weg, daarna de gewone tussenruimte.
+      world.nextObstacleAt = x0 + sceneLength + gap;
+      continue;
+    }
     const roll = world.random();
 
     if (roll < PLATFORMS.chance && spawnPlatformWithBoost(world, x0)) {

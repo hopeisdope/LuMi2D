@@ -149,6 +149,20 @@ export interface Pad {
   usedTime: number;
 }
 
+/** Kort verrassingstafereel langs de route, altijd aangekondigd met een bordje. */
+export type SceneKind = 'ducks' | 'tunnel' | 'herd';
+
+export interface Scene {
+  active: boolean;
+  kind: SceneKind;
+  /** Plek van het bordje; het tafereel zelf staat SCENES.eventOffset verder. */
+  x: number;
+  /** Wereldtijd waarop het tafereel begon (eendjes gaan oversteken, kudde huppelt opzij); -1 = nog niet. */
+  triggerTime: number;
+  /** Wereldtijd waarop de auto erdoor/erlangs is (tunnel: eronderdoor); -1 = nog niet. */
+  passTime: number;
+}
+
 /** Iets om te pakken: turbo, regenboogstukje of ster (regenboogrit). */
 export type CollectibleKind = 'boost' | 'rainbow' | 'star';
 
@@ -251,6 +265,10 @@ export interface WorldState {
   collectibles: Collectible[];
   /** Vaste pool met springkussens. */
   pads: Pad[];
+  /** Het huidige (of laatste) verrassingstafereel; er is er hooguit één tegelijk. */
+  scene: Scene;
+  /** Afstand waarop het volgende tafereel mag beginnen. */
+  nextSceneAt: number;
   /** Resterende turbotijd (s); 0 = geen turbo. */
   boostTimer: number;
   /** Resterende onkwetsbare tijd (s) na de regenboogrit, zodat de landing altijd veilig is. */
@@ -317,6 +335,9 @@ export interface WorldEvents {
   cleared: boolean;
   /** Op een springkussen omhoog geveerd. */
   bounced: boolean;
+  /** Een verrassingstafereel begint (eendjes, kudde) of de auto rijdt door de regenboogtunnel. */
+  sceneStart: boolean;
+  scenePass: boolean;
   /** Gesprongen vlak bij een vriendje (dat danst dan mee). */
   friendJump: boolean;
   /** De opdracht is gelukt. */

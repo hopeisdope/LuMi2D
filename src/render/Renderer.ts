@@ -9,6 +9,7 @@ import { FinishRenderer } from './FinishRenderer';
 import { FriendRenderer } from './FriendRenderer';
 import { ItemsRenderer } from './ItemsRenderer';
 import { ObstacleRenderer } from './ObstacleRenderer';
+import { SceneRenderer } from './SceneRenderer';
 import type { Screen } from './Screen';
 import { UIRenderer } from './UIRenderer';
 
@@ -24,6 +25,7 @@ export class Renderer {
   private readonly items: ItemsRenderer;
   private readonly friends: FriendRenderer;
   private readonly finish: FinishRenderer;
+  private readonly scenes: SceneRenderer;
   private readonly ui: UIRenderer;
 
   constructor(private readonly screen: Screen) {
@@ -34,6 +36,7 @@ export class Renderer {
     this.items = new ItemsRenderer(screen.ctx);
     this.friends = new FriendRenderer(screen.ctx);
     this.finish = new FinishRenderer(screen.ctx);
+    this.scenes = new SceneRenderer(screen.ctx);
     this.ui = new UIRenderer(screen.ctx, this.obstacles);
     screen.onResize(() => this.background.invalidate());
   }
@@ -63,15 +66,18 @@ export class Renderer {
     this.background.render(view, world.distance, idleTime, theme);
     this.friends.render(world, carScreenX, view.width);
     this.finish.renderBack(world, carScreenX, view.width);
+    this.scenes.renderBack(world, carScreenX, view.width);
     this.items.renderPlatforms(world, carScreenX, view.width);
     this.items.renderPads(world, carScreenX, view.width);
     this.obstacles.render(world, carScreenX, view.width);
+    this.scenes.renderMid(world, carScreenX, view.width);
     this.items.renderCollectibles(world, carScreenX, view.width);
     this.friends.renderPointers(world, carScreenX);
     this.effects.renderBehind(world, carScreenX);
     this.car.render(world.car, carScreenX, world.time, state === 'playing' && world.speed > 0, CARS[settings.car]);
     this.effects.render(world, carScreenX);
     this.finish.renderFront(world, carScreenX, view.width);
+    this.scenes.renderFront(world, carScreenX);
     this.friends.renderGifts(world, carScreenX);
 
     const showJumpHint =
