@@ -21,6 +21,7 @@ Read at the start of every session; update when something is done or added.
 
 ## Done
 
+- [x] Endless mode is the default (older saved settings get it too, once)
 - [x] Endless mode toggle (no finish, missions keep coming), car drives under the rainbow tunnel, obstacles bigger with a thick outline (a toddler missed some)
 - [x] Issues #33 (friends kept clear of platforms, world moments and scenes), #35 (car drives under the finish banner: front pole in front of the road), #36 (car drives into the garage, door closes in front of it; garage friend past the right wall)
 - [x] Gameplay sprites (ChatGPT): garage (car drives into the transparent doorway, roller door closes over it), bounce pad (bigger: 140 wide, hit zone 120), dino egg/hatching baby dino, cotton candy, walking ducks, sheep standing/hopping, pictures on the scene signs; drawn versions stay as fallback
