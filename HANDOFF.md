@@ -1,4 +1,4 @@
-# Handoff — 2026-10-15
+# Handoff — 2026-10-16
 
 Concise state for reloading into a fresh session. Details are in `WORKLIST.md`.
 
@@ -21,10 +21,11 @@ Concise state for reloading into a fresh session. Details are in `WORKLIST.md`.
 - Part 3: `world/Collectibles.ts` (platform + collectible pools, turbo/shield/ride timers). Course generation in
   `Obstacles.ts#spawnAhead` also places platforms (`PLATFORMS.chance`) and rainbow pieces (`RAINBOW.chance`).
   Platforms are one-way (land from above only) in `Car.updateCar`; the ride uses `Car.floatCar`.
-- Part 4: `world/Friends.ts` (own spawner, independent of the course); kinds per world in `THEMES[*].friends`, drawn by `FriendRenderer` (parametric critters). `world.theme` is set from settings in `Game.applySettings()`.
+- Part 4: `world/Friends.ts` (own spawner, independent of the course); kinds per world in `THEMES[*].friends` (Zoetroze: unicorn + cupcake), drawn by `FriendRenderer`. `world.theme` is set from settings in `Game.applySettings()`.
+- Sprites: cars, wheels and friends are PNGs in `public/sprites/` (~430 KB, from ChatGPT artwork via `scripts/process-sprites.py`, see `CLAUDE.md`). `CarRenderer.drawSprite` lays rotating wheel sprites over the wheels in the car picture; friends show idle, and alternate wave/cheer while cheering. Drawn shapes remain the fallback while images load or if they fail.
 - `world.events.jumped/landed/bumped/scored/boosted/rainbowPiece/rainbowRide` are set per frame — the hook for sound/feedback later.
 - `createWorld(seed)` / `resetWorld(world, seed)` take an optional seed for reproducible tests.
-- Hosting: Docker on the owner's Docker VM in Proxmox (LAN only): `Dockerfile`, `docker/nginx.conf`, `docker-compose.yml`. Netlify removed (credits), GitHub Pages workflow manual-only (private repo). Tested: image builds, healthy, correct cache headers, game plays via LAN IP; no service worker on plain http (expected).
+- Hosting: running on the Docker VM at `/opt/LuMi2D`, port from `.env` (`LUMI2D_PORT=8080`). Docker on the owner's Docker VM in Proxmox (LAN only): `Dockerfile`, `docker/nginx.conf`, `docker-compose.yml`. Netlify removed (credits), GitHub Pages workflow manual-only (private repo). Tested: image builds, healthy, correct cache headers, game plays via LAN IP; no service worker on plain http (expected).
 - Typecheck and build pass; tested in Chromium (Playwright) with iPad viewports, not yet on a real device.
 
 - Flow: start (`ready`) → kiesscherm (`choose`: auto + wereld, Rijden!) → `playing` ⇄ `paused`; Opnieuw in de pauze gaat terug naar `choose`. Auto/wereld kiezen kan alleen op het kiesscherm (`Game.choose` checkt de state).

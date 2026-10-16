@@ -100,7 +100,7 @@ export interface Collectible {
 }
 
 /** Vriendjes langs de weg; welke er komen hangt af van de wereld. */
-export type FriendKind = 'bunny' | 'bear' | 'dinoGreen' | 'dinoOrange' | 'alien' | 'robot' | 'unicorn' | 'kitty';
+export type FriendKind = 'bunny' | 'bear' | 'dinoGreen' | 'dinoOrange' | 'alien' | 'robot' | 'unicorn' | 'cupcake';
 
 /** Wat een vriendje soms geeft als de auto langskomt. */
 export type FriendGift = 'none' | 'star' | 'surprise';
