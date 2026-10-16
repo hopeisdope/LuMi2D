@@ -27,6 +27,8 @@ Concise state for reloading into a fresh session. Details are in `WORKLIST.md`.
 - Hosting: Netlify via `netlify.toml`; the repo still has to be linked in the Netlify UI (production branch `main`).
 - Typecheck and build pass; tested in Chromium (Playwright) with iPad viewports, not yet on a real device.
 
+- Flow: start (`ready`) → kiesscherm (`choose`: auto + wereld, Rijden!) → `playing` ⇄ `paused`; Opnieuw in de pauze gaat terug naar `choose`. Auto/wereld kiezen kan alleen op het kiesscherm (`Game.choose` checkt de state).
+
 ## Watch out for
 - Perf measurement in headless Chromium needs a forced flush (`getImageData`) — canvas work is deferred otherwise. Without GPU every world costs ~20 ms/frame at 2x; real iPads use GPU canvas.
 - Finished work always gets merged into `main` (see Git workflow in `CLAUDE.md`).

@@ -58,8 +58,7 @@ export class UIRenderer {
       case 'ready':
         this.dim(view);
         this.logo(cx, 88, time);
-        this.iconText('hand', BRAND.tagline, cx, 150, SUBTITLE_FONT, false, time);
-        this.carPicker(layout.startCarCards, settings, time);
+        this.iconText('hand', BRAND.tagline, cx, 160, SUBTITLE_FONT, false, time);
         this.button(layout.start);
         this.iconButton(layout.settings, 'gear');
         break;
@@ -69,8 +68,18 @@ export class UIRenderer {
         this.toggleRow(layout.toggleObstacles, settings.obstacles, 'cone');
         this.toggleRow(layout.toggleEnemies, settings.enemies, 'hedgehog');
         this.toggleRow(layout.toggleSound, settings.sound, settings.sound ? 'soundOn' : 'soundOff');
-        this.worldPicker(layout.worldCards, settings);
         this.button(layout.done);
+        break;
+      case 'choose':
+        // Lichte overlay: de gekozen wereld en auto blijven goed zichtbaar op de achtergrond.
+        this.ctx.fillStyle = UI_STYLE.overlayLight;
+        this.ctx.fillRect(0, 0, view.width, view.height);
+        this.iconText('car', 'Kies je auto', cx, 58, SUBTITLE_FONT, true);
+        this.carPicker(layout.carCards, settings, time);
+        this.iconText('world', 'Kies je wereld', cx, 226, SUBTITLE_FONT, true);
+        this.worldPicker(layout.worldCards, settings);
+        this.button(layout.go);
+        this.iconButton(layout.back, 'back');
         break;
       case 'playing':
         if (showJumpHint) this.jumpHint(cx, view.height * 0.3, time);
@@ -81,8 +90,7 @@ export class UIRenderer {
       case 'paused':
         this.dim(view);
         this.scoreCounter(world);
-        this.iconText('pause', 'Pauze', cx, 70, HEADING_FONT, false);
-        this.carPicker(layout.pauseCarCards, settings, time);
+        this.iconText('pause', 'Pauze', cx, 100, HEADING_FONT, false);
         this.button(layout.resume);
         this.button(layout.restart);
         break;
@@ -403,7 +411,7 @@ export class UIRenderer {
       this.card(r, selected);
       ctx.save();
       ctx.translate(r.x + r.width / 2, r.y + r.height - 14);
-      const scale = selected ? 0.66 + Math.sin(time * 4) * 0.02 : 0.6;
+      const scale = selected ? 0.78 + Math.sin(time * 4) * 0.02 : 0.7;
       ctx.scale(scale, scale);
       this.carPreview.drawBody(CARS[id], 150, 70, 22, selected ? time * 6 : 0);
       ctx.restore();

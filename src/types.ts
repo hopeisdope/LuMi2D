@@ -14,7 +14,11 @@ export interface Settings {
 }
 
 /** Toestanden van de game. Uitbreidbaar met bv. 'gameOver' in een latere fase. */
-export type GameState = 'ready' | 'settings' | 'playing' | 'paused';
+/**
+ * Toestanden: start ⇄ instellingen, start → kiezen (auto + wereld) → spelen ⇄ pauze.
+ * Een nieuwe ronde begint altijd via het kiesscherm.
+ */
+export type GameState = 'ready' | 'settings' | 'choose' | 'playing' | 'paused';
 
 export interface Vec2 {
   x: number;
@@ -214,7 +218,7 @@ export type ButtonIcon = 'play' | 'restart' | 'check';
 /** Een knop in de canvas-UI. */
 export interface Button {
   icon?: ButtonIcon;
-  id: 'start' | 'pause' | 'resume' | 'restart' | 'settings' | 'toggleObstacles' | 'toggleEnemies' | 'toggleSound' | 'done';
+  id: 'start' | 'pause' | 'resume' | 'restart' | 'settings' | 'toggleObstacles' | 'toggleEnemies' | 'toggleSound' | 'done' | 'go' | 'back';
   rect: Rect;
   label: string;
 }

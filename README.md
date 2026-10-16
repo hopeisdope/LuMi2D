@@ -34,9 +34,9 @@ Botsen is niet erg: de auto hobbelt even en rijdt verder.
 Spring op een paars platform en pak de bliksem: dan rijd je even supersnel met turbo.
 Langs de weg staan vriendjes die zwaaien en juichen; soms geven ze je een ster of een verrassing.
 Verzamel drie regenboogkleuren en de auto maakt vanzelf een magische regenboogrit langs een rij sterren.
-Kies je auto op het startscherm of in het pauzemenu.
-Via het tandwiel op het startscherm zet je pionnen & stenen, egels en geluid aan of uit en kies je een wereld
-(Weide, Dino, Ruimte of Zoetroze).
+Voor elke nieuwe ronde kies je op het kiesscherm je auto en je wereld (Weide, Dino, Ruimte of Zoetroze);
+tijdens het rijden blijven die hetzelfde. Via het tandwiel op het startscherm zet je pionnen & stenen, egels
+en geluid aan of uit.
 Op toetsenbord: Spatie/Enter = start/springen/verder, ↑/W = springen, Esc/P = pauze.
 
 ## Structuur
