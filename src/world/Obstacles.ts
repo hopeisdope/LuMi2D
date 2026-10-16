@@ -1,6 +1,20 @@
-import { BOUNCE, BUMP, CAR_HITBOX, ENEMIES, MOMENTS, OBSTACLES, PLATFORMS, RAINBOW, RIDE, WORLD } from '../config';
+import {
+  BOUNCE,
+  BUMP,
+  CAR_HITBOX,
+  ENEMIES,
+  FRIENDS,
+  MOMENTS,
+  OBSTACLES,
+  PLATFORMS,
+  RAINBOW,
+  RIDE,
+  SCENES,
+  WORLD,
+} from '../config';
 import type { Obstacle, ObstacleKind, WorldState } from '../types';
 import { canSpawnRainbowPiece, spawnPlatformWithBoost, spawnRainbowPiece } from './Collectibles';
+import { friendBetween } from './Friends';
 import { spawnMoment } from './Moments';
 import { bounceDistance, spawnPad } from './Pads';
 import { trySpawnScene } from './Scenes';
@@ -89,7 +103,9 @@ function spawnAhead(world: WorldState): void {
       return;
     }
     const gap = OBSTACLES.minGap + world.random() * (OBSTACLES.maxGap - OBSTACLES.minGap);
-    const sceneLength = trySpawnScene(world, x0);
+    // Platforms, spelmomenten en taferelen niet waar al een vriendje staat (anders overlappen ze).
+    const m = FRIENDS.clearance;
+    const sceneLength = friendBetween(world, x0 - m, x0 + SCENES.length) ? 0 : trySpawnScene(world, x0);
     if (sceneLength > 0) {
       // Verrassingstafereel: een stuk vrije weg, daarna de gewone tussenruimte.
       world.nextObstacleAt = x0 + sceneLength + gap;
@@ -97,7 +113,8 @@ function spawnAhead(world: WorldState): void {
     }
     const roll = world.random();
 
-    if (roll < PLATFORMS.chance && spawnPlatformWithBoost(world, x0)) {
+    const platformFree = !friendBetween(world, x0 - m, x0 + PLATFORMS.width + m);
+    if (roll < PLATFORMS.chance && platformFree && spawnPlatformWithBoost(world, x0)) {
       world.nextObstacleAt = x0 + PLATFORMS.width + gap;
       continue;
     }
@@ -113,7 +130,8 @@ function spawnAhead(world: WorldState): void {
       continue;
     }
     const momentFrom = PLATFORMS.chance + RAINBOW.chance + BOUNCE.chance;
-    if (roll >= momentFrom && roll < momentFrom + MOMENTS.chance && spawnMoment(world, x0)) {
+    const momentFree = !friendBetween(world, x0 - m - MOMENTS.radius, x0 + m + MOMENTS.radius);
+    if (roll >= momentFrom && roll < momentFrom + MOMENTS.chance && momentFree && spawnMoment(world, x0)) {
       // Spelmoment van de wereld (geen obstakel): gewone tussenruimte tot het volgende deel.
       world.nextObstacleAt = x0 + gap;
       continue;

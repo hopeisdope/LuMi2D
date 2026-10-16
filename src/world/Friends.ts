@@ -1,4 +1,4 @@
-import { FEEDBACK, FRIENDS, OBSTACLES, RIDE } from '../config';
+import { FEEDBACK, FRIENDS, MOMENTS, OBSTACLES, RIDE, SCENES } from '../config';
 import { THEMES } from '../themes';
 import type { Friend, FriendReaction, WorldState } from '../types';
 
@@ -52,8 +52,14 @@ function spawnFriend(world: WorldState, x: number): Friend | null {
 export function updateFriends(world: WorldState): void {
   const car = world.car;
   while (car.x + OBSTACLES.spawnAhead >= world.nextFriendAt && world.nextFriendAt < world.finishX - FRIENDS.minGap / 2) {
-    spawnFriend(world, world.nextFriendAt);
-    world.nextFriendAt += FRIENDS.minGap + world.random() * (FRIENDS.maxGap - FRIENDS.minGap);
+    // Niet onder een platform of bij een spelmoment of tafereel: dan schuift het vriendje op tot een vrije plek.
+    const x = freeSpot(world, world.nextFriendAt);
+    if (x >= world.finishX - FRIENDS.minGap / 2) {
+      world.nextFriendAt = x;
+      break;
+    }
+    spawnFriend(world, x);
+    world.nextFriendAt = x + FRIENDS.minGap + world.random() * (FRIENDS.maxGap - FRIENDS.minGap);
   }
   if (!world.finishFriends && car.x + OBSTACLES.spawnAhead >= world.finishX) {
     // Twee vriendjes juichen: vóór de finishboog en na de garage.
@@ -100,4 +106,46 @@ export function reactFriends(world: WorldState, reaction: FriendReaction): void 
     f.reaction = reaction;
     f.reactionTime = world.time;
   }
+}
+
+/**
+ * Eerste plek vanaf x waar een vriendje niet overlapt met een platform, spelmoment of verrassingstafereel
+ * (met FRIENDS.clearance ruimte ertussen).
+ */
+function freeSpot(world: WorldState, x: number): number {
+  const m = FRIENDS.clearance;
+  // Een paar rondes: na het opschuiven kan het vriendje bij het volgende ding uitkomen.
+  for (let round = 0; round < 6; round++) {
+    let moved = false;
+    for (let i = 0; i < world.platforms.length; i++) {
+      const p = world.platforms[i];
+      if (p.active && x > p.x - m && x < p.x + p.width + m) {
+        x = p.x + p.width + m;
+        moved = true;
+      }
+    }
+    for (let i = 0; i < world.moments.length; i++) {
+      const o = world.moments[i];
+      if (o.active && Math.abs(x - o.x) < m + MOMENTS.radius) {
+        x = o.x + m + MOMENTS.radius;
+        moved = true;
+      }
+    }
+    const s = world.scene;
+    if (s.active && x > s.x - m && x < s.x + SCENES.length) {
+      x = s.x + SCENES.length;
+      moved = true;
+    }
+    if (!moved) break;
+  }
+  return x;
+}
+
+/** Staat er een vriendje tussen from en to? (Voor het parcours: daar geen platform, spelmoment of tafereel.) */
+export function friendBetween(world: WorldState, from: number, to: number): boolean {
+  for (let i = 0; i < world.friends.length; i++) {
+    const f = world.friends[i];
+    if (f.active && f.x > from && f.x < to) return true;
+  }
+  return false;
 }
