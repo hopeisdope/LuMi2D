@@ -9,11 +9,13 @@ Read at the start of every session; update when something is done or added.
 
 ## Next
 
-- [ ] Replace the code-drawn new visuals (finish/garage, ducks, sheep, bounce pad, world moments, reaction bubbles) with ChatGPT sprites if wanted (prompts given 2026-10-16)
+- [ ] Replace the code-drawn new visuals (finish/garage, ducks, sheep, bounce pad, world moments, reaction bubbles) with ChatGPT sprites if wanted (prompts in `docs/art-prompts-gameplay.md`)
 - [ ] Check the new sprites on a real iPad (sharpness, size of friends next to the car)
 - [ ] Configurable auto-movement, difficulty and increasing speed
 
 ## Open questions
+
+- Dependabot PRs #17–#22 are open: node 22 → 25 (not LTS; close or retarget to 24), GitHub Actions major bumps (CI and the manual Pages workflow)
 
 - Offline mode on the LAN needs HTTPS (reverse proxy with a certificate); is that wanted later?
 
