@@ -154,6 +154,7 @@ export class Game {
     else if (e.rainbowPiece) this.sound.play('rainbowPiece');
     if (e.friendGift) this.sound.play('gift');
     else if (e.friendCheer) this.sound.play('cheer');
+    if (e.friendDemo) this.sound.play('hup');
   }
 
   private readonly render = (): void => {

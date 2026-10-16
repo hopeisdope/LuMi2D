@@ -54,6 +54,7 @@ export class Renderer {
     this.items.renderPlatforms(world, carScreenX, view.width);
     this.obstacles.render(world, carScreenX, view.width);
     this.items.renderCollectibles(world, carScreenX, view.width);
+    this.friends.renderPointers(world, carScreenX);
     this.effects.renderBehind(world, carScreenX);
     this.car.render(world.car, carScreenX, world.time, state === 'playing' && world.speed > 0, CARS[settings.car]);
     this.effects.render(world, carScreenX);

@@ -1,5 +1,5 @@
 import { UI_STYLE } from '../brand/brand';
-import { COLORS, FEEDBACK, FRIENDS, SPRITES, WORLD } from '../config';
+import { COACH, COLORS, FEEDBACK, FRIENDS, SPRITES, WORLD } from '../config';
 import type { Friend, FriendKind, FriendReaction, WorldState } from '../types';
 import { drawIcon, type IconName } from './icons';
 import { roundRectPath, starPath } from './shapes';
@@ -53,8 +53,28 @@ export class FriendRenderer {
       if (!f.active) continue;
       const sx = carScreenX + (f.x - world.car.x);
       if (sx < -100 || sx > viewWidth + 100) continue;
-      this.drawFriend(f, sx, WORLD.groundY - 4, world.time);
+      this.drawFriend(f, sx, WORLD.groundY - 4, world.time, this.pointing(world, f));
     }
+  }
+
+  /**
+   * Pijltjes boven obstakels die een vriendje aanwijst (vóór de obstakels getekend zou het pijltje erachter
+   * vallen; daarom apart, na de obstakels).
+   */
+  renderPointers(world: WorldState, carScreenX: number): void {
+    for (let i = 0; i < world.friends.length; i++) {
+      const f = world.friends[i];
+      if (!f.active || !this.pointing(world, f)) continue;
+      const o = world.obstacles[f.coachObstacle];
+      const bounce = Math.abs(Math.sin(world.time * 6)) * 10;
+      this.bubble('arrowDown', carScreenX + (o.x - world.car.x), WORLD.groundY - o.height - 44 - bounce, 1, 0);
+    }
+  }
+
+  /** Wijst dit vriendje nu een obstakel aan (auto nadert, nog niet voorgesprongen)? */
+  private pointing(world: WorldState, f: Friend): boolean {
+    if (f.coachObstacle < 0 || f.coachJumpTime >= 0) return false;
+    return world.car.x >= world.obstacles[f.coachObstacle].x - COACH.pointFrom;
   }
 
   /** Cadeaus die naar de auto vliegen en confetti (boven alles getekend). */
@@ -87,7 +107,7 @@ export class FriendRenderer {
     }
   }
 
-  private drawFriend(f: Friend, x: number, groundY: number, time: number): void {
+  private drawFriend(f: Friend, x: number, groundY: number, time: number, pointing: boolean): void {
     const { ctx } = this;
     const s = STYLES[f.kind];
     const since = f.cheerTime < 0 ? Infinity : time - f.cheerTime;
@@ -103,6 +123,10 @@ export class FriendRenderer {
       hop = Math.abs(Math.sin(rSince * 10)) * 8;
       sway = Math.sin(rSince * 10) * 0.15;
     }
+    // Voordoen: sprongetje op het moment dat het kind moet tikken.
+    const demoSince = f.coachJumpTime < 0 ? Infinity : time - f.coachJumpTime;
+    const demo = demoSince < COACH.jumpTime;
+    if (demo) hop = Math.sin((demoSince / COACH.jumpTime) * Math.PI) * COACH.jumpHeight;
     const y = groundY - hop;
 
     const img = FRIEND_IMAGES[f.kind];
@@ -126,16 +150,19 @@ export class FriendRenderer {
     if (sprite) {
       // Rustig staan; bij het juichen wisselen zwaaien en juichen elkaar af. Duimpje = zwaaihouding.
       let pose = cheering ? 1 + (Math.floor(since / SPRITES.friendPoseTime) % 2) : 0;
+      if (pointing) pose = 1;
+      else if (demo) pose = 2;
       if (reaction === 'thumbs') pose = 1;
       else if (reaction === 'surprised') pose = 0;
       else if (reaction === 'dance') pose = 1 + (Math.floor(rSince / SPRITES.friendPoseTime) % 2);
       halfWidth = this.drawSprite(img, f.kind, pose, x, y);
       height = SPRITES.friendHeight;
     } else {
-      this.drawShapes(s, x, y, time, cheering || reaction === 'thumbs' || reaction === 'dance');
+      this.drawShapes(s, x, y, time, cheering || demo || pointing || reaction === 'thumbs' || reaction === 'dance');
     }
     ctx.restore();
     if (reaction !== 'none') this.reactionBubble(REACTION_ICONS[reaction], x, y - height - 22, rSince);
+    else if (demo) this.bubble('hand', x, y - height - 22, Math.min(1, demoSince / 0.15), time);
 
     // Cadeau dat nog gegeven wordt: klein pakje of sterretje naast het vriendje.
     if (f.gift !== 'none' && f.giftTime < 0) {
@@ -148,14 +175,19 @@ export class FriendRenderer {
     }
   }
 
-  /** Wit wolkje met een icoon boven het hoofd: springt op en vervaagt aan het eind. */
+  /** Reactiewolkje: springt op en vervaagt aan het eind. */
   private reactionBubble(icon: IconName, x: number, y: number, t: number): void {
-    const { ctx } = this;
     const grow = Math.min(1, t / 0.15);
-    const fade = Math.min(1, (FEEDBACK.reactionTime - t) / 0.25);
+    this.ctx.save();
+    this.ctx.globalAlpha = Math.max(0, Math.min(1, (FEEDBACK.reactionTime - t) / 0.25));
+    this.bubble(icon, x, y, grow, 0);
+    this.ctx.restore();
+  }
+
+  /** Wit wolkje met een donker icoon (dezelfde beeldtaal voor alle aanwijzingen en reacties); grow 0..1. */
+  private bubble(icon: IconName, x: number, y: number, grow: number, time: number): void {
+    const { ctx } = this;
     const r = 20 * (0.6 + 0.4 * grow);
-    ctx.save();
-    ctx.globalAlpha = Math.max(0, fade);
     ctx.fillStyle = UI_STYLE.text.fill;
     ctx.strokeStyle = UI_STYLE.text.outline;
     ctx.lineWidth = 4;
@@ -163,8 +195,7 @@ export class FriendRenderer {
     ctx.arc(x, y, r, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
-    drawIcon(ctx, icon, x, y, r * 1.15, UI_STYLE.text.outline);
-    ctx.restore();
+    drawIcon(ctx, icon, x, y, r * 1.15, UI_STYLE.text.outline, time);
   }
 
   /** Eén houding uit het plaatje, voeten op (x, y). Geeft de halve breedte terug (voor het cadeautje ernaast). */
