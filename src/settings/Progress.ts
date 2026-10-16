@@ -93,12 +93,12 @@ export interface RideLedger {
   rainbows: number;
   /** De rit is al als rit geteld. */
   counted: boolean;
-  /** De gelukte opdracht is al geteld. */
-  mission: boolean;
+  /** Zoveel gelukte opdrachten zijn al geteld. */
+  missions: number;
 }
 
 export function newLedger(): RideLedger {
-  return { stars: 0, distance: 0, rainbows: 0, counted: false, mission: false };
+  return { stars: 0, distance: 0, rainbows: 0, counted: false, missions: 0 };
 }
 
 /**
@@ -113,10 +113,8 @@ export function recordRide(progress: Progress, ledger: RideLedger, world: WorldS
   ledger.distance = Math.floor(world.distance);
   ledger.rainbows = world.rainbowRides;
   if (world.score > progress.bestStars) progress.bestStars = world.score;
-  if (!ledger.mission && world.mission.doneTime >= 0) {
-    ledger.mission = true;
-    progress.missions++;
-  }
+  progress.missions += Math.max(0, world.missionsDone - ledger.missions);
+  ledger.missions = world.missionsDone;
   if (!ledger.counted && world.time >= RIDE.minTime) {
     ledger.counted = true;
     progress.rides++;

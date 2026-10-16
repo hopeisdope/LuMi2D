@@ -81,12 +81,15 @@ export const OBSTACLES = {
   /** Obstakels zo ver achter de auto worden opgeruimd. */
   despawnBehind: 800,
   /** Vergevingsgezinde botsing: zoveel eenheden van elke kant van het obstakel tellen niet mee. */
-  hitboxInset: 10,
-  /** Afmetingen per soort; laag genoeg om er makkelijk overheen te springen. */
+  hitboxInset: 13,
+  /**
+   * Afmetingen per soort: groot genoeg om ze op tijd te zien (met dikke rand, zie ObstacleRenderer), laag genoeg om
+   * er makkelijk overheen te springen.
+   */
   kinds: {
-    cone: { width: 40, height: 44 },
-    rock: { width: 56, height: 30 },
-    crate: { width: 44, height: 38 },
+    cone: { width: 52, height: 58 },
+    rock: { width: 72, height: 40 },
+    crate: { width: 58, height: 50 },
   },
 } as const;
 
@@ -104,7 +107,7 @@ export const ENEMIES = {
    */
   extraGap: 250,
   kinds: {
-    hedgehog: { width: 58, height: 36 },
+    hedgehog: { width: 74, height: 46 },
   },
 } as const;
 
@@ -316,6 +319,8 @@ export const MISSION = {
   targets: { stars: 5, starsEasy: 3, jumpOver: 3, rainbowPiece: 1, friendJump: 2, turbo: 1 },
   /** Duur (s) van de confetti als de opdracht lukt. */
   celebrateTime: 1.4,
+  /** Oneindig rijden: zo lang (s) na een gelukte opdracht komt de volgende (na de confetti). */
+  nextDelay: 4,
 } as const;
 
 /** Ritten en het rittenboekje. */
@@ -375,11 +380,14 @@ export const COLORS = {
   carWheel: '#222222',
   carHub: '#d0d0d0',
   carLight: '#fff59d',
+  /** Dikke donkere rand om obstakels en egels, zodat ze uitspringen tegen weg en gras. */
+  obstacleOutline: PALETTE.navy,
+  obstacleOutlineWidth: 5,
   cone: PALETTE.orange,
   coneDark: PALETTE.orangeDark,
   coneStripe: PALETTE.white,
-  rock: '#8d8d99',
-  rockLight: '#b4b4c0',
+  rock: '#b4b4c6',
+  rockLight: '#dcdce6',
   crate: '#d9a35b',
   crateDark: '#9c6a2c',
   hedgehog: '#7a5230',
@@ -407,9 +415,9 @@ export const COLORS = {
 export const UI = {
   pauseButton: { size: 72, margin: 20 },
   score: { margin: 22, starSize: 30 },
-  settingsRow: { width: 480, height: 74, gap: 14 },
+  settingsRow: { width: 540, height: 64, gap: 10 },
   /** Bovenkant van de eerste instellingenrij. */
-  settingsTop: 104,
+  settingsTop: 86,
   /** Kaartjes van de auto- en wereldkiezer. */
   pickerCard: { width: 140, height: 92, gap: 28 },
   menuButton: { width: 280, height: 84, gap: 24 },

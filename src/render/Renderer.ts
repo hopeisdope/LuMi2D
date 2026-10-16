@@ -80,7 +80,7 @@ export class Renderer {
     this.car.render(world.car, carScreenX, world.time, state === 'playing' && world.speed > 0, CARS[settings.car]);
     this.effects.render(world, carScreenX);
     this.finish.renderFront(world, carScreenX, view.width);
-    this.scenes.renderFront(world, carScreenX);
+    this.scenes.renderFront(world, carScreenX, view.width);
     this.friends.renderGifts(world, carScreenX);
 
     const showJumpHint =

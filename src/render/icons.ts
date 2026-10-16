@@ -25,7 +25,8 @@ export type IconName =
   | 'flag'
   | 'rainbow'
   | 'crown'
-  | 'bolt';
+  | 'bolt'
+  | 'infinity';
 
 export function drawIcon(
   ctx: CanvasRenderingContext2D,
@@ -253,6 +254,17 @@ export function drawIcon(
       ctx.quadraticCurveTo(cx + s * 0.1, cy - s * 0.3, cx - s * 0.5, cy - s * 0.1);
       ctx.closePath();
       ctx.fill();
+      break;
+    case 'infinity':
+      // Liggende acht: oneindig doorrijden.
+      ctx.lineWidth = s * 0.22;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.bezierCurveTo(cx + s * 0.35, cy - s * 0.6, cx + s * 0.95, cy - s * 0.5, cx + s * 0.95, cy);
+      ctx.bezierCurveTo(cx + s * 0.95, cy + s * 0.5, cx + s * 0.35, cy + s * 0.6, cx, cy);
+      ctx.bezierCurveTo(cx - s * 0.35, cy - s * 0.6, cx - s * 0.95, cy - s * 0.5, cx - s * 0.95, cy);
+      ctx.bezierCurveTo(cx - s * 0.95, cy + s * 0.5, cx - s * 0.35, cy + s * 0.6, cx, cy);
+      ctx.stroke();
       break;
     case 'rainbow':
       ctx.lineWidth = s * 0.2;

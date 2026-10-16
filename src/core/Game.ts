@@ -32,7 +32,7 @@ export class Game {
     stars: 0,
     record: false,
     stickers: [],
-    mission: { kind: 'stars', target: 0, count: 0, doneTime: -1 },
+    mission: { kind: 'stars', target: 0, count: 0, doneTime: -1, startTime: 0, startScore: 0 },
     shownAt: 0,
   };
 
@@ -138,12 +138,13 @@ export class Game {
   private applySettings(): void {
     this.world.obstaclesEnabled = this.settings.obstacles;
     this.world.enemiesEnabled = this.settings.enemies;
+    this.world.endless = this.settings.endless;
     this.world.theme = this.settings.theme;
     this.sound.enabled = this.settings.sound;
   }
 
   /** Wijzigt een aan/uit-instelling, past hem direct toe en bewaart hem. */
-  private toggleSetting(key: 'obstacles' | 'enemies' | 'sound'): void {
+  private toggleSetting(key: 'obstacles' | 'enemies' | 'sound' | 'endless'): void {
     this.settings[key] = !this.settings[key];
     this.applySettings();
     saveSettings(this.settings);
@@ -280,6 +281,7 @@ export class Game {
         if (hitTest(this.layout.toggleObstacles.rect, p.x, p.y, 0)) this.toggleSetting('obstacles');
         else if (hitTest(this.layout.toggleEnemies.rect, p.x, p.y, 0)) this.toggleSetting('enemies');
         else if (hitTest(this.layout.toggleSound.rect, p.x, p.y, 0)) this.toggleSetting('sound');
+        else if (hitTest(this.layout.toggleEndless.rect, p.x, p.y, 0)) this.toggleSetting('endless');
         else if (hitTest(this.layout.done.rect, p.x, p.y, 0)) this.closeSettings();
         else break;
         this.sound.play('tap');

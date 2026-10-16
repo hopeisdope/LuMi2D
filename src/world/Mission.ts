@@ -22,16 +22,24 @@ export function startMission(world: WorldState): void {
     kind === 'stars' ? (canJumpOver ? MISSION.targets.stars : MISSION.targets.starsEasy) : MISSION.targets[kind];
   m.count = 0;
   m.doneTime = -1;
+  m.startTime = world.time;
+  m.startScore = world.score;
 }
 
-/** Telt mee met de gebeurtenissen van dit frame; bij succes juichen de vriendjes in beeld. */
+/**
+ * Telt mee met de gebeurtenissen van dit frame; bij succes juichen de vriendjes in beeld. Bij oneindig rijden
+ * komt er na een gelukte opdracht even later een nieuwe.
+ */
 export function updateMission(world: WorldState): void {
   const m = world.mission;
-  if (m.doneTime >= 0) return;
+  if (m.doneTime >= 0) {
+    if (world.endless && world.ridePhase === 'riding' && world.time - m.doneTime >= MISSION.nextDelay) startMission(world);
+    return;
+  }
   const e = world.events;
   switch (m.kind) {
     case 'stars':
-      m.count = world.score;
+      m.count = world.score - m.startScore;
       break;
     case 'jumpOver':
       if (e.cleared) m.count++;
@@ -49,6 +57,7 @@ export function updateMission(world: WorldState): void {
   if (m.count >= m.target) {
     m.count = m.target;
     m.doneTime = world.time;
+    world.missionsDone++;
     e.missionDone = true;
     reactFriends(world, 'dance');
   }

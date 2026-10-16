@@ -5,7 +5,10 @@ import { roundRectPath } from './shapes';
 /** Duur (s) van de tuimelanimatie na een botsing. */
 const TUMBLE_TIME = 0.8;
 
-/** Tekent obstakels met eenvoudige, vrolijke vormen. Leest alleen state. */
+/**
+ * Tekent obstakels met eenvoudige, vrolijke vormen en een dikke donkere rand, zodat ze goed opvallen tegen
+ * de weg en het gras. Leest alleen state.
+ */
 export class ObstacleRenderer {
   constructor(private readonly ctx: CanvasRenderingContext2D) {}
 
@@ -134,6 +137,24 @@ export class ObstacleRenderer {
     ctx.lineTo(-(5 + k * (bandBottom - top)), bandBottom);
     ctx.closePath();
     ctx.fill();
+    // Rand om kegel en voetstuk.
+    ctx.beginPath();
+    ctx.moveTo(-5, top);
+    ctx.lineTo(5, top);
+    ctx.lineTo(w * 0.38, bottom - 8);
+    ctx.lineTo(-w * 0.38, bottom - 8);
+    ctx.closePath();
+    roundRectPath(ctx, -w / 2, bottom - 8, w, 8, 3);
+    this.outline();
+  }
+
+  /** Trekt de dikke donkere rand langs het huidige pad. */
+  private outline(): void {
+    const { ctx } = this;
+    ctx.strokeStyle = COLORS.obstacleOutline;
+    ctx.lineWidth = COLORS.obstacleOutlineWidth;
+    ctx.lineJoin = 'round';
+    ctx.stroke();
   }
 
   private rock(w: number, h: number): void {
@@ -146,6 +167,7 @@ export class ObstacleRenderer {
     ctx.lineTo(w / 2, h / 2);
     ctx.closePath();
     ctx.fill();
+    this.outline();
     // Lichtvlek voor wat volume
     ctx.fillStyle = COLORS.rockLight;
     ctx.beginPath();
@@ -183,6 +205,7 @@ export class ObstacleRenderer {
     }
     ctx.closePath();
     ctx.fill();
+    this.outline();
 
     // Lichaam
     ctx.fillStyle = COLORS.hedgehog;
@@ -196,6 +219,7 @@ export class ObstacleRenderer {
     ctx.beginPath();
     ctx.ellipse(-w * 0.38, bottom - h * 0.32, w * 0.17, h * 0.24, -0.15, 0, Math.PI * 2);
     ctx.fill();
+    this.outline();
     ctx.fillStyle = COLORS.hedgehogNose;
     ctx.beginPath();
     ctx.arc(-w * 0.54, bottom - h * 0.36, 4, 0, Math.PI * 2);
@@ -229,5 +253,8 @@ export class ObstacleRenderer {
     ctx.moveTo(w / 2 - 6, -h / 2 + 6);
     ctx.lineTo(-w / 2 + 6, h / 2 - 6);
     ctx.stroke();
+    ctx.beginPath();
+    roundRectPath(ctx, -w / 2, -h / 2, w, h, 5);
+    this.outline();
   }
 }

@@ -8,6 +8,8 @@ import { drawFrame, PROP_IMAGES, ready } from './sprites';
 /** Kleuren van de regenboogtunnel (van buiten naar binnen). */
 const TUNNEL_COLORS = ['#e53935', '#ff9800', '#ffd93b', '#43c04a', '#29a9f0', '#9c4dcc'];
 const SPARKLE_TIME = 1;
+/** Breedte (eenheden) van één kleurband van de tunnel. */
+const TUNNEL_BAND = 14;
 
 /**
  * Verrassingstaferelen: bordje vooraf, eendjes die oversteken, regenboogtunnel en een kudde schaapjes die
@@ -16,7 +18,7 @@ const SPARKLE_TIME = 1;
 export class SceneRenderer {
   constructor(private readonly ctx: CanvasRenderingContext2D) {}
 
-  /** Achter de auto: het bordje en de tunnelboog. */
+  /** Achter de auto: het bordje en de hele tunnelboog (de rechterhelft komt daarna nog eens vóór de auto). */
   renderBack(world: WorldState, carScreenX: number, viewWidth: number): void {
     const s = world.scene;
     if (!s.active) return;
@@ -25,17 +27,26 @@ export class SceneRenderer {
     if (s.kind !== 'tunnel') return;
     const tx = carScreenX + (s.x + SCENES.eventOffset - world.car.x);
     if (tx < -SCENES.tunnel.halfWidth - 40 || tx > viewWidth + SCENES.tunnel.halfWidth + 40) return;
+    this.tunnel(tx, Math.PI, false);
+  }
+
+  /**
+   * Regenboogboog met de voeten op de grond. Met `front` alleen de rechterhelft (vanaf `from`), waarvan de voet
+   * doorloopt tot in het gras vóór de weg: zo staat de linkervoet achter de weg en rijdt de auto onder de boog door.
+   */
+  private tunnel(tx: number, from: number, front: boolean): void {
     const { ctx } = this;
     const ground = WORLD.groundY;
     ctx.save();
     ctx.lineCap = 'butt';
     for (let i = 0; i < TUNNEL_COLORS.length; i++) {
       ctx.strokeStyle = TUNNEL_COLORS[i];
-      ctx.lineWidth = 14;
-      const rx = SCENES.tunnel.halfWidth - i * 13;
-      const ry = SCENES.tunnel.height - i * 13;
+      ctx.lineWidth = TUNNEL_BAND;
+      const rx = SCENES.tunnel.halfWidth - i * (TUNNEL_BAND - 1);
+      const ry = SCENES.tunnel.height - i * (TUNNEL_BAND - 1);
       ctx.beginPath();
-      ctx.ellipse(tx, ground, rx, ry, 0, Math.PI, Math.PI * 2);
+      ctx.ellipse(tx, ground, rx, ry, 0, from, Math.PI * 2);
+      if (front) ctx.lineTo(tx + rx, ground + WORLD.roadHeight + 6);
       ctx.stroke();
     }
     ctx.restore();
@@ -85,9 +96,14 @@ export class SceneRenderer {
     }
   }
 
-  /** Vóór de auto: glitters rond de auto nadat hij door de regenboogtunnel reed. */
-  renderFront(world: WorldState, carScreenX: number): void {
+  /** Vóór de auto: de rechterhelft van de tunnelboog en glitters rond de auto nadat hij erdoor reed. */
+  renderFront(world: WorldState, carScreenX: number, viewWidth: number): void {
     const s = world.scene;
+    if (s.active && s.kind === 'tunnel') {
+      const tx = carScreenX + (s.x + SCENES.eventOffset - world.car.x);
+      const hw = SCENES.tunnel.halfWidth;
+      if (tx > -hw - 40 && tx < viewWidth + hw + 40) this.tunnel(tx, Math.PI * 1.5, true);
+    }
     if (!s.active || s.kind !== 'tunnel' || s.passTime < 0) return;
     const t = world.time - s.passTime;
     if (t > SPARKLE_TIME) return;
