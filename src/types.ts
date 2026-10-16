@@ -122,6 +122,10 @@ export interface Friend {
   reaction: FriendReaction;
   /** Wereldtijd waarop de reactie begon. */
   reactionTime: number;
+  /** Voordoen: index van het obstakel waar dit vriendje bij staat (-1 = gewoon vriendje). */
+  coachObstacle: number;
+  /** Wereldtijd van het voorgedane sprongetje; -1 = nog niet. */
+  coachJumpTime: number;
 }
 
 export type ObstacleKind = 'cone' | 'rock' | 'crate' | 'hedgehog';
@@ -193,6 +197,10 @@ export interface WorldState {
   friends: Friend[];
   /** Afstand waarop het volgende vriendje verschijnt. */
   nextFriendAt: number;
+  /** Vriendjes doen sprongetjes voor; stopt na een paar goede sprongen op rij en begint weer na een botsing. */
+  coaching: boolean;
+  /** Obstakels op rij zonder botsing. */
+  cleanJumps: number;
   /** Laatste afzet en landing (tijd en plek), voor de veerstreepjes en stofwolkjes; tijd -1 = nog niet. */
   lastJumpTime: number;
   lastJumpX: number;
@@ -223,6 +231,8 @@ export interface WorldEvents {
   friendCheer: boolean;
   /** Een vriendje geeft een ster of verrassing. */
   friendGift: boolean;
+  /** Een vriendje doet een sprongetje voor. */
+  friendDemo: boolean;
 }
 
 /** Icoon naast de tekst van een knop (voor kinderen die nog niet lezen). */

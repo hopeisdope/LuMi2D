@@ -15,7 +15,8 @@ export type SoundName =
   | 'rainbowPiece'
   | 'rainbowRide'
   | 'gift'
-  | 'cheer';
+  | 'cheer'
+  | 'hup';
 
 type Wave = OscillatorType;
 
@@ -84,6 +85,10 @@ export class Sound {
         break;
       case 'cheer':
         this.arpeggio(t, [880, 1109, 880, 1109], 0.05, 'sine', 0.12);
+        break;
+      case 'hup':
+        // Vriendje doet een sprongetje voor: zacht en hoog, anders dan de sprong van de auto.
+        this.tone(t, 700, 0.12, 'sine', 0.18, 1250);
         break;
     }
   }
