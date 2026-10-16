@@ -22,6 +22,7 @@ Read `WORKLIST.md` first. Keep `HANDOFF.md` current at the end of long sessions.
 ```bash
 npm install && npm run dev   # Vite dev server on port 5173 (--host, reachable from iPad on LAN)
 npm run typecheck && npm run build   # no test framework yet; typecheck + production build are the checks
+node scripts/test-offline.mjs       # after a build: service worker keeps the offline game when the server errors (needs Playwright)
 ```
 
 Test hosting: Docker on the owner's own server (Docker VM in Proxmox, LAN only): `Dockerfile` (Node build → nginx),

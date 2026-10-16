@@ -19,6 +19,7 @@ Read at the start of every session; update when something is done or added.
 
 ## Done
 
+- [x] Service worker caches the page only when it is successful HTML; regression test `scripts/test-offline.mjs` (review LUMI-001)
 - [x] CI workflow on PRs and pushes to main (npm ci, typecheck, build); merge only when green (review LUMI-002)
 - [x] Generated sprites (ChatGPT) for the four cars (with spinning wheel overlays) and per-world friends (idle/wave/cheer); Zoetroze kitty replaced by a cupcake; drawn shapes stay as fallback
 - [x] Service worker cache name now hashes file contents too, so a replaced file with the same name reaches devices that already cached it
