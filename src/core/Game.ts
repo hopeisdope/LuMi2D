@@ -28,7 +28,13 @@ export class Game {
   private readonly progress = loadProgress();
   private readonly ledger = newLedger();
   /** Overzicht van de laatst uitgereden rit. */
-  private readonly summary: RideSummary = { stars: 0, record: false, stickers: [], shownAt: 0 };
+  private readonly summary: RideSummary = {
+    stars: 0,
+    record: false,
+    stickers: [],
+    mission: { kind: 'stars', target: 0, count: 0, doneTime: -1 },
+    shownAt: 0,
+  };
 
   constructor(
     private readonly screen: Screen,
@@ -84,6 +90,7 @@ export class Game {
     saveProgress(this.progress);
     this.summary.stars = this.world.score;
     this.summary.record = this.world.score > previousBest && this.world.score > 0;
+    Object.assign(this.summary.mission, this.world.mission);
     this.summary.shownAt = this.ambientTime;
     this.state = 'finished';
   }
@@ -196,6 +203,7 @@ export class Game {
     if (e.friendDemo) this.sound.play('hup');
     if (e.finished) this.sound.play('finish');
     if (e.parked) this.sound.play('horn');
+    if (e.missionDone) this.sound.play('mission');
   }
 
   private readonly render = (): void => {

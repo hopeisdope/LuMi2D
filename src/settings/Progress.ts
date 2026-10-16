@@ -24,11 +24,12 @@ export const STICKERS: readonly Sticker[] = [
   { id: 'rainbows10', earned: (p) => p.rainbows >= 10 },
   { id: 'distance50', earned: (p) => p.distance >= 50 * RIDE.unitsPerKm },
   { id: 'allWorlds', earned: (p) => p.worlds.length >= THEME_IDS.length },
+  { id: 'missions5', earned: (p) => p.missions >= 5 },
 ];
 const STICKER_IDS: readonly string[] = STICKERS.map((s) => s.id);
 
 export function emptyProgress(): Progress {
-  return { rides: 0, bestStars: 0, totalStars: 0, distance: 0, rainbows: 0, worlds: [], stickers: [] };
+  return { rides: 0, bestStars: 0, totalStars: 0, distance: 0, rainbows: 0, missions: 0, worlds: [], stickers: [] };
 }
 
 function count(value: unknown): number {
@@ -52,6 +53,7 @@ export function loadProgress(): Progress {
     progress.totalStars = count(d.totalStars);
     progress.distance = count(d.distance);
     progress.rainbows = count(d.rainbows);
+    progress.missions = count(d.missions);
     if (Array.isArray(d.worlds)) {
       for (const w of d.worlds) {
         if ((THEME_IDS as readonly unknown[]).includes(w) && !progress.worlds.includes(w as ThemeId)) {
@@ -91,10 +93,12 @@ export interface RideLedger {
   rainbows: number;
   /** De rit is al als rit geteld. */
   counted: boolean;
+  /** De gelukte opdracht is al geteld. */
+  mission: boolean;
 }
 
 export function newLedger(): RideLedger {
-  return { stars: 0, distance: 0, rainbows: 0, counted: false };
+  return { stars: 0, distance: 0, rainbows: 0, counted: false, mission: false };
 }
 
 /**
@@ -109,6 +113,10 @@ export function recordRide(progress: Progress, ledger: RideLedger, world: WorldS
   ledger.distance = Math.floor(world.distance);
   ledger.rainbows = world.rainbowRides;
   if (world.score > progress.bestStars) progress.bestStars = world.score;
+  if (!ledger.mission && world.mission.doneTime >= 0) {
+    ledger.mission = true;
+    progress.missions++;
+  }
   if (!ledger.counted && world.time >= RIDE.minTime) {
     ledger.counted = true;
     progress.rides++;

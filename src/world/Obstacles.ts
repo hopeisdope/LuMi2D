@@ -149,6 +149,7 @@ export function updateObstacles(world: WorldState, dt: number): void {
     if (carLeft > right) {
       // Helemaal voorbij zonder botsing: ster verdiend.
       o.cleared = true;
+      world.events.cleared = true;
       world.cleanJumps++;
       if (world.cleanJumps >= COACH.cleanJumpsToStop) world.coaching = false;
       world.score++;

@@ -1,9 +1,10 @@
-import { BOOST, ENEMIES, FRIENDS, OBSTACLES, RAINBOW, RIDE, SPEED, WORLD } from '../config';
+import { BOOST, ENEMIES, FRIENDS, MISSION, OBSTACLES, RAINBOW, RIDE, SPEED, WORLD } from '../config';
 import type { WorldState } from '../types';
 import { createCar, floatCar, requestJump, resetCar, updateCar } from './Car';
 import { createCollectiblePool, createPlatformPool, resetCollectibles, updateCollectibles } from './Collectibles';
 import { createObstaclePool, resetObstacles, updateObstacles } from './Obstacles';
 import { createFriendPool, reactFriends, resetFriends, updateFriends } from './Friends';
+import { startMission, updateMission } from './Mission';
 import { createRandom, randomSeed } from './random';
 
 /**
@@ -36,6 +37,7 @@ export function createWorld(seed: number = randomSeed()): WorldState {
     finishTime: -1,
     parkedTime: -1,
     finishFriends: false,
+    mission: { kind: 'stars', target: MISSION.targets.stars, count: 0, doneTime: -1 },
     theme: 'meadow',
     friends: createFriendPool(),
     nextFriendAt: FRIENDS.firstDistance,
@@ -59,6 +61,9 @@ export function createWorld(seed: number = randomSeed()): WorldState {
       friendCheer: false,
       friendGift: false,
       friendDemo: false,
+      cleared: false,
+      friendJump: false,
+      missionDone: false,
       finished: false,
       parked: false,
     },
@@ -84,6 +89,7 @@ export function resetWorld(world: WorldState, seed: number = randomSeed()): void
   world.finishTime = -1;
   world.parkedTime = -1;
   world.finishFriends = false;
+  startMission(world);
   world.random = createRandom(seed);
   clearEvents(world);
   resetCar(world.car);
@@ -109,6 +115,9 @@ function clearEvents(world: WorldState): void {
   world.events.friendCheer = false;
   world.events.friendGift = false;
   world.events.friendDemo = false;
+  world.events.cleared = false;
+  world.events.friendJump = false;
+  world.events.missionDone = false;
   world.events.finished = false;
   world.events.parked = false;
 }
@@ -165,10 +174,14 @@ export function updateWorld(world: WorldState, dt: number): void {
   updateCollectibles(world, dt);
   updateFriends(world);
 
-  // Vriendjes in beeld reageren op wat het kind doet.
+  // Springen vlak bij een vriendje: het vriendje danst mee (en het telt voor die opdracht).
   const e = world.events;
+  if (e.jumped && friendNearCar(world)) e.friendJump = true;
   if (e.rainbowRide) world.rainbowRides++;
-  if (e.rainbowPiece || e.rainbowRide || e.boosted) reactFriends(world, 'dance');
+  updateMission(world);
+
+  // Vriendjes in beeld reageren op wat het kind doet.
+  if (e.rainbowPiece || e.rainbowRide || e.boosted || e.friendJump) reactFriends(world, 'dance');
   else if (e.bumped) reactFriends(world, 'surprised');
   else if (e.scored) reactFriends(world, 'thumbs');
 }
@@ -192,4 +205,13 @@ function brakeToGarage(world: WorldState): void {
     world.parkedTime = world.time;
     world.events.parked = true;
   }
+}
+
+/** Staat er een vriendje vlak bij de auto? */
+function friendNearCar(world: WorldState): boolean {
+  for (let i = 0; i < world.friends.length; i++) {
+    const f = world.friends[i];
+    if (f.active && Math.abs(f.x - world.car.x) < MISSION.friendJumpDistance) return true;
+  }
+  return false;
 }
