@@ -254,11 +254,11 @@ export const COLORS = {
 export const UI = {
   pauseButton: { size: 72, margin: 20 },
   score: { margin: 22, starSize: 30 },
-  settingsRow: { width: 480, height: 62, gap: 10 },
+  settingsRow: { width: 480, height: 74, gap: 14 },
   /** Bovenkant van de eerste instellingenrij. */
-  settingsTop: 88,
+  settingsTop: 104,
   /** Kaartjes van de auto- en wereldkiezer. */
-  pickerCard: { width: 118, height: 90, gap: 16 },
+  pickerCard: { width: 140, height: 100, gap: 18 },
   menuButton: { width: 280, height: 84, gap: 24 },
 } as const;
 

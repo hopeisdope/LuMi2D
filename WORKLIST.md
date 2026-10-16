@@ -17,6 +17,7 @@ Read at the start of every session; update when something is done or added.
 
 ## Done
 
+- [x] Choose screen before every new round (car + world); no more choosing on the start/pause/settings screens or while driving
 - [x] Part 4: friends along the road per world (wave and cheer, ~1 in 3 gives a star or a surprise with confetti and 3 stars)
 - [x] Part 3: floating platforms with turbo power-up (faster + smash obstacles), rainbow pieces (red/yellow/blue) and an automatic rainbow ride over a row of stars
 - [x] Part 2: four worlds (Weide, Dino, Ruimte, Zoetroze) chosen in settings, four cars chosen on start/pause screen, icons next to all texts and buttons

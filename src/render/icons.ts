@@ -3,7 +3,19 @@
  * Elk icoon wordt gecentreerd op (cx, cy) getekend binnen een vierkant van `size`.
  * Geen externe afbeeldingen of emoji-lettertypen nodig.
  */
-export type IconName = 'play' | 'restart' | 'check' | 'cross' | 'pause' | 'gear' | 'soundOn' | 'soundOff' | 'hand';
+export type IconName =
+  | 'play'
+  | 'restart'
+  | 'check'
+  | 'cross'
+  | 'pause'
+  | 'gear'
+  | 'soundOn'
+  | 'soundOff'
+  | 'hand'
+  | 'back'
+  | 'car'
+  | 'world';
 
 export function drawIcon(
   ctx: CanvasRenderingContext2D,
@@ -61,6 +73,48 @@ export function drawIcon(
       ctx.moveTo(cx + s * 0.5, cy - s * 0.5);
       ctx.lineTo(cx - s * 0.5, cy + s * 0.5);
       ctx.stroke();
+      break;
+    case 'back':
+      // Pijl naar links
+      ctx.lineWidth = s * 0.3;
+      ctx.beginPath();
+      ctx.moveTo(cx + s * 0.6, cy);
+      ctx.lineTo(cx - s * 0.5, cy);
+      ctx.moveTo(cx - s * 0.05, cy - s * 0.5);
+      ctx.lineTo(cx - s * 0.55, cy);
+      ctx.lineTo(cx - s * 0.05, cy + s * 0.5);
+      ctx.stroke();
+      break;
+    case 'car':
+      // Autootje: dak, carrosserie en twee wielen (wielen als gaten via evenodd)
+      ctx.beginPath();
+      ctx.moveTo(cx - s * 0.45, cy - s * 0.1);
+      ctx.lineTo(cx - s * 0.25, cy - s * 0.5);
+      ctx.lineTo(cx + s * 0.3, cy - s * 0.5);
+      ctx.lineTo(cx + s * 0.55, cy - s * 0.1);
+      ctx.closePath();
+      ctx.fill();
+      ctx.beginPath();
+      ctx.rect(cx - s * 0.85, cy - s * 0.15, s * 1.7, s * 0.5);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(cx - s * 0.45, cy + s * 0.4, s * 0.25, 0, Math.PI * 2);
+      ctx.arc(cx + s * 0.45, cy + s * 0.4, s * 0.25, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    case 'world':
+      // Landschapje: zon en twee bergen
+      ctx.beginPath();
+      ctx.arc(cx + s * 0.45, cy - s * 0.45, s * 0.22, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(cx - s * 0.9, cy + s * 0.6);
+      ctx.lineTo(cx - s * 0.3, cy - s * 0.35);
+      ctx.lineTo(cx + s * 0.1, cy + s * 0.2);
+      ctx.lineTo(cx + s * 0.35, cy - s * 0.05);
+      ctx.lineTo(cx + s * 0.9, cy + s * 0.6);
+      ctx.closePath();
+      ctx.fill();
       break;
     case 'pause':
       ctx.fillRect(cx - s * 0.55, cy - s * 0.65, s * 0.38, s * 1.3);

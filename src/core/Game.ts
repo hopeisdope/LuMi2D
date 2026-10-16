@@ -9,7 +9,7 @@ import { createWorld, jump, resetWorld, updateWorld } from '../world/World';
 import { GameLoop } from './GameLoop';
 
 /**
- * Regisseert de game: toestandsmachine (ready ⇄ settings, ready → playing ⇄ paused),
+ * Regisseert de game: toestandsmachine (ready ⇄ settings, ready → choose → playing ⇄ paused, paused → choose),
  * verwerkt input-acties en roept wereld-update en rendering aan.
  */
 export class Game {
@@ -50,10 +50,29 @@ export class Game {
     this.loop.start();
   }
 
-  start(): void {
-    if (this.state !== 'ready') return;
+  /**
+   * Naar het kiesscherm, vóór elke nieuwe ronde. De wereld wordt alvast leeggemaakt, zodat de
+   * achtergrond de gekozen wereld en auto rustig laat zien.
+   */
+  openChooser(): void {
+    if (this.state !== 'ready' && this.state !== 'paused') return;
     resetWorld(this.world);
+    this.input.clear();
+    this.state = 'choose';
+  }
+
+  /** Start de ronde met de gekozen auto en wereld; daarna liggen die vast tot de volgende ronde. */
+  start(): void {
+    if (this.state !== 'choose') return;
+    resetWorld(this.world);
+    this.input.clear();
     this.state = 'playing';
+  }
+
+  /** Terug van het kiesscherm naar het startscherm. */
+  backToStart(): void {
+    if (this.state !== 'choose') return;
+    this.state = 'ready';
   }
 
   pause(): void {
@@ -66,10 +85,9 @@ export class Game {
     this.state = 'playing';
   }
 
+  /** Opnieuw: een nieuwe ronde begint altijd via het kiesscherm. */
   restart(): void {
-    resetWorld(this.world);
-    this.input.clear();
-    this.state = 'playing';
+    this.openChooser();
   }
 
   /** Zet de instellingen door naar wereld en geluid. */
@@ -87,8 +105,9 @@ export class Game {
     saveSettings(this.settings);
   }
 
-  /** Kiest een auto of wereld en bewaart de keuze. */
+  /** Kiest een auto of wereld (alleen op het kiesscherm) en bewaart de keuze. */
   private choose(kind: 'car' | 'theme', index: number): void {
+    if (this.state !== 'choose') return;
     if (kind === 'car') this.settings.car = CAR_IDS[index];
     else this.settings.theme = THEME_IDS[index];
     this.applySettings();
@@ -118,7 +137,7 @@ export class Game {
       updateWorld(this.world, dt);
       this.playWorldSounds();
       this.ambientTime += dt;
-    } else if (this.state === 'ready' || this.state === 'settings') {
+    } else if (this.state === 'ready' || this.state === 'settings' || this.state === 'choose') {
       this.ambientTime += dt;
     }
   };
@@ -145,13 +164,15 @@ export class Game {
     switch (action.type) {
       case 'togglePause':
         if (this.state === 'settings') this.closeSettings();
+        else if (this.state === 'choose') this.backToStart();
         else this.togglePause();
         break;
       case 'jump':
         if (this.state === 'playing') jump(this.world);
         break;
       case 'confirm':
-        if (this.state === 'ready') this.start();
+        if (this.state === 'ready') this.openChooser();
+        else if (this.state === 'choose') this.start();
         else if (this.state === 'settings') this.closeSettings();
         else if (this.state === 'playing') jump(this.world);
         else if (this.state === 'paused') this.resume();
@@ -165,16 +186,25 @@ export class Game {
   private handleTap(cssX: number, cssY: number): void {
     const p = this.screen.toWorld(cssX, cssY, this.tapPoint);
     switch (this.state) {
-      case 'ready': {
-        // Auto-kaartje kiest een auto; tandwiel opent de instellingen; overal elders tikken start de game (makkelijk voor jonge kinderen).
-        const car = hitCard(this.layout.startCarCards, p.x, p.y);
-        if (car >= 0) {
-          this.choose('car', car);
-          break;
-        }
+      case 'ready':
+        // Tandwiel opent de instellingen; overal elders tikken gaat naar het kiesscherm (makkelijk voor jonge kinderen).
         this.sound.play('tap');
         if (hitTest(this.layout.settings.rect, p.x, p.y)) this.openSettings();
-        else this.start();
+        else this.openChooser();
+        break;
+      case 'choose': {
+        // Alleen kaartjes en knoppen reageren, zodat er niet per ongeluk een ronde start.
+        const car = hitCard(this.layout.carCards, p.x, p.y);
+        const world = hitCard(this.layout.worldCards, p.x, p.y);
+        if (car >= 0) this.choose('car', car);
+        else if (world >= 0) this.choose('theme', world);
+        else if (hitTest(this.layout.go.rect, p.x, p.y)) {
+          this.sound.play('tap');
+          this.start();
+        } else if (hitTest(this.layout.back.rect, p.x, p.y)) {
+          this.sound.play('tap');
+          this.backToStart();
+        }
         break;
       }
       case 'settings':
@@ -182,10 +212,6 @@ export class Game {
         if (hitTest(this.layout.toggleObstacles.rect, p.x, p.y, 0)) this.toggleSetting('obstacles');
         else if (hitTest(this.layout.toggleEnemies.rect, p.x, p.y, 0)) this.toggleSetting('enemies');
         else if (hitTest(this.layout.toggleSound.rect, p.x, p.y, 0)) this.toggleSetting('sound');
-        else if (hitCard(this.layout.worldCards, p.x, p.y) >= 0) {
-          this.choose('theme', hitCard(this.layout.worldCards, p.x, p.y));
-          break;
-        }
         else if (hitTest(this.layout.done.rect, p.x, p.y, 0)) this.closeSettings();
         else break;
         this.sound.play('tap');
@@ -198,10 +224,6 @@ export class Game {
         } else jump(this.world);
         break;
       case 'paused':
-        if (hitCard(this.layout.pauseCarCards, p.x, p.y) >= 0) {
-          this.choose('car', hitCard(this.layout.pauseCarCards, p.x, p.y));
-          break;
-        }
         if (hitTest(this.layout.resume.rect, p.x, p.y, 0)) this.resume();
         else if (hitTest(this.layout.restart.rect, p.x, p.y, 0)) this.restart();
         else break;
