@@ -60,22 +60,8 @@ export class FinishRenderer {
           ctx.fillRect(fx - 12 + col * 12, ground + row * 12, 12, 12);
         }
       }
-      // Twee gestreepte palen in de berm met een geblokte banier erover.
+      // Achterste paal in de berm achter de weg; de voorste paal en de banier komen vóór de auto.
       this.pole(fx - ARCH.halfWidth, ground);
-      this.pole(fx + ARCH.halfWidth, ground);
-      const top = ground - ARCH.height;
-      ctx.fillStyle = PALETTE.navy;
-      ctx.beginPath();
-      roundRectPath(ctx, fx - ARCH.halfWidth - 8, top - 4, ARCH.halfWidth * 2 + 16, ARCH.banner + 8, 8);
-      ctx.fill();
-      const cols = Math.floor((ARCH.halfWidth * 2) / ARCH.square);
-      const left = fx - (cols * ARCH.square) / 2;
-      for (let c = 0; c < cols; c++) {
-        for (let r = 0; r < 2; r++) {
-          ctx.fillStyle = (c + r) % 2 === 0 ? PALETTE.white : '#222222';
-          ctx.fillRect(left + c * ARCH.square, top + r * ARCH.square, ARCH.square, ARCH.square);
-        }
-      }
     }
 
     const gx = carScreenX + (world.finishX + RIDE.garageDistance - world.car.x);
@@ -92,13 +78,20 @@ export class FinishRenderer {
     }
   }
 
-  /** Vóór de auto: confetti bij de finish en de roldeur die achter de geparkeerde auto dichtgaat. */
+  /** Vóór de auto: voorste paal en banier van de finishboog, confetti, en de roldeur van de garage. */
   renderFront(world: WorldState, carScreenX: number, viewWidth: number): void {
     const ground = WORLD.groundY;
 
+    const fx = carScreenX + (world.finishX - world.car.x);
+    if (fx > -ARCH.halfWidth - 40 && fx < viewWidth + ARCH.halfWidth + 40) {
+      // Voorste paal staat in het gras vóór de weg (dus vóór de auto) en draagt samen met de achterste de banier:
+      // de auto rijdt tussen de palen door, onder de vlag.
+      this.pole(fx + ARCH.halfWidth, ground + WORLD.roadHeight + 6);
+      this.banner(fx, ground - ARCH.height);
+    }
     if (world.finishTime >= 0) {
       const t = world.time - world.finishTime;
-      if (t < CONFETTI_TIME) this.confetti(carScreenX + (world.finishX - world.car.x), ground - ARCH.height, t);
+      if (t < CONFETTI_TIME) this.confetti(fx, ground - ARCH.height, t);
     }
 
     if (world.parkedTime < 0) return;
@@ -167,14 +160,31 @@ export class FinishRenderer {
     }
   }
 
-  /** Gestreepte paal (rood/wit) vanaf de grond tot de banier. */
-  private pole(x: number, ground: number): void {
+  /** Geblokte banier tussen de palen, bovenkant op top. */
+  private banner(fx: number, top: number): void {
     const { ctx } = this;
-    const top = ground - ARCH.height;
+    ctx.fillStyle = PALETTE.navy;
+    ctx.beginPath();
+    roundRectPath(ctx, fx - ARCH.halfWidth - 8, top - 4, ARCH.halfWidth * 2 + 16, ARCH.banner + 8, 8);
+    ctx.fill();
+    const cols = Math.floor((ARCH.halfWidth * 2) / ARCH.square);
+    const left = fx - (cols * ARCH.square) / 2;
+    for (let c = 0; c < cols; c++) {
+      for (let r = 0; r < 2; r++) {
+        ctx.fillStyle = (c + r) % 2 === 0 ? PALETTE.white : '#222222';
+        ctx.fillRect(left + c * ARCH.square, top + r * ARCH.square, ARCH.square, ARCH.square);
+      }
+    }
+  }
+
+  /** Gestreepte paal (rood/wit) van base (onderkant) tot de banier. */
+  private pole(x: number, base: number): void {
+    const { ctx } = this;
+    const top = WORLD.groundY - ARCH.height;
     const seg = 24;
-    for (let y = top; y < ground; y += seg) {
+    for (let y = top; y < base; y += seg) {
       ctx.fillStyle = Math.floor((y - top) / seg) % 2 === 0 ? PALETTE.red : PALETTE.white;
-      ctx.fillRect(x - ARCH.pole / 2, y, ARCH.pole, Math.min(seg, ground - y));
+      ctx.fillRect(x - ARCH.pole / 2, y, ARCH.pole, Math.min(seg, base - y));
     }
   }
 

@@ -25,6 +25,8 @@ export const LOOP = {
 export const WORLD = {
   /** Y-positie van de grondlijn (bovenkant weg). */
   groundY: 430,
+  /** Diepte van de weg op het scherm: daaronder begint het gras vóór de weg. */
+  roadHeight: 46,
 } as const;
 
 export const CAR = {
