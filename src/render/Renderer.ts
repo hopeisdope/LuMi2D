@@ -1,10 +1,11 @@
 import { CAR, CARS } from '../config';
 import { THEMES } from '../themes';
-import type { GameState, Progress, Settings, Viewport, WorldState } from '../types';
+import type { GameState, Progress, RideSummary, Settings, Viewport, WorldState } from '../types';
 import type { Layout } from '../ui/Layout';
 import { BackgroundRenderer } from './BackgroundRenderer';
 import { CarRenderer } from './CarRenderer';
 import { EffectsRenderer } from './EffectsRenderer';
+import { FinishRenderer } from './FinishRenderer';
 import { FriendRenderer } from './FriendRenderer';
 import { ItemsRenderer } from './ItemsRenderer';
 import { ObstacleRenderer } from './ObstacleRenderer';
@@ -22,6 +23,7 @@ export class Renderer {
   private readonly effects: EffectsRenderer;
   private readonly items: ItemsRenderer;
   private readonly friends: FriendRenderer;
+  private readonly finish: FinishRenderer;
   private readonly ui: UIRenderer;
 
   constructor(private readonly screen: Screen) {
@@ -31,11 +33,20 @@ export class Renderer {
     this.effects = new EffectsRenderer(screen.ctx);
     this.items = new ItemsRenderer(screen.ctx);
     this.friends = new FriendRenderer(screen.ctx);
+    this.finish = new FinishRenderer(screen.ctx);
     this.ui = new UIRenderer(screen.ctx, this.obstacles);
     screen.onResize(() => this.background.invalidate());
   }
 
-  render(state: GameState, world: WorldState, layout: Layout, idleTime: number, settings: Settings, progress: Progress): void {
+  render(
+    state: GameState,
+    world: WorldState,
+    layout: Layout,
+    idleTime: number,
+    settings: Settings,
+    progress: Progress,
+    summary: RideSummary,
+  ): void {
     const view: Viewport = this.screen.viewport;
     const theme = THEMES[settings.theme];
     this.screen.beginFrame(theme.grassEdge);
@@ -51,6 +62,7 @@ export class Renderer {
     const carScreenX = view.width * CAR.screenXRatio;
     this.background.render(view, world.distance, idleTime, theme);
     this.friends.render(world, carScreenX, view.width);
+    this.finish.renderBack(world, carScreenX, view.width);
     this.items.renderPlatforms(world, carScreenX, view.width);
     this.obstacles.render(world, carScreenX, view.width);
     this.items.renderCollectibles(world, carScreenX, view.width);
@@ -58,10 +70,12 @@ export class Renderer {
     this.effects.renderBehind(world, carScreenX);
     this.car.render(world.car, carScreenX, world.time, state === 'playing' && world.speed > 0, CARS[settings.car]);
     this.effects.render(world, carScreenX);
+    this.finish.renderFront(world, carScreenX, view.width);
     this.friends.renderGifts(world, carScreenX);
 
-    const showJumpHint = state === 'playing' && world.jumpCount === 0 && world.time > JUMP_HINT_DELAY;
-    this.ui.render(state, view, layout, idleTime, world, settings, progress, showJumpHint);
+    const showJumpHint =
+      state === 'playing' && world.ridePhase === 'riding' && world.jumpCount === 0 && world.time > JUMP_HINT_DELAY;
+    this.ui.render(state, view, layout, idleTime, world, settings, progress, summary, showJumpHint);
 
     ctx.restore();
   }

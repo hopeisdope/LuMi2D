@@ -3,7 +3,7 @@ import { BOOST, CARS, COLORS, RAINBOW, RIDE, UI } from '../config';
 import { STICKERS } from '../settings/Progress';
 import { CAR_IDS, THEME_IDS } from '../settings/Settings';
 import { THEMES, type Theme } from '../themes';
-import type { Button, GameState, ObstacleKind, Progress, Rect, Settings, StickerId, Viewport, WorldState } from '../types';
+import type { Button, GameState, ObstacleKind, Progress, Rect, RideSummary, Settings, StickerId, Viewport, WorldState } from '../types';
 import type { Layout } from '../ui/Layout';
 import { CarRenderer } from './CarRenderer';
 import { drawIcon, type IconName } from './icons';
@@ -17,6 +17,8 @@ const SUBTITLE_FONT = font(TYPOGRAPHY.size.subtitle);
 const BUTTON_FONT = font(TYPOGRAPHY.size.button);
 const SCORE_FONT = font(TYPOGRAPHY.size.score);
 const TOGGLE_FONT = font(TYPOGRAPHY.size.toggle);
+/** Groot getal (sterren) in het overzicht na de finish. */
+const SUMMARY_FONT = font(64);
 /** Duur (s) van het opveren van de sterrenteller bij een nieuwe ster. */
 const SCORE_PULSE_TIME = 0.3;
 
@@ -69,6 +71,7 @@ export class UIRenderer {
     world: WorldState,
     settings: Settings,
     progress: Progress,
+    summary: RideSummary,
     showJumpHint: boolean,
   ): void {
     const cx = view.width / 2;
@@ -110,7 +113,14 @@ export class UIRenderer {
         if (showJumpHint) this.jumpHint(cx, view.height * 0.3, time);
         this.scoreCounter(world);
         this.rainbowMeter(world, cx, 46);
+        this.rideProgress(world, cx, view.height - 26);
         this.iconButton(layout.pause, 'pause');
+        break;
+      case 'finished':
+        this.dim(view);
+        this.rideSummary(cx, summary, time);
+        this.button(layout.again);
+        this.button(layout.chooseAgain);
         break;
       case 'paused':
         this.dim(view);
@@ -244,6 +254,77 @@ export class UIRenderer {
       ctx.lineTo(x + 1, cy - 3);
       ctx.closePath();
       ctx.fill();
+    }
+  }
+
+  /** Onderin: een weggetje waarop een autootje naar het finishvlaggetje rijdt. */
+  private rideProgress(world: WorldState, cx: number, cy: number): void {
+    const { ctx } = this;
+    const width = 300;
+    const left = cx - width / 2;
+    const k = Math.max(0, Math.min(1, world.car.x / world.finishX));
+    ctx.fillStyle = 'rgba(30, 60, 110, 0.45)';
+    ctx.beginPath();
+    roundRectPath(ctx, left, cy - 6, width, 12, 6);
+    ctx.fill();
+    ctx.fillStyle = UI_STYLE.text.fill;
+    ctx.beginPath();
+    roundRectPath(ctx, left, cy - 6, Math.max(12, width * k), 12, 6);
+    ctx.fill();
+    drawIcon(ctx, 'flag', left + width + 18, cy - 8, 30, PALETTE.red);
+    const x = left + width * k;
+    ctx.fillStyle = UI_STYLE.text.outline;
+    ctx.beginPath();
+    ctx.arc(x, cy, 16, 0, Math.PI * 2);
+    ctx.fill();
+    drawIcon(ctx, 'car', x, cy, 22, UI_STYLE.text.fill);
+  }
+
+  /**
+   * Overzicht na de finish: sterren van deze rit, een kroontje bij een record en de nieuwe stickers
+   * (die één voor één opspringen).
+   */
+  private rideSummary(cx: number, summary: RideSummary, time: number): void {
+    const { ctx } = this;
+    const t = time - summary.shownAt;
+    this.iconText('flag', 'Klaar!', cx, 72, HEADING_FONT, true);
+    const hasStickers = summary.stickers.length > 0;
+    const sy = hasStickers ? 185 : 235;
+    const pop = 1 + Math.max(0, Math.sin(Math.min(1, t * 2) * Math.PI)) * 0.25;
+    ctx.save();
+    ctx.translate(cx - 60, sy);
+    ctx.scale(pop, pop);
+    this.bigStar(0, 0, 44);
+    ctx.restore();
+    this.text(this.countLabel(summary.stars), cx + 30, sy + 4, SUMMARY_FONT, true);
+    if (summary.record) {
+      // Record: gouden rondje met een kroontje.
+      const rx = cx + 130;
+      const wobble = Math.sin(time * 4) * 0.12;
+      ctx.save();
+      ctx.translate(rx, sy);
+      ctx.rotate(wobble);
+      ctx.fillStyle = PALETTE.yellow;
+      ctx.strokeStyle = PALETTE.orangeDark;
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.arc(0, 0, 32, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      drawIcon(ctx, 'crown', 0, 2, 40, PALETTE.orangeDark);
+      ctx.restore();
+    }
+    for (let i = 0; i < summary.stickers.length; i++) {
+      const k = Math.min(1, Math.max(0, (t - 0.6 - i * 0.35) / 0.3));
+      if (k <= 0) continue;
+      const x = cx + (i - (summary.stickers.length - 1) / 2) * 96;
+      const scale = k < 1 ? k * 1.2 : 1;
+      ctx.save();
+      ctx.translate(x, 300);
+      ctx.scale(scale, scale);
+      ctx.translate(-x, -300);
+      this.sticker(summary.stickers[i], x, 300, true, time + i);
+      ctx.restore();
     }
   }
 

@@ -1,4 +1,4 @@
-import { BOOST, ENEMIES, FRIENDS, OBSTACLES, RAINBOW, SPEED, WORLD } from '../config';
+import { BOOST, ENEMIES, FRIENDS, OBSTACLES, RAINBOW, RIDE, SPEED, WORLD } from '../config';
 import type { WorldState } from '../types';
 import { createCar, floatCar, requestJump, resetCar, updateCar } from './Car';
 import { createCollectiblePool, createPlatformPool, resetCollectibles, updateCollectibles } from './Collectibles';
@@ -31,6 +31,11 @@ export function createWorld(seed: number = randomSeed()): WorldState {
     rainbowPieces: 0,
     rainbowRide: 0,
     rainbowRides: 0,
+    finishX: RIDE.length,
+    ridePhase: 'riding',
+    finishTime: -1,
+    parkedTime: -1,
+    finishFriends: false,
     theme: 'meadow',
     friends: createFriendPool(),
     nextFriendAt: FRIENDS.firstDistance,
@@ -54,6 +59,8 @@ export function createWorld(seed: number = randomSeed()): WorldState {
       friendCheer: false,
       friendGift: false,
       friendDemo: false,
+      finished: false,
+      parked: false,
     },
   };
 }
@@ -72,6 +79,11 @@ export function resetWorld(world: WorldState, seed: number = randomSeed()): void
   world.lastJumpTime = -1;
   world.lastLandTime = -1;
   world.rainbowRides = 0;
+  world.finishX = RIDE.length;
+  world.ridePhase = 'riding';
+  world.finishTime = -1;
+  world.parkedTime = -1;
+  world.finishFriends = false;
   world.random = createRandom(seed);
   clearEvents(world);
   resetCar(world.car);
@@ -80,8 +92,9 @@ export function resetWorld(world: WorldState, seed: number = randomSeed()): void
   resetFriends(world);
 }
 
-/** Laat de auto springen (of bewaart de vraag kort als hij nog in de lucht is). */
+/** Laat de auto springen (of bewaart de vraag kort als hij nog in de lucht is). Na de finish niet meer. */
 export function jump(world: WorldState): void {
+  if (world.ridePhase !== 'riding') return;
   requestJump(world.car);
 }
 
@@ -96,6 +109,8 @@ function clearEvents(world: WorldState): void {
   world.events.friendCheer = false;
   world.events.friendGift = false;
   world.events.friendDemo = false;
+  world.events.finished = false;
+  world.events.parked = false;
 }
 
 export function updateWorld(world: WorldState, dt: number): void {
@@ -118,6 +133,7 @@ export function updateWorld(world: WorldState, dt: number): void {
   } else if (world.speed > world.targetSpeed) {
     world.speed = Math.max(world.targetSpeed, world.speed - accel * dt);
   }
+  if (world.ridePhase !== 'riding') brakeToGarage(world);
 
   if (world.rainbowRide > 0) {
     floatCar(world.car, world.speed, dt, WORLD.groundY - RAINBOW.rideHeight, world.time);
@@ -129,6 +145,14 @@ export function updateWorld(world: WorldState, dt: number): void {
     world.lastJumpTime = world.time;
     world.lastJumpX = world.car.x;
     world.lastJumpY = world.car.y;
+  }
+  if (world.ridePhase === 'riding' && world.car.x >= world.finishX) {
+    // Over de finish: turbo en regenboogrit stoppen, de auto rijdt rustig uit naar de garage.
+    world.ridePhase = 'finishing';
+    world.finishTime = world.time;
+    world.rainbowRide = 0;
+    world.boostTimer = 0;
+    world.events.finished = true;
   }
   if (world.events.landed) {
     world.lastLandTime = world.time;
@@ -147,4 +171,25 @@ export function updateWorld(world: WorldState, dt: number): void {
   if (e.rainbowPiece || e.rainbowRide || e.boosted) reactFriends(world, 'dance');
   else if (e.bumped) reactFriends(world, 'surprised');
   else if (e.scored) reactFriends(world, 'thumbs');
+}
+
+/**
+ * Na de finish: zacht afremmen zodat de auto precies in de garage stopt (v = √(2·a·resterend)).
+ * Pas als hij op de grond staat, telt hij als geparkeerd.
+ */
+function brakeToGarage(world: WorldState): void {
+  if (world.ridePhase === 'parked') {
+    world.speed = 0;
+    return;
+  }
+  const remaining = world.finishX + RIDE.garageDistance - world.car.x;
+  const limit = Math.sqrt(2 * RIDE.brake * Math.max(0, remaining));
+  world.targetSpeed = Math.min(world.targetSpeed, limit);
+  world.speed = Math.min(world.speed, limit);
+  if (remaining <= 1 && world.car.onGround) {
+    world.speed = 0;
+    world.ridePhase = 'parked';
+    world.parkedTime = world.time;
+    world.events.parked = true;
+  }
 }
