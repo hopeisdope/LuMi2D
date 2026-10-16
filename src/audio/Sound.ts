@@ -19,7 +19,8 @@ export type SoundName =
   | 'hup'
   | 'finish'
   | 'horn'
-  | 'mission';
+  | 'mission'
+  | 'boing';
 
 type Wave = OscillatorType;
 
@@ -104,6 +105,11 @@ export class Sound {
         // Opdracht gelukt: vrolijk loopje omhoog met een glinster erachteraan.
         this.arpeggio(t, [659, 784, 988, 1319], 0.08, 'triangle', 0.24);
         this.tone(t + 0.34, 1568, 0.25, 'sine', 0.16);
+        break;
+      case 'boing':
+        // Springkussen: veerkrachtig omhoog glijden.
+        this.tone(t, 180, 0.32, 'sine', 0.3, 900);
+        this.tone(t + 0.02, 360, 0.18, 'triangle', 0.1, 1400);
         break;
       case 'hup':
         // Vriendje doet een sprongetje voor: zacht en hoog, anders dan de sprong van de auto.

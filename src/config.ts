@@ -119,6 +119,28 @@ export const PLATFORMS = {
   edgeMargin: 30,
 } as const;
 
+/**
+ * Springkussens (altijd aan: ze zijn nooit gevaarlijk). Erop rijden of landen geeft een zachte sprong die
+ * hoger is dan een gewone; langs de boog hangen sterren.
+ */
+export const BOUNCE = {
+  poolSize: 2,
+  /** Kans per nieuw parcoursdeel op een springkussen. */
+  chance: 0.1,
+  width: 96,
+  height: 20,
+  /** Hoogte van de top van de veersprong (een gewone sprong is JUMP.height). */
+  launchHeight: 260,
+  /** Sterren langs de boog, op deze fracties van de luchttijd. */
+  starTimes: [0.3, 0.5, 0.7],
+} as const;
+
+/** Afgeleide veersprong: v = √(2·g·h), luchttijd t = 2v/g (zelfde zwaartekracht als springen). */
+export const BOUNCE_PHYSICS = {
+  velocity: Math.sqrt(2 * JUMP_PHYSICS.gravity * BOUNCE.launchHeight),
+  airTime: (2 * Math.sqrt(2 * JUMP_PHYSICS.gravity * BOUNCE.launchHeight)) / JUMP_PHYSICS.gravity,
+} as const;
+
 /** Turbo: tijdelijk sneller rijden en obstakels zonder hobbel wegknallen. */
 export const BOOST = {
   duration: 4,
@@ -329,6 +351,12 @@ export const COLORS = {
   boostBolt: PALETTE.yellow,
   star: PALETTE.yellow,
   starOutline: PALETTE.orangeDark,
+  /** Springkussen: fel mint, anders dan alle obstakels. */
+  padMat: '#1de9b6',
+  padMatLight: '#a7ffeb',
+  padSpring: '#cfd8dc',
+  padFrame: PALETTE.navy,
+  padArrow: PALETTE.white,
 } as const;
 
 /** Posities en afmetingen van UI-elementen op het virtuele 2D-scherm. */

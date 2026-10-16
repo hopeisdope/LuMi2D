@@ -1,7 +1,8 @@
-import { BUMP, CAR_HITBOX, COACH, ENEMIES, OBSTACLES, PLATFORMS, RAINBOW, RIDE, WORLD } from '../config';
+import { BOUNCE, BUMP, CAR_HITBOX, COACH, ENEMIES, OBSTACLES, PLATFORMS, RAINBOW, RIDE, WORLD } from '../config';
 import type { Obstacle, ObstacleKind, WorldState } from '../types';
 import { canSpawnRainbowPiece, spawnPlatformWithBoost, spawnRainbowPiece } from './Collectibles';
 import { spawnCoach } from './Friends';
+import { bounceDistance, spawnPad } from './Pads';
 
 /** Stilstaande obstakelsoorten. */
 const STATIC_KINDS = ['cone', 'rock', 'crate'] as const;
@@ -99,6 +100,11 @@ function spawnAhead(world: WorldState): void {
     if (roll < PLATFORMS.chance + RAINBOW.chance && rainbowAllowed && canSpawnRainbowPiece(world)) {
       spawnRainbowPiece(world, x0);
       world.nextObstacleAt = x0 + gap;
+      continue;
+    }
+    if (roll >= PLATFORMS.chance + RAINBOW.chance && roll < PLATFORMS.chance + RAINBOW.chance + BOUNCE.chance && spawnPad(world, x0)) {
+      // Na een springkussen: ruimte voor de lange veersprong en daarna de gewone tussenruimte.
+      world.nextObstacleAt = x0 + bounceDistance() + gap;
       continue;
     }
     if (!canObstacle && !canEnemy) {

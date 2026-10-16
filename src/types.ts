@@ -140,6 +140,15 @@ export interface Platform {
   top: number;
 }
 
+/** Springkussen op de weg: erop rijden of landen geeft een zachte, extra hoge sprong. */
+export interface Pad {
+  active: boolean;
+  /** Wereldpositie van het midden. */
+  x: number;
+  /** Wereldtijd waarop de auto erop veerde; -1 = nog niet. */
+  usedTime: number;
+}
+
 /** Iets om te pakken: turbo, regenboogstukje of ster (regenboogrit). */
 export type CollectibleKind = 'boost' | 'rainbow' | 'star';
 
@@ -240,6 +249,8 @@ export interface WorldState {
   platforms: Platform[];
   /** Vaste pool met dingen om te pakken. */
   collectibles: Collectible[];
+  /** Vaste pool met springkussens. */
+  pads: Pad[];
   /** Resterende turbotijd (s); 0 = geen turbo. */
   boostTimer: number;
   /** Resterende onkwetsbare tijd (s) na de regenboogrit, zodat de landing altijd veilig is. */
@@ -304,6 +315,8 @@ export interface WorldEvents {
   friendDemo: boolean;
   /** Over een obstakel gesprongen (zonder botsing). */
   cleared: boolean;
+  /** Op een springkussen omhoog geveerd. */
+  bounced: boolean;
   /** Gesprongen vlak bij een vriendje (dat danst dan mee). */
   friendJump: boolean;
   /** De opdracht is gelukt. */

@@ -64,6 +64,7 @@ export class Renderer {
     this.friends.render(world, carScreenX, view.width);
     this.finish.renderBack(world, carScreenX, view.width);
     this.items.renderPlatforms(world, carScreenX, view.width);
+    this.items.renderPads(world, carScreenX, view.width);
     this.obstacles.render(world, carScreenX, view.width);
     this.items.renderCollectibles(world, carScreenX, view.width);
     this.friends.renderPointers(world, carScreenX);

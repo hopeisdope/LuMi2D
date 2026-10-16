@@ -3,6 +3,7 @@ import type { WorldState } from '../types';
 import { createCar, floatCar, requestJump, resetCar, updateCar } from './Car';
 import { createCollectiblePool, createPlatformPool, resetCollectibles, updateCollectibles } from './Collectibles';
 import { createObstaclePool, resetObstacles, updateObstacles } from './Obstacles';
+import { createPadPool, resetPads, updatePads } from './Pads';
 import { createFriendPool, reactFriends, resetFriends, updateFriends } from './Friends';
 import { startMission, updateMission } from './Mission';
 import { createRandom, randomSeed } from './random';
@@ -27,6 +28,7 @@ export function createWorld(seed: number = randomSeed()): WorldState {
     random: createRandom(seed),
     platforms: createPlatformPool(),
     collectibles: createCollectiblePool(),
+    pads: createPadPool(),
     boostTimer: 0,
     shieldTimer: 0,
     rainbowPieces: 0,
@@ -62,6 +64,7 @@ export function createWorld(seed: number = randomSeed()): WorldState {
       friendGift: false,
       friendDemo: false,
       cleared: false,
+      bounced: false,
       friendJump: false,
       missionDone: false,
       finished: false,
@@ -95,6 +98,7 @@ export function resetWorld(world: WorldState, seed: number = randomSeed()): void
   resetCar(world.car);
   resetObstacles(world);
   resetCollectibles(world);
+  resetPads(world);
   resetFriends(world);
 }
 
@@ -116,6 +120,7 @@ function clearEvents(world: WorldState): void {
   world.events.friendGift = false;
   world.events.friendDemo = false;
   world.events.cleared = false;
+  world.events.bounced = false;
   world.events.friendJump = false;
   world.events.missionDone = false;
   world.events.finished = false;
@@ -170,6 +175,7 @@ export function updateWorld(world: WorldState, dt: number): void {
   }
   world.distance = world.car.x;
 
+  updatePads(world);
   updateObstacles(world, dt);
   updateCollectibles(world, dt);
   updateFriends(world);
@@ -181,7 +187,7 @@ export function updateWorld(world: WorldState, dt: number): void {
   updateMission(world);
 
   // Vriendjes in beeld reageren op wat het kind doet.
-  if (e.rainbowPiece || e.rainbowRide || e.boosted || e.friendJump) reactFriends(world, 'dance');
+  if (e.rainbowPiece || e.rainbowRide || e.boosted || e.friendJump || e.bounced) reactFriends(world, 'dance');
   else if (e.bumped) reactFriends(world, 'surprised');
   else if (e.scored) reactFriends(world, 'thumbs');
 }

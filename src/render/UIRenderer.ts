@@ -54,8 +54,11 @@ const STICKER_LOOK: Readonly<Record<StickerId, { icon: IconName | 'star'; badge?
 const TALLY_MAX = 10;
 const BOOK_TILE = { width: 160, height: 140, gap: 16, top: 104 } as const;
 const STICKER_R = 38;
-/** Opdrachtkaartje: plekje linksboven onder de sterrenteller, en hoe groot het aan het begin in beeld staat. */
-const MISSION_CARD = { x: 20, y: 96, height: 60, introScale: 2, introY: 250 } as const;
+/**
+ * Opdrachtkaartje: plekje linksonder in het gras (daar komen auto en obstakels nooit, ook niet bij een hoge
+ * veersprong), en hoe groot het aan het begin in beeld staat.
+ */
+const MISSION_CARD = { x: 16, y: 482, height: 60, hudScale: 0.85, introScale: 2, introY: 250 } as const;
 const CONFETTI_COLORS = ['#e53935', '#ffd93b', '#29a9f0', '#43c04a', '#9c4dcc', '#ff9800'];
 
 /** Letters van het logo, één keer opgesplitst. */
@@ -277,7 +280,7 @@ export class UIRenderer {
   }
 
   /**
-   * Opdracht van deze rit: eerst groot in het midden, dan schuift hij naar linksboven. Bij succes: confetti
+   * Opdracht van deze rit: eerst groot in het midden, dan schuift hij naar linksonder. Bij succes: confetti
    * rond het kaartje en een vinkje.
    */
   private missionHud(world: WorldState, cx: number, settings: Settings, time: number): void {
@@ -285,9 +288,12 @@ export class UIRenderer {
     const w = this.missionCardWidth(m);
     const k = Math.min(1, Math.max(0, (world.time - MISSION.introTime) / MISSION.slideTime));
     const ease = k * k * (3 - 2 * k);
-    const scale = MISSION_CARD.introScale + (1 - MISSION_CARD.introScale) * ease;
-    const x = cx - w / 2 + (MISSION_CARD.x - (cx - w / 2)) * ease;
-    const y = MISSION_CARD.introY + (MISSION_CARD.y - MISSION_CARD.introY) * ease;
+    const scale = MISSION_CARD.introScale + (MISSION_CARD.hudScale - MISSION_CARD.introScale) * ease;
+    // Eindplek: linksonder, rekening houdend met de schaal (het kaartje schaalt rond zijn midden).
+    const hudX = MISSION_CARD.x - (w * (1 - MISSION_CARD.hudScale)) / 2;
+    const hudY = MISSION_CARD.y - (MISSION_CARD.height * (1 - MISSION_CARD.hudScale)) / 2;
+    const x = cx - w / 2 + (hudX - (cx - w / 2)) * ease;
+    const y = MISSION_CARD.introY + (hudY - MISSION_CARD.introY) * ease;
     this.missionCard(m, x, y, scale, settings, time);
     if (m.doneTime >= 0) {
       const t = world.time - m.doneTime;
