@@ -24,8 +24,8 @@ Iconen opnieuw maken na een wijziging van `public/icons/icon.svg`: `node scripts
 
 ## Hosting (test)
 
-Netlify bouwt en host de game via `netlify.toml` (`npm run build` → `dist/`, Node 22).
-Koppel de GitHub-repo eenmalig in Netlify; elke push op de productietak wordt automatisch gepubliceerd.
+GitHub Pages: de workflow `.github/workflows/pages.yml` bouwt de game en publiceert `dist/` bij elke push naar
+`main` op https://hopeisdope.github.io/LuMi2D/. Eenmalig instellen: Settings → Pages → Source: "GitHub Actions".
 
 Bediening: tik om te starten, tik ergens op het scherm om te springen, pauzeknop rechtsboven.
 Spring over pionnen, stenen en kistjes: elk obstakel waar je overheen springt levert een ster op.

@@ -24,11 +24,12 @@ npm install && npm run dev   # Vite dev server on port 5173 (--host, reachable f
 npm run typecheck && npm run build   # no test framework yet; typecheck + production build are the checks
 ```
 
-Test hosting: Netlify, configured in `netlify.toml` (repo linked in the Netlify UI).
+Test hosting: GitHub Pages via `.github/workflows/pages.yml` (builds and deploys on every push to `main`).
+Site: `https://hopeisdope.github.io/LuMi2D/` (Vite `base: './'` keeps all paths relative for this subpath).
 
 ## Git workflow
 - Work on a feature branch, then always merge it into `main` when the work is done and checks pass
-  (open a PR and merge it; merge commit, no squash). No need to ask first — `main` is what Netlify publishes.
+  (open a PR and merge it; merge commit, no squash). No need to ask first — `main` is what GitHub Pages publishes.
 - After merging, sync the local `main`.
 
 ## Conventions
