@@ -48,8 +48,8 @@ export class Layout {
 
     // Kiesscherm: auto's, werelden en een grote Rijden!-knop; terugknop linksboven.
     placeRow(this.carCards, cx, 100);
-    placeRow(this.worldCards, cx, 252);
-    set(this.go.rect, cx - bw / 2, 376, bw, bh);
+    placeRow(this.worldCards, cx, 276);
+    set(this.go.rect, cx - bw / 2, 392, bw, bh);
     set(this.back.rect, margin, margin, size, size);
 
     // Tijdens het spelen: pauzeknop rechtsboven.

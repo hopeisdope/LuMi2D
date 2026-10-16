@@ -258,7 +258,7 @@ export const UI = {
   /** Bovenkant van de eerste instellingenrij. */
   settingsTop: 104,
   /** Kaartjes van de auto- en wereldkiezer. */
-  pickerCard: { width: 140, height: 100, gap: 18 },
+  pickerCard: { width: 140, height: 92, gap: 28 },
   menuButton: { width: 280, height: 84, gap: 24 },
 } as const;
 
