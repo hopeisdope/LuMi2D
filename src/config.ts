@@ -236,6 +236,8 @@ export const FRIENDS = {
   /** Deel van de cadeaus dat een verrassing is (confetti + extra sterren) i.p.v. één ster. */
   surpriseShare: 0.3,
   surpriseStars: 3,
+  /** Vrije ruimte tussen een vriendje en een platform, spelmoment of verrassingstafereel (zodat ze niet overlappen). */
+  clearance: 90,
   /** Duur (s) van het zwaaien/juichen en van de cadeau-animaties. */
   cheerTime: 2,
   giftFlightTime: 0.6,
