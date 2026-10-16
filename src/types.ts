@@ -102,6 +102,9 @@ export interface Collectible {
 /** Vriendjes langs de weg; welke er komen hangt af van de wereld. */
 export type FriendKind = 'bunny' | 'bear' | 'dinoGreen' | 'dinoOrange' | 'alien' | 'robot' | 'unicorn' | 'cupcake';
 
+/** Reactie van een vriendje op wat het kind doet: duimpje (gelukt), verbaasd (botsing), dansje (regenboog/turbo). */
+export type FriendReaction = 'none' | 'thumbs' | 'surprised' | 'dance';
+
 /** Wat een vriendje soms geeft als de auto langskomt. */
 export type FriendGift = 'none' | 'star' | 'surprise';
 
@@ -116,6 +119,9 @@ export interface Friend {
   cheerTime: number;
   /** Cadeau al gegeven; -1 = nog niet. */
   giftTime: number;
+  reaction: FriendReaction;
+  /** Wereldtijd waarop de reactie begon. */
+  reactionTime: number;
 }
 
 export type ObstacleKind = 'cone' | 'rock' | 'crate' | 'hedgehog';
@@ -187,6 +193,13 @@ export interface WorldState {
   friends: Friend[];
   /** Afstand waarop het volgende vriendje verschijnt. */
   nextFriendAt: number;
+  /** Laatste afzet en landing (tijd en plek), voor de veerstreepjes en stofwolkjes; tijd -1 = nog niet. */
+  lastJumpTime: number;
+  lastJumpX: number;
+  lastJumpY: number;
+  lastLandTime: number;
+  lastLandX: number;
+  lastLandY: number;
   car: Car;
   /** Gebeurtenissen van het laatste update-frame (voor later: geluid en feedback). */
   events: WorldEvents;

@@ -1,5 +1,7 @@
-import { COLORS, FRIENDS, SPRITES, WORLD } from '../config';
-import type { Friend, FriendKind, WorldState } from '../types';
+import { UI_STYLE } from '../brand/brand';
+import { COLORS, FEEDBACK, FRIENDS, SPRITES, WORLD } from '../config';
+import type { Friend, FriendKind, FriendReaction, WorldState } from '../types';
+import { drawIcon, type IconName } from './icons';
 import { roundRectPath, starPath } from './shapes';
 import { FRIEND_SPRITES } from './spriteData';
 import { FRIEND_IMAGES, ready } from './sprites';
@@ -24,6 +26,13 @@ const STYLES: Readonly<Record<FriendKind, FriendStyle>> = {
   robot: { body: '#b0bec5', belly: '#eceff1', ears: 'antenna', boxy: true, accent: '#29b6f6' },
   unicorn: { body: '#ffffff', belly: '#fce4ec', ears: 'horn', accent: '#ff80ab' },
   cupcake: { body: '#8d5a3b', belly: '#b9f6ca', ears: 'round', accent: '#e53935' },
+};
+
+/** Icoon in het wolkje boven een reagerend vriendje. */
+const REACTION_ICONS: Readonly<Record<Exclude<FriendReaction, 'none'>, IconName>> = {
+  thumbs: 'thumb',
+  surprised: 'exclaim',
+  dance: 'note',
 };
 
 /** Kleuren van de confetti bij een verrassing. */
@@ -83,8 +92,17 @@ export class FriendRenderer {
     const s = STYLES[f.kind];
     const since = f.cheerTime < 0 ? Infinity : time - f.cheerTime;
     const cheering = since < FRIENDS.cheerTime;
-    // Rustig dobberen; huppelen tijdens het juichen.
-    const hop = cheering ? Math.abs(Math.sin(since * 9)) * 14 : Math.sin(time * 2 + f.x) * 1.5;
+    const rSince = f.reactionTime < 0 ? Infinity : time - f.reactionTime;
+    const reaction: FriendReaction = rSince < FEEDBACK.reactionTime ? f.reaction : 'none';
+    // Rustig dobberen; huppelen tijdens het juichen; een reactie heeft een eigen beweging.
+    let hop = cheering ? Math.abs(Math.sin(since * 9)) * 14 : Math.sin(time * 2 + f.x) * 1.5;
+    let sway = 0;
+    if (reaction === 'thumbs') hop = rSince < 0.4 ? Math.abs(Math.sin(rSince * 8)) * 10 : 0;
+    else if (reaction === 'surprised') hop = Math.sin(Math.min(1, rSince / 0.3) * Math.PI) * 18;
+    else if (reaction === 'dance') {
+      hop = Math.abs(Math.sin(rSince * 10)) * 8;
+      sway = Math.sin(rSince * 10) * 0.15;
+    }
     const y = groundY - hop;
 
     const img = FRIEND_IMAGES[f.kind];
@@ -97,13 +115,27 @@ export class FriendRenderer {
     ctx.fill();
 
     let halfWidth = 20;
-    if (sprite) {
-      // Rustig staan; bij het juichen wisselen zwaaien en juichen elkaar af.
-      const pose = cheering ? 1 + (Math.floor(since / SPRITES.friendPoseTime) % 2) : 0;
-      halfWidth = this.drawSprite(img, f.kind, pose, x, y);
-    } else {
-      this.drawShapes(s, x, y, time, cheering);
+    let height = 90;
+    ctx.save();
+    if (sway !== 0) {
+      // Dansje: heen en weer wiegen vanaf de voeten.
+      ctx.translate(x, y);
+      ctx.rotate(sway);
+      ctx.translate(-x, -y);
     }
+    if (sprite) {
+      // Rustig staan; bij het juichen wisselen zwaaien en juichen elkaar af. Duimpje = zwaaihouding.
+      let pose = cheering ? 1 + (Math.floor(since / SPRITES.friendPoseTime) % 2) : 0;
+      if (reaction === 'thumbs') pose = 1;
+      else if (reaction === 'surprised') pose = 0;
+      else if (reaction === 'dance') pose = 1 + (Math.floor(rSince / SPRITES.friendPoseTime) % 2);
+      halfWidth = this.drawSprite(img, f.kind, pose, x, y);
+      height = SPRITES.friendHeight;
+    } else {
+      this.drawShapes(s, x, y, time, cheering || reaction === 'thumbs' || reaction === 'dance');
+    }
+    ctx.restore();
+    if (reaction !== 'none') this.reactionBubble(REACTION_ICONS[reaction], x, y - height - 22, rSince);
 
     // Cadeau dat nog gegeven wordt: klein pakje of sterretje naast het vriendje.
     if (f.gift !== 'none' && f.giftTime < 0) {
@@ -114,6 +146,25 @@ export class FriendRenderer {
       else this.star(16);
       ctx.restore();
     }
+  }
+
+  /** Wit wolkje met een icoon boven het hoofd: springt op en vervaagt aan het eind. */
+  private reactionBubble(icon: IconName, x: number, y: number, t: number): void {
+    const { ctx } = this;
+    const grow = Math.min(1, t / 0.15);
+    const fade = Math.min(1, (FEEDBACK.reactionTime - t) / 0.25);
+    const r = 20 * (0.6 + 0.4 * grow);
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, fade);
+    ctx.fillStyle = UI_STYLE.text.fill;
+    ctx.strokeStyle = UI_STYLE.text.outline;
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    drawIcon(ctx, icon, x, y, r * 1.15, UI_STYLE.text.outline);
+    ctx.restore();
   }
 
   /** Eén houding uit het plaatje, voeten op (x, y). Geeft de halve breedte terug (voor het cadeautje ernaast). */

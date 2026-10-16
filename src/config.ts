@@ -170,6 +170,21 @@ export const FRIENDS = {
   confettiTime: 1.2,
 } as const;
 
+/** Korte beelden bij elke actie, en reacties van de vriendjes daarop. Tijden in seconden. */
+export const FEEDBACK = {
+  /** Veerstreepjes onder de auto bij het afzetten. */
+  jumpLinesTime: 0.3,
+  /** Stofwolkjes bij de landing. */
+  dustTime: 0.45,
+  /** Glinsterplof bij het pakken van iets. */
+  sparkleTime: 0.5,
+  /** Vriendjes binnen deze afstand (achter tot vóór de auto, in beeld) reageren op wat het kind doet. */
+  reactBehind: 200,
+  reactAhead: 650,
+  /** Duur van een reactie (duimpje, verbaasd, dansje). */
+  reactionTime: 1.2,
+} as const;
+
 /** Plaatjes uit public/sprites/ (de maten in pixels staan in src/render/spriteData.ts). */
 export const SPRITES = {
   /** Draaiend wiel iets groter dan het getekende wiel in het autoplaatje, zodat dat er helemaal onder valt. */
