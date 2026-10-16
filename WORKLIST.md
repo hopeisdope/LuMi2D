@@ -18,6 +18,7 @@ Read at the start of every session; update when something is done or added.
 
 ## Done
 
+- [x] Service worker cache name now hashes file contents too, so a replaced file with the same name reaches devices that already cached it
 - [x] Choose screen spacing: picker cards 140×92 with 28 gap, headings and rows evenly spaced (~22 between elements)
 - [x] Container running on the Docker VM at `http://<server-ip>:8080` (port via `LUMI2D_PORT` in `.env`)
 - [x] Self-hosting with Docker (Node build → nginx, compose file, cache headers, healthcheck); GitHub Pages workflow made manual-only

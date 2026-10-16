@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { defineConfig, type Plugin } from 'vite';
 
@@ -16,7 +16,7 @@ function listPublicFiles(dir: string, base = dir): string[] {
 
 /**
  * Genereert sw.js bij de build met de exacte lijst gebouwde bestanden (inclusief hashes)
- * en een cachenaam die per build verandert. Geen extra dependency nodig.
+ * en een cachenaam die verandert zodra een bestand of de inhoud ervan verandert. Geen extra dependency nodig.
  */
 function serviceWorker(): Plugin {
   return {
@@ -27,7 +27,15 @@ function serviceWorker(): Plugin {
         .filter((f) => !f.endsWith('.map'))
         .filter((f, i, all) => all.indexOf(f) === i)
         .sort();
-      const hash = createHash('sha256').update(files.join('\n')).digest('hex').slice(0, 12);
+      // Cachenaam uit namen én inhoud: ook een vervangen plaatje met dezelfde naam geeft een nieuwe cache.
+      const digest = createHash('sha256');
+      for (const f of files) {
+        digest.update(f);
+        const item = bundle[f];
+        if (item) digest.update(item.type === 'chunk' ? item.code : item.source);
+        else if (existsSync(join('public', f)) && statSync(join('public', f)).isFile()) digest.update(readFileSync(join('public', f)));
+      }
+      const hash = digest.digest('hex').slice(0, 12);
       const source = readFileSync('sw-template.js', 'utf8')
         .replace('__CACHE_NAME__', `lumi2d-${hash}`)
         .replace('__PRECACHE__', JSON.stringify(files, null, 2));
