@@ -223,8 +223,7 @@ export const COLLECTIBLES = {
 
 /** Vriendjes langs de weg: zwaaien en juichen, en geven soms een ster of verrassing. */
 export const FRIENDS = {
-  /** Ruim genoeg voor gewone vriendjes plus de vriendjes die voordoen. */
-  poolSize: 6,
+  poolSize: 4,
   firstDistance: 700,
   minGap: 1100,
   maxGap: 1900,
@@ -254,25 +253,6 @@ export const FEEDBACK = {
   reactAhead: 650,
   /** Duur van een reactie (duimpje, verbaasd, dansje). */
   reactionTime: 1.2,
-} as const;
-
-/**
- * Voordoen: een vriendje staat net achter een obstakel, wijst het aan en springt op het moment dat het kind
- * moet tikken. Het afzetvenster loopt van ~280 tot ~50 eenheden vóór het obstakel; met ~0,3–0,5 s
- * reactietijd na het voorspringen komt het kind daar middenin.
- */
-export const COACH = {
-  /** Zoveel obstakels op rij zonder botsing, dan stopt het voordoen (tot de volgende botsing). */
-  cleanJumpsToStop: 3,
-  /** Het vriendje staat zo ver achter het obstakel. */
-  standBehind: 70,
-  /** Afstand van de auto tot het obstakel waarop het aanwijzen begint. */
-  pointFrom: 750,
-  /** Afstand van de auto tot het obstakel waarop het vriendje voorspringt. */
-  jumpAt: 300,
-  /** Hoogte en duur van het voorgedane sprongetje. */
-  jumpHeight: 40,
-  jumpTime: 0.6,
 } as const;
 
 /** Plaatjes uit public/sprites/ (de maten in pixels staan in src/render/spriteData.ts). */

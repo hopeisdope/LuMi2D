@@ -21,7 +21,6 @@ export type IconName =
   | 'thumb'
   | 'exclaim'
   | 'note'
-  | 'arrowDown'
   | 'book'
   | 'flag'
   | 'rainbow'
@@ -285,19 +284,6 @@ export function drawIcon(
       ctx.lineTo(cx + s * 0.42, cy);
       ctx.lineTo(cx + s * 0.85, cy - s * 0.45);
       ctx.lineTo(cx + s * 0.85, cy + s * 0.55);
-      ctx.closePath();
-      ctx.fill();
-      break;
-    case 'arrowDown':
-      ctx.lineWidth = s * 0.32;
-      ctx.beginPath();
-      ctx.moveTo(cx, cy - s * 0.75);
-      ctx.lineTo(cx, cy + s * 0.1);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(cx - s * 0.6, cy);
-      ctx.lineTo(cx + s * 0.6, cy);
-      ctx.lineTo(cx, cy + s * 0.8);
       ctx.closePath();
       ctx.fill();
       break;

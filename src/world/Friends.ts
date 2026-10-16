@@ -1,4 +1,4 @@
-import { COACH, FEEDBACK, FRIENDS, OBSTACLES, RIDE } from '../config';
+import { FEEDBACK, FRIENDS, OBSTACLES, RIDE } from '../config';
 import { THEMES } from '../themes';
 import type { Friend, FriendReaction, WorldState } from '../types';
 
@@ -14,8 +14,6 @@ export function createFriendPool(): Friend[] {
       giftTime: -1,
       reaction: 'none',
       reactionTime: -1,
-      coachObstacle: -1,
-      coachJumpTime: -1,
     });
   }
   return pool;
@@ -42,27 +40,9 @@ function spawnFriend(world: WorldState, x: number): Friend | null {
     f.giftTime = -1;
     f.reaction = 'none';
     f.reactionTime = -1;
-    f.coachObstacle = -1;
-    f.coachJumpTime = -1;
     return f;
   }
   return null;
-}
-
-/**
- * Zet een vriendje net achter dit obstakel dat het aanwijst en het sprongetje voordoet. Elk obstakel krijgt
- * zijn eigen vriendje (het obstakel verschijnt buiten beeld, dus het vriendje ook); zonder vrije plek in de pool
- * wordt er niet voorgedaan.
- */
-export function spawnCoach(world: WorldState, obstacleIndex: number): void {
-  const f = spawnFriend(world, world.obstacles[obstacleIndex].x + COACH.standBehind);
-  if (!f) return;
-  f.gift = 'none';
-  f.coachObstacle = obstacleIndex;
-  // Geen gewoon juichen bij het naderen (juichtijd ligt al voorbij): dit vriendje wijst aan en doet voor.
-  f.cheerTime = world.time - FRIENDS.cheerTime;
-  // Gewone vriendjes niet vlak bij het voordoen laten verschijnen.
-  if (Math.abs(world.nextFriendAt - f.x) < FRIENDS.minGap / 2) world.nextFriendAt = f.x + FRIENDS.minGap / 2;
 }
 
 /**
@@ -90,17 +70,6 @@ export function updateFriends(world: WorldState): void {
     if (!f.active) continue;
     if (f.x < car.x - 800) {
       f.active = false;
-      continue;
-    }
-    if (f.coachObstacle >= 0) {
-      const o = world.obstacles[f.coachObstacle];
-      if (!o.active || o.cleared || o.hit) {
-        // Obstakel voorbij: weer een gewoon vriendje (de reactie op het resultaat volgt vanzelf).
-        f.coachObstacle = -1;
-      } else if (f.coachJumpTime < 0 && car.x >= o.x - COACH.jumpAt) {
-        f.coachJumpTime = world.time;
-        world.events.friendDemo = true;
-      }
       continue;
     }
     if (f.cheerTime < 0 && car.x >= f.x - FRIENDS.cheerDistance) {
