@@ -32,6 +32,8 @@ GitHub Pages workflow (`.github/workflows/pages.yml`) is kept but manual-only (n
 ## Git workflow
 - Work on a feature branch, then always merge it into `main` when the work is done and checks pass
   (open a PR and merge it; merge commit, no squash). No need to ask first — the server builds from `main`.
+- Merge only after the `CI` check (`.github/workflows/ci.yml`: typecheck + build) is green: `gh pr checks <n> --watch`.
+  Required status checks can't be enforced on a private repo without GitHub Pro, so this is a working rule.
 - After merging, sync the local `main`.
 
 ## Conventions

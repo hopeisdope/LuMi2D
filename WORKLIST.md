@@ -19,6 +19,7 @@ Read at the start of every session; update when something is done or added.
 
 ## Done
 
+- [x] CI workflow on PRs and pushes to main (npm ci, typecheck, build); merge only when green (review LUMI-002)
 - [x] Generated sprites (ChatGPT) for the four cars (with spinning wheel overlays) and per-world friends (idle/wave/cheer); Zoetroze kitty replaced by a cupcake; drawn shapes stay as fallback
 - [x] Service worker cache name now hashes file contents too, so a replaced file with the same name reaches devices that already cached it
 - [x] Choose screen spacing: picker cards 140×92 with 28 gap, headings and rows evenly spaced (~22 between elements)
