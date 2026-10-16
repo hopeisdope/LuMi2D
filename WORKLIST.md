@@ -5,7 +5,6 @@ Read at the start of every session; update when something is done or added.
 ## Now
 
 - [ ] Tune jump height/airtime and obstacle sizes/gaps (`JUMP`, `OBSTACLES` in `config.ts`) with children on a real iPad — jump window widened to ~0.7 s, check if that feels right
-- [ ] Start the container on the Docker VM (`docker compose up -d --build`) and play via `http://<server-ip>:8080` on the iPad
 - [ ] Test on a real iPad and iPad mini in Safari: smoothness (headless Chromium without GPU can't measure this), touch, sound, install via "Zet op beginscherm", offline
 
 ## Next
@@ -19,6 +18,8 @@ Read at the start of every session; update when something is done or added.
 
 ## Done
 
+- [x] Choose screen spacing: picker cards 140×92 with 28 gap, headings and rows evenly spaced (~22 between elements)
+- [x] Container running on the Docker VM at `http://<server-ip>:8080` (port via `LUMI2D_PORT` in `.env`)
 - [x] Self-hosting with Docker (Node build → nginx, compose file, cache headers, healthcheck); GitHub Pages workflow made manual-only
 - [x] Hosting switched from Netlify to GitHub Pages (workflow; tested service worker, manifest and offline under the `/LuMi2D/` subpath)
 - [x] Choose screen before every new round (car + world); no more choosing on the start/pause/settings screens or while driving

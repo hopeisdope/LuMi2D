@@ -76,7 +76,7 @@ export class UIRenderer {
         this.ctx.fillRect(0, 0, view.width, view.height);
         this.iconText('car', 'Kies je auto', cx, 58, SUBTITLE_FONT, true);
         this.carPicker(layout.carCards, settings, time);
-        this.iconText('world', 'Kies je wereld', cx, 226, SUBTITLE_FONT, true);
+        this.iconText('world', 'Kies je wereld', cx, 234, SUBTITLE_FONT, true);
         this.worldPicker(layout.worldCards, settings);
         this.button(layout.go);
         this.iconButton(layout.back, 'back');
