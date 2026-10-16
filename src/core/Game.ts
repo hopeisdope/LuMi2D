@@ -201,7 +201,6 @@ export class Game {
     else if (e.rainbowPiece) this.sound.play('rainbowPiece');
     if (e.friendGift) this.sound.play('gift');
     else if (e.friendCheer) this.sound.play('cheer');
-    if (e.friendDemo) this.sound.play('hup');
     if (e.finished) this.sound.play('finish');
     if (e.parked) this.sound.play('horn');
     if (e.missionDone) this.sound.play('mission');

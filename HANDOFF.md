@@ -26,8 +26,7 @@ Concise state for reloading into a fresh session. Details are in `WORKLIST.md`.
 - Gameplay round (2026-10-16, PRs #23–#30), all drawn in code; art prompts in `docs/art-prompts-gameplay.md`:
   - Feedback: jump lines, landing dust, dizzy stars, collect sparkle (`EffectsRenderer`, `ItemsRenderer`); friends react
     (`Friend.reaction`: thumbs/surprised/dance with icon bubbles) via `reactFriends()`.
-  - Coaching: `world.coaching` puts a friend behind each new static obstacle (`spawnCoach`) that points and hops at
-    300 units — tapping 0.1–0.7 s later clears it; stops after `COACH.cleanJumpsToStop`, back on after a bump.
+  - Coaching (a friend demonstrating each jump, PR #24) was removed again on 2026-10-16: the owner found it too busy.
   - Ride book: `src/settings/Progress.ts` (`lumi2d.progress.v1`), recorded in increments via `RideLedger`; state `book`.
   - Rides end: `RIDE.length` 24 000 units, `world.ridePhase` riding → finishing → parked, `FinishRenderer`
     (arch, garage), state `finished` with `RideSummary` ("Nog een keer" / "Kiezen"); progress road at the bottom.

@@ -136,7 +136,7 @@ export class Sound {
         this.tone(t + 0.2, 880, 0.15, 'sine', 0.2, 1320);
         break;
       case 'hup':
-        // Vriendje doet een sprongetje voor: zacht en hoog, anders dan de sprong van de auto.
+        // Huppeltje (schaapjes die opzij springen): zacht en hoog, anders dan de sprong van de auto.
         this.tone(t, 700, 0.12, 'sine', 0.18, 1250);
         break;
     }

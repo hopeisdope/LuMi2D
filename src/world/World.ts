@@ -48,8 +48,6 @@ export function createWorld(seed: number = randomSeed()): WorldState {
     theme: 'meadow',
     friends: createFriendPool(),
     nextFriendAt: FRIENDS.firstDistance,
-    coaching: true,
-    cleanJumps: 0,
     lastJumpTime: -1,
     lastJumpX: 0,
     lastJumpY: WORLD.groundY,
@@ -67,7 +65,6 @@ export function createWorld(seed: number = randomSeed()): WorldState {
       rainbowRide: false,
       friendCheer: false,
       friendGift: false,
-      friendDemo: false,
       cleared: false,
       bounced: false,
       momentHit: false,
@@ -90,8 +87,6 @@ export function resetWorld(world: WorldState, seed: number = randomSeed()): void
   world.jumpCount = 0;
   world.score = 0;
   world.lastScoreTime = -1;
-  world.coaching = true;
-  world.cleanJumps = 0;
   world.lastJumpTime = -1;
   world.lastLandTime = -1;
   world.rainbowRides = 0;
@@ -128,7 +123,6 @@ function clearEvents(world: WorldState): void {
   world.events.rainbowRide = false;
   world.events.friendCheer = false;
   world.events.friendGift = false;
-  world.events.friendDemo = false;
   world.events.cleared = false;
   world.events.bounced = false;
   world.events.momentHit = false;

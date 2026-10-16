@@ -1,7 +1,6 @@
-import { BOUNCE, BUMP, CAR_HITBOX, COACH, ENEMIES, MOMENTS, OBSTACLES, PLATFORMS, RAINBOW, RIDE, WORLD } from '../config';
+import { BOUNCE, BUMP, CAR_HITBOX, ENEMIES, MOMENTS, OBSTACLES, PLATFORMS, RAINBOW, RIDE, WORLD } from '../config';
 import type { Obstacle, ObstacleKind, WorldState } from '../types';
 import { canSpawnRainbowPiece, spawnPlatformWithBoost, spawnRainbowPiece } from './Collectibles';
-import { spawnCoach } from './Friends';
 import { spawnMoment } from './Moments';
 import { bounceDistance, spawnPad } from './Pads';
 import { trySpawnScene } from './Scenes';
@@ -61,8 +60,6 @@ function spawn(world: WorldState, x: number, enemy: boolean): void {
     o.cleared = false;
     o.hit = false;
     o.hitTime = 0;
-    // Zolang het kind nog oefent, staat er een vriendje bij dat het sprongetje voordoet (alleen bij stilstaande obstakels).
-    if (!enemy && world.coaching) spawnCoach(world, i);
     return;
   }
   // Pool vol: dit obstakel overslaan (komt in de praktijk niet voor bij deze afstanden).
@@ -170,8 +167,6 @@ export function updateObstacles(world: WorldState, dt: number): void {
       // Helemaal voorbij zonder botsing: ster verdiend.
       o.cleared = true;
       world.events.cleared = true;
-      world.cleanJumps++;
-      if (world.cleanJumps >= COACH.cleanJumpsToStop) world.coaching = false;
       world.score++;
       world.lastScoreTime = world.time;
       world.events.scored = true;
@@ -190,8 +185,6 @@ export function updateObstacles(world: WorldState, dt: number): void {
       car.bumpTimer = BUMP.duration;
       world.speed = Math.min(world.speed, world.targetSpeed * BUMP.speedFactor);
       world.events.bumped = true;
-      world.cleanJumps = 0;
-      world.coaching = true;
     }
   }
 }

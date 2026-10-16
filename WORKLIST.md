@@ -22,6 +22,7 @@ Read at the start of every session; update when something is done or added.
 
 ## Done
 
+- [x] Removed the friend demonstrating jumps (1.2): too busy according to the owner. The "Tik om te springen!" hint at the start stays
 - [x] Gameplay 3.1 one moment per world, all hit by jumping (the whole car counts, so any jump past it works): meadow dandelion fluff blows away, dino egg in the berm hatches a waving baby dino, space bubbles pop, candy cotton-candy cloud rains sweets; each gives a star. Nothing happens when driving past without jumping
 - [x] Gameplay 2.2 surprise scenes (2–3 per ride, each announced by the same kind of roadside sign, on obstacle-free road): ducks crossing (the car stops and waits), rainbow tunnel (sparkles + a star), a herd of sheep hopping off the road
 - [x] Gameplay 2.3 bounce pads: mint trampoline with springs and bouncing up-arrows; driving or landing on it gives a soft 260-high bounce with 'boing' and three stars along the arc; course leaves room for the long bounce. Mission card moved to the bottom-left (the high bounce reached the top-left card)
