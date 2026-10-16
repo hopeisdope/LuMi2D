@@ -64,11 +64,13 @@ GitHub Pages workflow (`.github/workflows/pages.yml`) is kept but manual-only (n
   personal or sensitive. A ride is written to the book in increments (`RideLedger`), so recording on app hide and
   again at the end never counts anything twice.
 - Sound is synthesized with Web Audio in `src/audio/Sound.ts` (no audio files); it unlocks on the first tap.
-- Sprites (cars, wheels, friends) are generated artwork: raw PNGs go in `art-incoming/` (git-ignored, not committed),
+- Sprites (cars, wheels, friends, and the garage, bounce pad, egg, cotton candy, ducks and sheep) are generated artwork: raw PNGs go in `art-incoming/` (git-ignored, not committed),
   `python3 scripts/process-sprites.py` (Pillow) trims/resizes them into `public/sprites/` and writes
   `src/render/spriteData.ts` (sizes, wheel positions; generated, don't edit). Renderers draw a sprite only when it
   has loaded (`ready()` in `src/render/sprites.ts`) and otherwise fall back to the drawn shapes — keep that fallback.
-  Friend sheets hold three poses side by side: idle, wave, cheer.
+  Friend sheets hold three poses side by side: idle, wave, cheer. Other sheets (`moment-egg`, `scene-ducks`,
+  `scene-sheep`) keep relative sizes between frames; draw them with `drawFrame()`. The garage sprite's transparent
+  doorway is detected by the script (`GARAGE_SPRITE.opening`).
 - PWA: `public/manifest.webmanifest`, icons in `public/icons/` (regenerate with `scripts/generate-icons.mjs`),
   service worker generated at build time from `sw-template.js` by the plugin in `vite.config.ts` (production only).
 

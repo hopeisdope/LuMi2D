@@ -34,3 +34,25 @@ export const FRIEND_SPRITES: Readonly<Record<FriendKind, FriendSprite>> = {
   unicorn: { cellWidth: 255, cellHeight: 288 },
   cupcake: { cellWidth: 241, cellHeight: 288 },
 };
+
+/** Los plaatje (px). */
+export interface PropSprite {
+  width: number;
+  height: number;
+}
+
+/** Vel met beelden naast elkaar in gelijke vakken; onderrand = grond, beeld horizontaal in het midden. */
+export interface SheetSprite {
+  cellWidth: number;
+  cellHeight: number;
+  frames: number;
+}
+
+/** Garage (px) met de doorzichtige deuropening [x, y, breedte, hoogte]. */
+export const GARAGE_SPRITE = { width: 960, height: 654, opening: [133.7, 325.9, 443.4, 328.0] } as const;
+
+export const PAD_SPRITE: PropSprite = { width: 360, height: 65 };
+export const MOMENT_COTTON_SPRITE: PropSprite = { width: 238, height: 270 };
+export const MOMENT_EGG_SPRITE: SheetSprite = { cellWidth: 220, cellHeight: 240, frames: 3 };
+export const SCENE_DUCKS_SPRITE: SheetSprite = { cellWidth: 150, cellHeight: 180, frames: 4 };
+export const SCENE_SHEEP_SPRITE: SheetSprite = { cellWidth: 198, cellHeight: 180, frames: 2 };

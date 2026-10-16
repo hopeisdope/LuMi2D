@@ -1,6 +1,8 @@
 import { PALETTE } from '../brand/brand';
-import { MOMENTS, WORLD } from '../config';
+import { MOMENTS, SPRITES, WORLD } from '../config';
 import type { Moment, ThemeId, WorldState } from '../types';
+import { MOMENT_COTTON_SPRITE, MOMENT_EGG_SPRITE } from './spriteData';
+import { drawFrame, PROP_IMAGES, ready } from './sprites';
 
 const CANDY_COLORS = ['#e53935', '#ffd93b', '#29a9f0', '#43c04a', '#9c4dcc', '#ffffff'];
 
@@ -77,6 +79,30 @@ export class MomentRenderer {
   private egg(x: number, t: number, time: number, distance: number): void {
     const { ctx } = this;
     const ground = WORLD.groundY - 4;
+    const img = PROP_IMAGES.egg;
+    if (ready(img)) {
+      const h = SPRITES.eggHeight;
+      if (t < 0) {
+        // Ei in het nestje dat wiebelt (vanaf de onderkant) als de auto nadert.
+        ctx.save();
+        ctx.translate(x, ground);
+        ctx.rotate(distance < 450 ? Math.sin(time * 14) * 0.1 : 0);
+        drawFrame(ctx, img, MOMENT_EGG_SPRITE, 0, 0, 0, h);
+        ctx.restore();
+        return;
+      }
+      // Uitgekomen: de babydino springt op achter het opengebroken nestje en wiebelt blij.
+      const k = Math.min(1, t / 0.4);
+      const rise = Math.sin(k * Math.PI * 0.5);
+      ctx.save();
+      ctx.translate(x + 6, ground - 10 - rise * 8);
+      ctx.rotate(Math.sin(time * 6) * 0.08);
+      ctx.scale(rise, rise);
+      drawFrame(ctx, img, MOMENT_EGG_SPRITE, 2, 0, 0, h * SPRITES.dinoScale);
+      ctx.restore();
+      drawFrame(ctx, img, MOMENT_EGG_SPRITE, 1, x, ground, h);
+      return;
+    }
     // Nestje
     ctx.fillStyle = '#8d6e63';
     ctx.beginPath();
@@ -217,7 +243,15 @@ export class MomentRenderer {
     const k = t < 0 ? 0 : t / MOMENTS.effectTime;
     const shrink = 1 - Math.min(1, k * 2);
     const bob = Math.sin(time * 2 + x * 0.01) * 5;
-    if (shrink > 0) {
+    if (shrink > 0 && ready(PROP_IMAGES.cotton)) {
+      const h = SPRITES.cottonHeight;
+      const w = (MOMENT_COTTON_SPRITE.width / MOMENT_COTTON_SPRITE.height) * h;
+      ctx.save();
+      ctx.translate(x, y + bob);
+      ctx.scale(shrink, shrink);
+      ctx.drawImage(PROP_IMAGES.cotton, -w / 2, -h / 2, w, h);
+      ctx.restore();
+    } else if (shrink > 0) {
       ctx.save();
       ctx.translate(x, y + bob);
       ctx.scale(shrink, shrink);

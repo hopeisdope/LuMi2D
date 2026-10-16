@@ -2,6 +2,8 @@ import { PALETTE } from '../brand/brand';
 import { RIDE, WORLD } from '../config';
 import type { WorldState } from '../types';
 import { roundRectPath } from './shapes';
+import { GARAGE_SPRITE } from './spriteData';
+import { PROP_IMAGES, ready } from './sprites';
 
 /** Afmetingen van de finishboog en de garage (wereld-eenheden). */
 const ARCH = { halfWidth: 150, height: 230, pole: 12, banner: 34, square: 17 } as const;
@@ -17,7 +19,29 @@ const DOOR_TIME = 0.7;
  * staan achter de auto; de voorgevel van de garage ervoor, zodat de auto echt naar binnen rijdt. Leest alleen state.
  */
 export class FinishRenderer {
+  /** Plek van het garageplaatje en de deuropening (eenheden), elk frame opnieuw ingevuld: geen allocaties. */
+  private readonly garage = { left: 0, top: 0, width: 0, height: 0, ox: 0, oy: 0, ow: 0, oh: 0 };
+
   constructor(private readonly ctx: CanvasRenderingContext2D) {}
+
+  /** Garageplaatje zo geschaald dat de opening GARAGE.opening breed is, midden van de opening op gx, onderkant op de grond. */
+  private placeGarage(gx: number, ground: number): void {
+    const op = GARAGE_SPRITE.opening;
+    const ox = op[0];
+    const oy = op[1];
+    const ow = op[2];
+    const oh = op[3];
+    const s = GARAGE.opening / ow;
+    const g = this.garage;
+    g.width = GARAGE_SPRITE.width * s;
+    g.height = GARAGE_SPRITE.height * s;
+    g.left = gx - (ox + ow / 2) * s;
+    g.top = ground - g.height;
+    g.ox = g.left + ox * s;
+    g.oy = g.top + oy * s;
+    g.ow = ow * s;
+    g.oh = oh * s;
+  }
 
   /** Achter de auto: finishboog met geblokte lijn op de weg, binnenkant van de garage. */
   renderBack(world: WorldState, carScreenX: number, viewWidth: number): void {
@@ -52,7 +76,13 @@ export class FinishRenderer {
     }
 
     const gx = carScreenX + (world.finishX + RIDE.garageDistance - world.car.x);
-    if (gx > -300 && gx < viewWidth + 300) {
+    if (gx > -300 && gx < viewWidth + 300 && ready(PROP_IMAGES.garage)) {
+      // Donkere binnenkant precies in de deuropening van het plaatje.
+      this.placeGarage(gx, ground);
+      const g = this.garage;
+      ctx.fillStyle = '#3d3a4f';
+      ctx.fillRect(g.ox, g.oy, g.ow, g.oh);
+    } else if (gx > -300 && gx < viewWidth + 300) {
       // Donkere binnenkant: de auto staat hier straks voor.
       ctx.fillStyle = '#3d3a4f';
       ctx.fillRect(gx - GARAGE.opening / 2 - 2, ground - GARAGE.openingHeight - 2, GARAGE.opening + 4, GARAGE.openingHeight + 2);
@@ -73,6 +103,13 @@ export class FinishRenderer {
 
     const gx = carScreenX + (world.finishX + RIDE.garageDistance - world.car.x);
     if (gx < -300 || gx > viewWidth + 300) return;
+    if (ready(PROP_IMAGES.garage)) {
+      this.placeGarage(gx, ground);
+      const g = this.garage;
+      ctx.drawImage(PROP_IMAGES.garage, g.left, g.top, g.width, g.height);
+      if (world.parkedTime >= 0) this.door(g.ox, g.oy, g.ow, g.oh, world.time - world.parkedTime);
+      return;
+    }
     const half = GARAGE.opening / 2;
     const wallTop = ground - GARAGE.openingHeight - GARAGE.lintel;
     // Muren naast en boven de opening.
@@ -104,19 +141,23 @@ export class FinishRenderer {
 
     // Roldeur gaat dicht nadat de auto geparkeerd is.
     if (world.parkedTime >= 0) {
-      const k = Math.min(1, (world.time - world.parkedTime) / DOOR_TIME);
-      const h = GARAGE.openingHeight * k;
-      const top = ground - GARAGE.openingHeight;
-      ctx.fillStyle = '#b0bec5';
-      ctx.fillRect(gx - half, top, GARAGE.opening, h);
-      ctx.strokeStyle = '#78909c';
-      ctx.lineWidth = 3;
-      for (let y = top + 16; y < top + h; y += 16) {
-        ctx.beginPath();
-        ctx.moveTo(gx - half + 4, y);
-        ctx.lineTo(gx + half - 4, y);
-        ctx.stroke();
-      }
+      this.door(gx - half, ground - GARAGE.openingHeight, GARAGE.opening, GARAGE.openingHeight, world.time - world.parkedTime);
+    }
+  }
+
+  /** Roldeur die in DOOR_TIME van boven naar beneden over de opening (x, y, w, h) zakt. */
+  private door(x: number, y: number, w: number, h: number, t: number): void {
+    const { ctx } = this;
+    const dh = h * Math.min(1, t / DOOR_TIME);
+    ctx.fillStyle = '#b0bec5';
+    ctx.fillRect(x, y, w, dh);
+    ctx.strokeStyle = '#78909c';
+    ctx.lineWidth = 3;
+    for (let ly = y + 16; ly < y + dh; ly += 16) {
+      ctx.beginPath();
+      ctx.moveTo(x + 4, ly);
+      ctx.lineTo(x + w - 4, ly);
+      ctx.stroke();
     }
   }
 

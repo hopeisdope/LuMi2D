@@ -1,6 +1,8 @@
-import { BOUNCE, COLLECTIBLES, COLORS, FEEDBACK, PLATFORMS, RAINBOW, WORLD } from '../config';
+import { BOUNCE, COLLECTIBLES, COLORS, FEEDBACK, PLATFORMS, RAINBOW, SPRITES, WORLD } from '../config';
 import type { Collectible, Pad, WorldState } from '../types';
 import { roundRectPath, starPath } from './shapes';
+import { PAD_SPRITE } from './spriteData';
+import { PROP_IMAGES, ready } from './sprites';
 
 /** Duur (s) van de verdwijn-animatie na het pakken. */
 const COLLECT_TIME = 0.4;
@@ -59,6 +61,16 @@ export class ItemsRenderer {
     const dip = since < 0.35 ? Math.sin((since / 0.35) * Math.PI) * 8 : 0;
     const top = ground - BOUNCE.height + dip;
 
+    if (ready(PROP_IMAGES.pad)) {
+      // Plaatje: de mat zakt in door het plaatje platter te maken (onderkant blijft op de grond).
+      const w = SPRITES.padWidth;
+      const h = (PAD_SPRITE.height / PAD_SPRITE.width) * w;
+      const squash = h - dip * 0.6;
+      ctx.drawImage(PROP_IMAGES.pad, x - w / 2, ground - squash, w, squash);
+      this.padArrows(p, x, ground - h, time);
+      return;
+    }
+
     // Pootjes en veren.
     ctx.strokeStyle = COLORS.padFrame;
     ctx.lineWidth = 5;
@@ -88,7 +100,12 @@ export class ItemsRenderer {
     roundRectPath(ctx, x - half + 6, top - 3, BOUNCE.width - 12, 4, 2);
     ctx.fill();
 
-    // Pijltjes omhoog die zacht stuiteren (niet meer na gebruik).
+    this.padArrows(p, x, top, time);
+  }
+
+  /** Pijltjes omhoog die zacht stuiteren boven het kussen (niet meer na gebruik). */
+  private padArrows(p: Pad, x: number, top: number, time: number): void {
+    const { ctx } = this;
     if (p.usedTime >= 0) return;
     const bounce = Math.abs(Math.sin(time * 5)) * 8;
     ctx.strokeStyle = COLORS.padArrow;

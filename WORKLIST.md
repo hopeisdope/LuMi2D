@@ -9,7 +9,6 @@ Read at the start of every session; update when something is done or added.
 
 ## Next
 
-- [ ] Replace the code-drawn new visuals (finish/garage, ducks, sheep, bounce pad, world moments, reaction bubbles) with ChatGPT sprites if wanted (prompts in `docs/art-prompts-gameplay.md`)
 - [ ] Check the new sprites on a real iPad (sharpness, size of friends next to the car)
 - [ ] Configurable auto-movement, difficulty and increasing speed
 
@@ -22,6 +21,7 @@ Read at the start of every session; update when something is done or added.
 
 ## Done
 
+- [x] Gameplay sprites (ChatGPT): garage (car drives into the transparent doorway, roller door closes over it), bounce pad (bigger: 140 wide, hit zone 120), dino egg/hatching baby dino, cotton candy, walking ducks, sheep standing/hopping, pictures on the scene signs; drawn versions stay as fallback
 - [x] Removed the friend demonstrating jumps (1.2): too busy according to the owner. The "Tik om te springen!" hint at the start stays
 - [x] Gameplay 3.1 one moment per world, all hit by jumping (the whole car counts, so any jump past it works): meadow dandelion fluff blows away, dino egg in the berm hatches a waving baby dino, space bubbles pop, candy cotton-candy cloud rains sweets; each gives a star. Nothing happens when driving past without jumping
 - [x] Gameplay 2.2 surprise scenes (2–3 per ride, each announced by the same kind of roadside sign, on obstacle-free road): ducks crossing (the car stops and waits), rainbow tunnel (sparkles + a star), a herd of sheep hopping off the road

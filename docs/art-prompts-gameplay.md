@@ -1,5 +1,7 @@
 # Art prompts for the gameplay round (ChatGPT)
 
+Status: all six delivered and integrated on 2026-10-16 (`public/sprites/`). Kept for regenerating.
+
 The new elements from the 2026-10-16 gameplay round are drawn in code. These prompts produce matching sprites
 in the same style as the existing cars and friends. Paste the **style prompt** from the first sprite round
 first (same chat), then one prompt per message. Save the PNGs into `art-incoming/` with the names below; the

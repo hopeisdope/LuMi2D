@@ -29,6 +29,12 @@ WHEEL_SIZE = 160     # px
 FRIEND_HEIGHT = 288  # px per houding
 ALPHA_MIN = 16       # vage randjes (anti-aliasing) negeren bij het bijsnijden
 
+# Spullen uit de gameplayronde: losse plaatjes (max breedte/hoogte in px) en vellen met meerdere beelden
+# (aantal beelden, hoogte van een vak in px). In vellen blijven de onderlinge groottes bewaard.
+PROPS_SINGLE = {'pad': (360, 120), 'moment-cotton': (300, 270)}
+PROPS_SHEETS = {'moment-egg': (3, 240), 'scene-ducks': (4, 180), 'scene-sheep': (2, 180)}
+GARAGE_WIDTH = 960   # px; de opening wordt in de code ~200 eenheden breed
+
 
 def load(name):
     path = os.path.join(SRC, name)
@@ -152,7 +158,70 @@ def process_friend(kind):
     return {'cellWidth': cw, 'cellHeight': FRIEND_HEIGHT, 'bytes': save_png(out, f'friend-{kind}.png')}
 
 
-def write_data(cars, friends):
+def fit(im, max_w, max_h):
+    scale = min(max_w / im.size[0], max_h / im.size[1])
+    return im.resize((round(im.size[0] * scale), round(im.size[1] * scale)), Image.LANCZOS)
+
+
+def process_single(name):
+    out = fit(trim(load(f'{name}.png')), *PROPS_SINGLE[name])
+    return {'width': out.size[0], 'height': out.size[1], 'bytes': save_png(out, f'{name}.png')}
+
+
+def process_sheet(name):
+    """Beelden naast elkaar in gelijke vakken: onderrand op de grond, horizontaal in het midden, zonder ze los te
+    schalen (een kuiken blijft kleiner dan de moedereend)."""
+    count, cell_height = PROPS_SHEETS[name]
+    frames = split_columns(load(f'{name}.png'), count)
+    cw = max(f.size[0] for f in frames) + 2
+    ch = max(f.size[1] for f in frames)
+    sheet = Image.new('RGBA', (cw * count, ch))
+    for i, f in enumerate(frames):
+        sheet.paste(f, (i * cw + (cw - f.size[0]) // 2, ch - f.size[1]), f)
+    scale = cell_height / ch
+    out_w = round(cw * scale)
+    out = sheet.resize((out_w * count, cell_height), Image.LANCZOS)
+    return {'cellWidth': out_w, 'cellHeight': cell_height, 'frames': count, 'bytes': save_png(out, f'{name}.png')}
+
+
+def find_opening(im):
+    """Doorzichtige deuropening van de garage: de breedste doorzichtige strook tussen muren op 80% hoogte, en
+    vanaf de onderrand omhoog tot de bovendorpel."""
+    a = im.getchannel('A').load()
+    w, h = im.size
+    y = int(h * 0.8)
+    runs, start, seen_wall = [], None, False
+    for x in range(w):
+        solid = a[x, y] >= 64
+        if solid:
+            if start is not None and seen_wall:
+                runs.append((start, x))
+            start = None
+            seen_wall = True
+        elif start is None:
+            start = x
+    x0, x1 = max(runs, key=lambda r: r[1] - r[0])
+    cx = (x0 + x1) // 2
+    top = h - 1
+    while top > 0 and a[cx, top] < 64:
+        top -= 1
+    return x0, top + 1, x1 - x0, h - top - 1
+
+
+def process_garage(debug):
+    im = trim(load('garage.png'))
+    x, y, w, h = find_opening(im)
+    if debug:
+        d = im.copy()
+        ImageDraw.Draw(d).rectangle([x, y, x + w, y + h], outline=(255, 0, 255, 255), width=8)
+        d.save(os.path.join(debug, 'garage-opening.png'))
+    scale = GARAGE_WIDTH / im.size[0]
+    out = im.resize((GARAGE_WIDTH, round(im.size[1] * scale)), Image.LANCZOS)
+    opening = [round(v * scale, 1) for v in (x, y, w, h)]
+    return {'width': out.size[0], 'height': out.size[1], 'opening': opening, 'bytes': save_png(out, 'garage.png')}
+
+
+def write_data(cars, friends, props):
     lines = [
         '// Gegenereerd door scripts/process-sprites.py; niet met de hand aanpassen.',
         "import type { CarId, FriendKind } from '../types';",
@@ -181,9 +250,41 @@ def write_data(cars, friends):
     lines += ['};', '', 'export const FRIEND_SPRITES: Readonly<Record<FriendKind, FriendSprite>> = {']
     for kind, f in friends.items():
         lines.append(f"  {kind}: {{ cellWidth: {f['cellWidth']}, cellHeight: {f['cellHeight']} }},")
-    lines += ['};', '']
+    g = props['garage']
+    lines += [
+        '};',
+        '',
+        '/** Los plaatje (px). */',
+        'export interface PropSprite {',
+        '  width: number;',
+        '  height: number;',
+        '}',
+        '',
+        '/** Vel met beelden naast elkaar in gelijke vakken; onderrand = grond, beeld horizontaal in het midden. */',
+        'export interface SheetSprite {',
+        '  cellWidth: number;',
+        '  cellHeight: number;',
+        '  frames: number;',
+        '}',
+        '',
+        '/** Garage (px) met de doorzichtige deuropening [x, y, breedte, hoogte]. */',
+        f"export const GARAGE_SPRITE = {{ width: {g['width']}, height: {g['height']}, opening: [{', '.join(str(v) for v in g['opening'])}] }} as const;",
+        '',
+    ]
+    for name in PROPS_SINGLE:
+        p = props[name]
+        lines.append(f"export const {const_name(name)}: PropSprite = {{ width: {p['width']}, height: {p['height']} }};")
+    for name in PROPS_SHEETS:
+        p = props[name]
+        lines.append(f"export const {const_name(name)}: SheetSprite = {{ cellWidth: {p['cellWidth']}, cellHeight: {p['cellHeight']}, frames: {p['frames']} }};")
+    lines.append('')
     with open(DATA, 'w') as fh:
         fh.write('\n'.join(lines))
+
+
+def const_name(name):
+    """'scene-ducks' -> 'SCENE_DUCKS_SPRITE'."""
+    return name.upper().replace('-', '_') + '_SPRITE'
 
 
 def main():
@@ -194,7 +295,10 @@ def main():
     cars = {car: process_car(car, args.debug) for car in CARS}
     wheels = process_wheels()
     friends = {kind: process_friend(kind) for kind in FRIENDS}
-    write_data(cars, friends)
+    props = {'garage': process_garage(args.debug)}
+    props.update({name: process_single(name) for name in PROPS_SINGLE})
+    props.update({name: process_sheet(name) for name in PROPS_SHEETS})
+    write_data(cars, friends, props)
     total = sum(c['bytes'] for c in cars.values()) + sum(wheels.values()) + sum(f['bytes'] for f in friends.values())
     for car, c in cars.items():
         print(f"car-{car}.png {c['width']}x{c['height']} wheels={c['wheels']} r={c['wheelR']} {c['bytes'] // 1024} KB")
@@ -202,6 +306,9 @@ def main():
         print(f'wheel-{car}.png {b // 1024} KB')
     for kind, f in friends.items():
         print(f"friend-{kind}.png cell={f['cellWidth']}x{f['cellHeight']} {f['bytes'] // 1024} KB")
+    for name, p in props.items():
+        print(f"{name}.png {p} ".replace(f"'bytes': {p['bytes']}", f"{p['bytes'] // 1024} KB"))
+    total += sum(p['bytes'] for p in props.values())
     print(f'total {total // 1024} KB')
 
 

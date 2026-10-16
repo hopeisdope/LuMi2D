@@ -31,6 +31,7 @@ Concise state for reloading into a fresh session. Details are in `WORKLIST.md`.
   - Rides end: `RIDE.length` 24 000 units, `world.ridePhase` riding → finishing → parked, `FinishRenderer`
     (arch, garage), state `finished` with `RideSummary` ("Nog een keer" / "Kiezen"); progress road at the bottom.
   - Missions: `src/world/Mission.ts`, one per ride, card bottom-left (top-left collided with high bounces).
+  - Sprites for garage, pad, egg, cotton candy, ducks and sheep (after PR #32); drawn code stays as fallback.
   - Bounce pads (`world/Pads.ts`, 260 high), surprise scenes (`world/Scenes.ts`: ducks/tunnel/herd with a sign),
     world moments (`world/Moments.ts`: fluff/egg/bubble/cotton candy; the whole car height counts as hit).
   - Course segments in `Obstacles.ts#spawnAhead` roll in this order: platform, rainbow, bounce pad, world moment,
