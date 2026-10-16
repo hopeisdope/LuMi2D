@@ -2,6 +2,7 @@ import type { Sound } from '../audio/Sound';
 import type { InputManager } from '../input/InputManager';
 import type { Renderer } from '../render/Renderer';
 import type { Screen } from '../render/Screen';
+import { loadProgress, newLedger, recordRide, saveProgress } from '../settings/Progress';
 import { CAR_IDS, loadSettings, saveSettings, THEME_IDS } from '../settings/Settings';
 import type { GameState, InputAction, Settings, Vec2, WorldState } from '../types';
 import { hitCard, hitTest, Layout } from '../ui/Layout';
@@ -9,7 +10,7 @@ import { createWorld, jump, resetWorld, updateWorld } from '../world/World';
 import { GameLoop } from './GameLoop';
 
 /**
- * Regisseert de game: toestandsmachine (ready ⇄ settings, ready → choose → playing ⇄ paused, paused → choose),
+ * Regisseert de game: toestandsmachine (ready ⇄ settings, ready ⇄ book, ready → choose → playing ⇄ paused, paused → choose),
  * verwerkt input-acties en roept wereld-update en rendering aan.
  */
 export class Game {
@@ -22,6 +23,9 @@ export class Game {
   private readonly tapPoint: Vec2 = { x: 0, y: 0 };
   /** Bewaarde instellingen (localStorage); gelden voor elke nieuwe ronde. */
   private readonly settings: Settings = loadSettings();
+  /** Rittenboekje (localStorage) en wat er van de huidige rit al in staat. */
+  private readonly progress = loadProgress();
+  private readonly ledger = newLedger();
 
   constructor(
     private readonly screen: Screen,
@@ -65,8 +69,16 @@ export class Game {
   start(): void {
     if (this.state !== 'choose') return;
     resetWorld(this.world);
+    Object.assign(this.ledger, newLedger());
     this.input.clear();
     this.state = 'playing';
+  }
+
+  /** Schrijft de lopende rit (tot nu toe) in het rittenboekje en bewaart het. */
+  private recordRide(): void {
+    if (this.state !== 'playing' && this.state !== 'paused') return;
+    recordRide(this.progress, this.ledger, this.world);
+    saveProgress(this.progress);
   }
 
   /** Terug van het kiesscherm naar het startscherm. */
@@ -85,9 +97,20 @@ export class Game {
     this.state = 'playing';
   }
 
-  /** Opnieuw: een nieuwe ronde begint altijd via het kiesscherm. */
+  /** Opnieuw: de rit gaat in het boekje en een nieuwe ronde begint altijd via het kiesscherm. */
   restart(): void {
+    this.recordRide();
     this.openChooser();
+  }
+
+  openBook(): void {
+    if (this.state !== 'ready') return;
+    this.state = 'book';
+  }
+
+  closeBook(): void {
+    if (this.state !== 'book') return;
+    this.state = 'ready';
   }
 
   /** Zet de instellingen door naar wereld en geluid. */
@@ -137,7 +160,7 @@ export class Game {
       updateWorld(this.world, dt);
       this.playWorldSounds();
       this.ambientTime += dt;
-    } else if (this.state === 'ready' || this.state === 'settings' || this.state === 'choose') {
+    } else if (this.state === 'ready' || this.state === 'settings' || this.state === 'book' || this.state === 'choose') {
       this.ambientTime += dt;
     }
   };
@@ -158,13 +181,14 @@ export class Game {
   }
 
   private readonly render = (): void => {
-    this.renderer.render(this.state, this.world, this.layout, this.ambientTime, this.settings);
+    this.renderer.render(this.state, this.world, this.layout, this.ambientTime, this.settings, this.progress);
   };
 
   private readonly handleAction = (action: InputAction): void => {
     switch (action.type) {
       case 'togglePause':
         if (this.state === 'settings') this.closeSettings();
+        else if (this.state === 'book') this.closeBook();
         else if (this.state === 'choose') this.backToStart();
         else this.togglePause();
         break;
@@ -175,6 +199,7 @@ export class Game {
         if (this.state === 'ready') this.openChooser();
         else if (this.state === 'choose') this.start();
         else if (this.state === 'settings') this.closeSettings();
+        else if (this.state === 'book') this.closeBook();
         else if (this.state === 'playing') jump(this.world);
         else if (this.state === 'paused') this.resume();
         break;
@@ -188,10 +213,17 @@ export class Game {
     const p = this.screen.toWorld(cssX, cssY, this.tapPoint);
     switch (this.state) {
       case 'ready':
-        // Tandwiel opent de instellingen; overal elders tikken gaat naar het kiesscherm (makkelijk voor jonge kinderen).
+        // Tandwiel opent de instellingen, het boekje het rittenboekje; overal elders tikken gaat naar het kiesscherm.
         this.sound.play('tap');
         if (hitTest(this.layout.settings.rect, p.x, p.y)) this.openSettings();
+        else if (hitTest(this.layout.book.rect, p.x, p.y)) this.openBook();
         else this.openChooser();
+        break;
+      case 'book':
+        if (hitTest(this.layout.back.rect, p.x, p.y)) {
+          this.sound.play('tap');
+          this.closeBook();
+        }
         break;
       case 'choose': {
         // Alleen kaartjes en knoppen reageren, zodat er niet per ongeluk een ronde start.
@@ -234,11 +266,15 @@ export class Game {
   }
 
   private readonly onVisibilityChange = (): void => {
-    // Automatisch pauzeren als de app naar de achtergrond gaat.
-    if (document.hidden) this.pause();
+    // Automatisch pauzeren als de app naar de achtergrond gaat; de rit tot nu toe gaat alvast in het boekje.
+    if (document.hidden) {
+      this.pause();
+      this.recordRide();
+    }
   };
 
   private readonly onPageHide = (): void => {
     this.pause();
+    this.recordRide();
   };
 }

@@ -240,6 +240,14 @@ export const SCORE = {
   popDuration: 0.9,
 } as const;
 
+/** Ritten en het rittenboekje. */
+export const RIDE = {
+  /** Een rit telt mee in het boekje als hij minstens zo lang (s) duurde. */
+  minTime: 20,
+  /** Wereld-eenheden per "kilometer" in het boekje (een rit van ~75 s is dan ~2,4 km). */
+  unitsPerKm: 10000,
+} as const;
+
 /** Instelbare voortbeweging; later uit te breiden met moeilijkheidsgraad. */
 export const SPEED = {
   /** Basissnelheid in wereld-eenheden per seconde. */

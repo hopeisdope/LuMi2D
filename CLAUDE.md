@@ -58,8 +58,11 @@ GitHub Pages workflow (`.github/workflows/pages.yml`) is kept but manual-only (n
   play, and a timing-based jump game isn't meaningfully playable with a screen reader. Keyboard jump (Space/Enter/↑/W)
   exists. Revisit only if the audience changes.
 - Every text, button and instruction gets an icon or picture (`src/render/icons.ts`) for children who can't read yet.
-- Storage: only `localStorage` key `lumi2d.settings.v1` for settings (toggles, car, world) via `src/settings/Settings.ts`;
-  always validate on load and fall back to defaults. Never store anything personal or sensitive.
+- Storage: only two `localStorage` keys — `lumi2d.settings.v1` for settings (toggles, car, world) via
+  `src/settings/Settings.ts`, and `lumi2d.progress.v1` for the ride book (counters + stickers) via
+  `src/settings/Progress.ts`. Always validate every field on load and fall back to defaults. Never store anything
+  personal or sensitive. A ride is written to the book in increments (`RideLedger`), so recording on app hide and
+  again at the end never counts anything twice.
 - Sound is synthesized with Web Audio in `src/audio/Sound.ts` (no audio files); it unlocks on the first tap.
 - Sprites (cars, wheels, friends) are generated artwork: raw PNGs go in `art-incoming/` (git-ignored, not committed),
   `python3 scripts/process-sprites.py` (Pillow) trims/resizes them into `public/sprites/` and writes

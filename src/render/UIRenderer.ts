@@ -1,8 +1,9 @@
 import { BRAND, LOGO_COLORS, PALETTE, TYPOGRAPHY, UI_STYLE } from '../brand/brand';
-import { BOOST, CARS, COLORS, RAINBOW, UI } from '../config';
+import { BOOST, CARS, COLORS, RAINBOW, RIDE, UI } from '../config';
+import { STICKERS } from '../settings/Progress';
 import { CAR_IDS, THEME_IDS } from '../settings/Settings';
 import { THEMES, type Theme } from '../themes';
-import type { Button, GameState, ObstacleKind, Rect, Settings, Viewport, WorldState } from '../types';
+import type { Button, GameState, ObstacleKind, Progress, Rect, Settings, StickerId, Viewport, WorldState } from '../types';
 import type { Layout } from '../ui/Layout';
 import { CarRenderer } from './CarRenderer';
 import { drawIcon, type IconName } from './icons';
@@ -20,6 +21,22 @@ const TOGGLE_FONT = font(TYPOGRAPHY.size.toggle);
 const SCORE_PULSE_TIME = 0.3;
 
 const JUMP_HINT = 'Tik om te springen!';
+
+/** Plaatje (en eventueel getal) per sticker in het rittenboekje. */
+const STICKER_LOOK: Readonly<Record<StickerId, { icon: IconName | 'star'; badge?: string }>> = {
+  firstRide: { icon: 'flag' },
+  rides10: { icon: 'flag', badge: '10' },
+  bestRide10: { icon: 'star', badge: '10' },
+  stars100: { icon: 'star', badge: '100' },
+  firstRainbow: { icon: 'rainbow' },
+  rainbows10: { icon: 'rainbow', badge: '10' },
+  distance50: { icon: 'car', badge: '50' },
+  allWorlds: { icon: 'world' },
+};
+/** Tot zoveel tonen we een aantal als rijtje plaatjes in plaats van als getal. */
+const TALLY_MAX = 10;
+const BOOK_TILE = { width: 160, height: 140, gap: 16, top: 104 } as const;
+const STICKER_R = 38;
 
 /** Letters van het logo, één keer opgesplitst. */
 const LOGO_LETTERS: readonly string[] = Array.from(BRAND.name);
@@ -51,6 +68,7 @@ export class UIRenderer {
     time: number,
     world: WorldState,
     settings: Settings,
+    progress: Progress,
     showJumpHint: boolean,
   ): void {
     const cx = view.width / 2;
@@ -61,6 +79,13 @@ export class UIRenderer {
         this.iconText('hand', BRAND.tagline, cx, 160, SUBTITLE_FONT, false, time);
         this.button(layout.start);
         this.iconButton(layout.settings, 'gear');
+        this.iconButton(layout.book, 'book');
+        break;
+      case 'book':
+        this.dim(view);
+        this.iconText('book', 'Mijn rittenboekje', cx, 48, SUBTITLE_FONT, true);
+        this.book(cx, progress, settings, time);
+        this.iconButton(layout.back, 'back');
         break;
       case 'settings':
         this.dim(view);
@@ -386,6 +411,196 @@ export class UIRenderer {
     ctx.textAlign = 'center';
     ctx.fillStyle = UI_STYLE.text.fill;
     ctx.fillText(on ? 'AAN' : 'UIT', on ? sx + (sw - sh) / 2 + 4 : sx + sh + (sw - sh) / 2 - 4, sy + sh / 2 + 1);
+  }
+
+  /**
+   * Rittenboekje: vier tegels (beste rit, ritten, afstand, regenbogen) met een plaatje en het aantal,
+   * daaronder de stickers. Geen ranglijst: alleen de eigen vooruitgang.
+   */
+  private book(cx: number, progress: Progress, settings: Settings, time: number): void {
+    const { ctx } = this;
+    const { width, height, gap, top } = BOOK_TILE;
+    const left = cx - (4 * width + 3 * gap) / 2;
+    for (let i = 0; i < 4; i++) {
+      const x = left + i * (width + gap);
+      ctx.fillStyle = UI_STYLE.panel;
+      ctx.beginPath();
+      roundRectPath(ctx, x, top, width, height, UI_STYLE.button.radius);
+      ctx.fill();
+      const px = x + width / 2;
+      const py = top + 46;
+      const vy = top + 108;
+      switch (i) {
+        case 0:
+          // Beste rit: meeste sterren in één rit.
+          this.bigStar(px, py, 30);
+          this.tally('star', progress.bestStars, px, vy);
+          break;
+        case 1:
+          // Ritten: de eigen auto.
+          ctx.save();
+          ctx.translate(px, py + 28);
+          ctx.scale(0.55, 0.55);
+          this.carPreview.drawBody(CARS[settings.car], 150, 70, 22, 0);
+          ctx.restore();
+          this.tally('flag', progress.rides, px, vy);
+          break;
+        case 2:
+          // Afstand: een stukje weg met een vlaggetje, in "kilometers".
+          ctx.fillStyle = '#6d6d6d';
+          ctx.beginPath();
+          roundRectPath(ctx, px - 56, py + 6, 112, 20, 6);
+          ctx.fill();
+          ctx.fillStyle = PALETTE.white;
+          for (let d = -46; d < 50; d += 26) ctx.fillRect(px + d, py + 14, 14, 4);
+          drawIcon(ctx, 'flag', px + 40, py - 18, 40, PALETTE.red);
+          this.value(`${Math.floor(progress.distance / RIDE.unitsPerKm)} km`, px, vy);
+          break;
+        case 3:
+          // Regenbogen: aantal regenboogritten.
+          this.colorRainbow(px, py + 18, 34);
+          this.tally('rainbow', progress.rainbows, px, vy);
+          break;
+      }
+    }
+
+    // Stickers: twee rijen van vier op een eigen paneel; nog niet verdiend = grijs.
+    const spacing = 104;
+    ctx.fillStyle = UI_STYLE.panel;
+    ctx.beginPath();
+    roundRectPath(ctx, cx - 2 * spacing - 8, 264, 4 * spacing + 16, 196, UI_STYLE.button.radius);
+    ctx.fill();
+    for (let i = 0; i < STICKERS.length; i++) {
+      const id = STICKERS[i].id;
+      const col = i % 4;
+      const row = Math.floor(i / 4);
+      const x = cx + (col - 1.5) * spacing;
+      const y = 312 + row * 96;
+      this.sticker(id, x, y, progress.stickers.includes(id), time + i);
+    }
+  }
+
+  private sticker(id: StickerId, x: number, y: number, earned: boolean, time: number): void {
+    const { ctx } = this;
+    const look = STICKER_LOOK[id];
+    ctx.save();
+    if (earned) {
+      ctx.translate(x, y);
+      ctx.rotate(Math.sin(time * 2) * 0.06);
+      ctx.translate(-x, -y);
+    } else {
+      ctx.globalAlpha = 0.5;
+    }
+    ctx.fillStyle = earned ? PALETTE.yellow : '#dfe6ee';
+    ctx.strokeStyle = earned ? PALETTE.orangeDark : '#9aa8ba';
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.arc(x, y, STICKER_R, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    const iconColor = earned ? UI_STYLE.text.outline : 'rgba(30, 60, 110, 0.6)';
+    if (look.icon === 'star') {
+      ctx.fillStyle = earned ? PALETTE.white : iconColor;
+      ctx.beginPath();
+      starPath(ctx, x, y, STICKER_R * 0.62, STICKER_R * 0.3);
+      ctx.fill();
+    } else {
+      drawIcon(ctx, look.icon, x, y, STICKER_R * 1.15, iconColor);
+    }
+    if (look.badge) {
+      const bx = x + STICKER_R * 0.72;
+      const by = y + STICKER_R * 0.72;
+      ctx.font = TOGGLE_FONT;
+      const w = Math.max(30, this.measure(look.badge, TOGGLE_FONT) + 14);
+      ctx.fillStyle = UI_STYLE.text.outline;
+      ctx.beginPath();
+      roundRectPath(ctx, bx - w / 2, by - 15, w, 30, 15);
+      ctx.fill();
+      ctx.fillStyle = UI_STYLE.text.fill;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(look.badge, bx, by + 1);
+    }
+    ctx.restore();
+  }
+
+  /** Aantal als rijtje kleine plaatjes (tot TALLY_MAX, in twee rijen van vijf), daarboven als getal. */
+  private tally(icon: 'star' | 'flag' | 'rainbow', n: number, cx: number, cy: number): void {
+    if (n === 0 || n > TALLY_MAX) {
+      this.value(this.countLabel(n), cx, cy);
+      return;
+    }
+    const { ctx } = this;
+    const perRow = 5;
+    const rows = Math.ceil(n / perRow);
+    const size = 22;
+    for (let i = 0; i < n; i++) {
+      const row = Math.floor(i / perRow);
+      const inRow = Math.min(perRow, n - row * perRow);
+      const x = cx + (i % perRow - (inRow - 1) / 2) * (size + 4);
+      const y = cy + (row - (rows - 1) / 2) * (size + 2);
+      if (icon === 'star') {
+        ctx.fillStyle = COLORS.star;
+        ctx.strokeStyle = COLORS.starOutline;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        starPath(ctx, x, y, size / 2, size / 4.2);
+        ctx.fill();
+        ctx.stroke();
+      } else if (icon === 'rainbow') {
+        this.colorRainbow(x, y + 5, size / 2);
+      } else {
+        drawIcon(ctx, icon, x, y, size, PALETTE.red);
+      }
+    }
+  }
+
+  /** Cache van getallen als tekst (het boekje kan open blijven staan; geen nieuwe strings per frame). */
+  private readonly countLabels = new Map<number, string>();
+
+  private countLabel(n: number): string {
+    let label = this.countLabels.get(n);
+    if (label === undefined) {
+      label = String(n);
+      this.countLabels.set(n, label);
+    }
+    return label;
+  }
+
+  /** Groot getal in de huisstijl (donkerblauw op een licht paneel). */
+  private value(text: string, cx: number, cy: number): void {
+    const { ctx } = this;
+    ctx.font = SCORE_FONT;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = UI_STYLE.text.outline;
+    ctx.fillText(text, cx, cy + 2);
+  }
+
+  private bigStar(x: number, y: number, r: number): void {
+    const { ctx } = this;
+    ctx.fillStyle = COLORS.star;
+    ctx.strokeStyle = COLORS.starOutline;
+    ctx.lineWidth = 5;
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    starPath(ctx, x, y, r, r * 0.48);
+    ctx.fill();
+    ctx.stroke();
+  }
+
+  /** Regenboog in de spelkleuren; (x, y) = midden van de onderkant. */
+  private colorRainbow(x: number, y: number, r: number): void {
+    const { ctx } = this;
+    ctx.save();
+    ctx.lineWidth = r * 0.26;
+    for (let i = 0; i < RAINBOW.colors.length; i++) {
+      ctx.strokeStyle = RAINBOW.colors[i];
+      ctx.beginPath();
+      ctx.arc(x, y, r * (1 - i * 0.28), Math.PI, Math.PI * 2);
+      ctx.stroke();
+    }
+    ctx.restore();
   }
 
   /** Kaartje van een kiezer: wit, de gekozen optie met een dikke oranje rand. */

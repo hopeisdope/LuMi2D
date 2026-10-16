@@ -13,12 +13,38 @@ export interface Settings {
   theme: ThemeId;
 }
 
-/** Toestanden van de game. Uitbreidbaar met bv. 'gameOver' in een latere fase. */
+/** Stickers in het rittenboekje: mijlpalen, geen ranglijst. */
+export type StickerId =
+  | 'firstRide'
+  | 'rides10'
+  | 'bestRide10'
+  | 'stars100'
+  | 'firstRainbow'
+  | 'rainbows10'
+  | 'distance50'
+  | 'allWorlds';
+
+/** Persoonlijke voortgang (localStorage), alleen tellers: niets persoonlijks. */
+export interface Progress {
+  /** Ritten van minstens RIDE.minTime seconden. */
+  rides: number;
+  /** Meeste sterren in één rit. */
+  bestStars: number;
+  totalStars: number;
+  /** Totaal gereden afstand in wereld-eenheden. */
+  distance: number;
+  /** Aantal regenboogritten. */
+  rainbows: number;
+  /** Werelden waarin al gereden is. */
+  worlds: ThemeId[];
+  stickers: StickerId[];
+}
+
 /**
- * Toestanden: start ⇄ instellingen, start → kiezen (auto + wereld) → spelen ⇄ pauze.
+ * Toestanden: start ⇄ instellingen, start ⇄ rittenboekje, start → kiezen (auto + wereld) → spelen ⇄ pauze.
  * Een nieuwe ronde begint altijd via het kiesscherm.
  */
-export type GameState = 'ready' | 'settings' | 'choose' | 'playing' | 'paused';
+export type GameState = 'ready' | 'settings' | 'book' | 'choose' | 'playing' | 'paused';
 
 export interface Vec2 {
   x: number;
@@ -189,6 +215,8 @@ export interface WorldState {
   shieldTimer: number;
   /** Aantal verzamelde regenboogkleuren (0–3). */
   rainbowPieces: number;
+  /** Aantal regenboogritten in deze ronde (voor het rittenboekje). */
+  rainbowRides: number;
   /** Resterende tijd (s) van de regenboogrit; 0 = geen rit. */
   rainbowRide: number;
   /** Gekozen wereld: bepaalt welke vriendjes er langs de weg staan. */
@@ -241,7 +269,19 @@ export type ButtonIcon = 'play' | 'restart' | 'check';
 /** Een knop in de canvas-UI. */
 export interface Button {
   icon?: ButtonIcon;
-  id: 'start' | 'pause' | 'resume' | 'restart' | 'settings' | 'toggleObstacles' | 'toggleEnemies' | 'toggleSound' | 'done' | 'go' | 'back';
+  id:
+    | 'start'
+    | 'pause'
+    | 'resume'
+    | 'restart'
+    | 'settings'
+    | 'book'
+    | 'toggleObstacles'
+    | 'toggleEnemies'
+    | 'toggleSound'
+    | 'done'
+    | 'go'
+    | 'back';
   rect: Rect;
   label: string;
 }

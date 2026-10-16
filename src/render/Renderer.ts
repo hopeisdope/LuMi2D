@@ -1,6 +1,6 @@
 import { CAR, CARS } from '../config';
 import { THEMES } from '../themes';
-import type { GameState, Settings, Viewport, WorldState } from '../types';
+import type { GameState, Progress, Settings, Viewport, WorldState } from '../types';
 import type { Layout } from '../ui/Layout';
 import { BackgroundRenderer } from './BackgroundRenderer';
 import { CarRenderer } from './CarRenderer';
@@ -35,7 +35,7 @@ export class Renderer {
     screen.onResize(() => this.background.invalidate());
   }
 
-  render(state: GameState, world: WorldState, layout: Layout, idleTime: number, settings: Settings): void {
+  render(state: GameState, world: WorldState, layout: Layout, idleTime: number, settings: Settings, progress: Progress): void {
     const view: Viewport = this.screen.viewport;
     const theme = THEMES[settings.theme];
     this.screen.beginFrame(theme.grassEdge);
@@ -61,7 +61,7 @@ export class Renderer {
     this.friends.renderGifts(world, carScreenX);
 
     const showJumpHint = state === 'playing' && world.jumpCount === 0 && world.time > JUMP_HINT_DELAY;
-    this.ui.render(state, view, layout, idleTime, world, settings, showJumpHint);
+    this.ui.render(state, view, layout, idleTime, world, settings, progress, showJumpHint);
 
     ctx.restore();
   }
