@@ -205,6 +205,7 @@ export class Game {
     if (e.finished) this.sound.play('finish');
     if (e.parked) this.sound.play('horn');
     if (e.missionDone) this.sound.play('mission');
+    if (e.momentHit) this.sound.play(this.world.theme === 'dino' ? 'hatch' : 'pop');
     if (e.sceneStart || e.scenePass) {
       const kind = this.world.scene.kind;
       if (kind === 'ducks') this.sound.play('quack');

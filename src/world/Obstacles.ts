@@ -1,7 +1,8 @@
-import { BOUNCE, BUMP, CAR_HITBOX, COACH, ENEMIES, OBSTACLES, PLATFORMS, RAINBOW, RIDE, WORLD } from '../config';
+import { BOUNCE, BUMP, CAR_HITBOX, COACH, ENEMIES, MOMENTS, OBSTACLES, PLATFORMS, RAINBOW, RIDE, WORLD } from '../config';
 import type { Obstacle, ObstacleKind, WorldState } from '../types';
 import { canSpawnRainbowPiece, spawnPlatformWithBoost, spawnRainbowPiece } from './Collectibles';
 import { spawnCoach } from './Friends';
+import { spawnMoment } from './Moments';
 import { bounceDistance, spawnPad } from './Pads';
 import { trySpawnScene } from './Scenes';
 
@@ -112,6 +113,12 @@ function spawnAhead(world: WorldState): void {
     if (roll >= PLATFORMS.chance + RAINBOW.chance && roll < PLATFORMS.chance + RAINBOW.chance + BOUNCE.chance && spawnPad(world, x0)) {
       // Na een springkussen: ruimte voor de lange veersprong en daarna de gewone tussenruimte.
       world.nextObstacleAt = x0 + bounceDistance() + gap;
+      continue;
+    }
+    const momentFrom = PLATFORMS.chance + RAINBOW.chance + BOUNCE.chance;
+    if (roll >= momentFrom && roll < momentFrom + MOMENTS.chance && spawnMoment(world, x0)) {
+      // Spelmoment van de wereld (geen obstakel): gewone tussenruimte tot het volgende deel.
+      world.nextObstacleAt = x0 + gap;
       continue;
     }
     if (!canObstacle && !canEnemy) {

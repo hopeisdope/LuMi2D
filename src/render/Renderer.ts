@@ -8,6 +8,7 @@ import { EffectsRenderer } from './EffectsRenderer';
 import { FinishRenderer } from './FinishRenderer';
 import { FriendRenderer } from './FriendRenderer';
 import { ItemsRenderer } from './ItemsRenderer';
+import { MomentRenderer } from './MomentRenderer';
 import { ObstacleRenderer } from './ObstacleRenderer';
 import { SceneRenderer } from './SceneRenderer';
 import type { Screen } from './Screen';
@@ -26,6 +27,7 @@ export class Renderer {
   private readonly friends: FriendRenderer;
   private readonly finish: FinishRenderer;
   private readonly scenes: SceneRenderer;
+  private readonly moments: MomentRenderer;
   private readonly ui: UIRenderer;
 
   constructor(private readonly screen: Screen) {
@@ -37,6 +39,7 @@ export class Renderer {
     this.friends = new FriendRenderer(screen.ctx);
     this.finish = new FinishRenderer(screen.ctx);
     this.scenes = new SceneRenderer(screen.ctx);
+    this.moments = new MomentRenderer(screen.ctx);
     this.ui = new UIRenderer(screen.ctx, this.obstacles);
     screen.onResize(() => this.background.invalidate());
   }
@@ -71,6 +74,7 @@ export class Renderer {
     this.items.renderPads(world, carScreenX, view.width);
     this.obstacles.render(world, carScreenX, view.width);
     this.scenes.renderMid(world, carScreenX, view.width);
+    this.moments.render(world, carScreenX, view.width);
     this.items.renderCollectibles(world, carScreenX, view.width);
     this.friends.renderPointers(world, carScreenX);
     this.effects.renderBehind(world, carScreenX);

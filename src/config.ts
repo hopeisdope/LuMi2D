@@ -142,6 +142,27 @@ export const BOUNCE_PHYSICS = {
 } as const;
 
 /**
+ * Eén eigen spelmoment per wereld, altijd door/over te springen: paardenbloempluis (weide), een ei dat uitkomt
+ * (dino), zwevende bellen (ruimte) en een suikerspinwolkje (zoetroze). Raken geeft een verrassing en een ster;
+ * eronderdoor of erlangs rijden doet niets.
+ */
+export const MOMENTS = {
+  poolSize: 3,
+  /** Kans per nieuw parcoursdeel. */
+  chance: 0.12,
+  /**
+   * Hoogte van het midden boven de weg: alleen met een sprong te raken. Het hele autootje telt mee, dus op deze
+   * hoogte raakt elke sprong die er langskomt (vanaf ~57 hoog, ook op de top van de sprong op 190).
+   */
+  height: { meadow: 175, dino: 0, space: 185, candy: 180 },
+  radius: 30,
+  /** Ei in de berm: de auto moet in de lucht zijn binnen deze afstand van het nestje. */
+  eggReach: 100,
+  /** Duur (s) van de verrassing na het raken. */
+  effectTime: 1.4,
+} as const;
+
+/**
  * Verrassingstaferelen: eendjes die oversteken (de auto wacht even), een regenboogtunnel en een kudde schaapjes
  * die opzij huppelt. Altijd met hetzelfde bordje vooraf en een stuk weg zonder obstakels.
  */

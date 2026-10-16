@@ -22,7 +22,9 @@ export type SoundName =
   | 'mission'
   | 'boing'
   | 'quack'
-  | 'tunnel';
+  | 'tunnel'
+  | 'pop'
+  | 'hatch';
 
 type Wave = OscillatorType;
 
@@ -121,6 +123,17 @@ export class Sound {
       case 'tunnel':
         // Glinsterend door de regenboogtunnel.
         this.arpeggio(t, [1047, 1319, 1568, 2093, 1568, 2093], 0.05, 'sine', 0.14);
+        break;
+      case 'pop':
+        // Plop: bel, pluis of suikerspin geraakt.
+        this.tone(t, 900, 0.07, 'sine', 0.25, 300);
+        this.arpeggio(t + 0.06, [1319, 1760], 0.06, 'triangle', 0.15);
+        break;
+      case 'hatch':
+        // Krak-krak, en dan een blij piepje van de babydino.
+        this.tone(t, 260, 0.04, 'square', 0.12);
+        this.tone(t + 0.08, 240, 0.04, 'square', 0.12);
+        this.tone(t + 0.2, 880, 0.15, 'sine', 0.2, 1320);
         break;
       case 'hup':
         // Vriendje doet een sprongetje voor: zacht en hoog, anders dan de sprong van de auto.

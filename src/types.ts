@@ -149,6 +149,16 @@ export interface Pad {
   usedTime: number;
 }
 
+/** Spelmoment van een wereld: iets waar je doorheen of overheen springt voor een verrassing. */
+export interface Moment {
+  active: boolean;
+  /** Wereldpositie van het midden. */
+  x: number;
+  y: number;
+  /** Wereldtijd waarop de auto het raakte; -1 = nog niet. */
+  hitTime: number;
+}
+
 /** Kort verrassingstafereel langs de route, altijd aangekondigd met een bordje. */
 export type SceneKind = 'ducks' | 'tunnel' | 'herd';
 
@@ -265,6 +275,8 @@ export interface WorldState {
   collectibles: Collectible[];
   /** Vaste pool met springkussens. */
   pads: Pad[];
+  /** Vaste pool met spelmomenten van de gekozen wereld. */
+  moments: Moment[];
   /** Het huidige (of laatste) verrassingstafereel; er is er hooguit één tegelijk. */
   scene: Scene;
   /** Afstand waarop het volgende tafereel mag beginnen. */
@@ -335,6 +347,8 @@ export interface WorldEvents {
   cleared: boolean;
   /** Op een springkussen omhoog geveerd. */
   bounced: boolean;
+  /** Een spelmoment van de wereld geraakt (pluis, ei, bel, suikerspin). */
+  momentHit: boolean;
   /** Een verrassingstafereel begint (eendjes, kudde) of de auto rijdt door de regenboogtunnel. */
   sceneStart: boolean;
   scenePass: boolean;

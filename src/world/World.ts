@@ -3,6 +3,7 @@ import type { WorldState } from '../types';
 import { createCar, floatCar, requestJump, resetCar, updateCar } from './Car';
 import { createCollectiblePool, createPlatformPool, resetCollectibles, updateCollectibles } from './Collectibles';
 import { createObstaclePool, resetObstacles, updateObstacles } from './Obstacles';
+import { createMomentPool, resetMoments, updateMoments } from './Moments';
 import { createPadPool, resetPads, updatePads } from './Pads';
 import { resetScene, updateScene } from './Scenes';
 import { createFriendPool, reactFriends, resetFriends, updateFriends } from './Friends';
@@ -30,6 +31,7 @@ export function createWorld(seed: number = randomSeed()): WorldState {
     platforms: createPlatformPool(),
     collectibles: createCollectiblePool(),
     pads: createPadPool(),
+    moments: createMomentPool(),
     scene: { active: false, kind: 'ducks', x: 0, triggerTime: -1, passTime: -1 },
     nextSceneAt: SCENES.first,
     boostTimer: 0,
@@ -68,6 +70,7 @@ export function createWorld(seed: number = randomSeed()): WorldState {
       friendDemo: false,
       cleared: false,
       bounced: false,
+      momentHit: false,
       sceneStart: false,
       scenePass: false,
       friendJump: false,
@@ -104,6 +107,7 @@ export function resetWorld(world: WorldState, seed: number = randomSeed()): void
   resetObstacles(world);
   resetCollectibles(world);
   resetPads(world);
+  resetMoments(world);
   resetScene(world);
   resetFriends(world);
 }
@@ -127,6 +131,7 @@ function clearEvents(world: WorldState): void {
   world.events.friendDemo = false;
   world.events.cleared = false;
   world.events.bounced = false;
+  world.events.momentHit = false;
   world.events.sceneStart = false;
   world.events.scenePass = false;
   world.events.friendJump = false;
@@ -186,6 +191,7 @@ export function updateWorld(world: WorldState, dt: number): void {
   world.distance = world.car.x;
 
   updatePads(world);
+  updateMoments(world);
   updateObstacles(world, dt);
   updateCollectibles(world, dt);
   updateFriends(world);
