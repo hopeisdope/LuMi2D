@@ -24,12 +24,14 @@ npm install && npm run dev   # Vite dev server on port 5173 (--host, reachable f
 npm run typecheck && npm run build   # no test framework yet; typecheck + production build are the checks
 ```
 
-Test hosting: GitHub Pages via `.github/workflows/pages.yml` (builds and deploys on every push to `main`).
-Site: `https://hopeisdope.github.io/LuMi2D/` (Vite `base: './'` keeps all paths relative for this subpath).
+Test hosting: Docker on the owner's own server (Docker VM in Proxmox, LAN only): `Dockerfile` (Node build → nginx),
+`docker/nginx.conf`, `docker-compose.yml`. Update there with `git pull && docker compose up -d --build`; default port 8080.
+On plain `http://<lan-ip>` there is no service worker (not a secure context): the game works, offline mode doesn't.
+GitHub Pages workflow (`.github/workflows/pages.yml`) is kept but manual-only (needs a public repo or GitHub Pro).
 
 ## Git workflow
 - Work on a feature branch, then always merge it into `main` when the work is done and checks pass
-  (open a PR and merge it; merge commit, no squash). No need to ask first — `main` is what GitHub Pages publishes.
+  (open a PR and merge it; merge commit, no squash). No need to ask first — the server builds from `main`.
 - After merging, sync the local `main`.
 
 ## Conventions

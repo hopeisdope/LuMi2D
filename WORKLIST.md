@@ -5,7 +5,7 @@ Read at the start of every session; update when something is done or added.
 ## Now
 
 - [ ] Tune jump height/airtime and obstacle sizes/gaps (`JUMP`, `OBSTACLES` in `config.ts`) with children on a real iPad — jump window widened to ~0.7 s, check if that feels right
-- [ ] Enable GitHub Pages (Settings → Pages → Source: GitHub Actions; repo must be public or on GitHub Pro) and test via https://hopeisdope.github.io/LuMi2D/
+- [ ] Start the container on the Docker VM (`docker compose up -d --build`) and play via `http://<server-ip>:8080` on the iPad
 - [ ] Test on a real iPad and iPad mini in Safari: smoothness (headless Chromium without GPU can't measure this), touch, sound, install via "Zet op beginscherm", offline
 
 ## Next
@@ -14,9 +14,12 @@ Read at the start of every session; update when something is done or added.
 
 ## Open questions
 
+- Offline mode on the LAN needs HTTPS (reverse proxy with a certificate); is that wanted later?
+
 
 ## Done
 
+- [x] Self-hosting with Docker (Node build → nginx, compose file, cache headers, healthcheck); GitHub Pages workflow made manual-only
 - [x] Hosting switched from Netlify to GitHub Pages (workflow; tested service worker, manifest and offline under the `/LuMi2D/` subpath)
 - [x] Choose screen before every new round (car + world); no more choosing on the start/pause/settings screens or while driving
 - [x] Part 4: friends along the road per world (wave and cheer, ~1 in 3 gives a star or a surprise with confetti and 3 stars)

@@ -1,9 +1,8 @@
-# Bouwt LuMi2d en publiceert het op GitHub Pages bij elke push naar main (of handmatig).
+# Bouwt LuMi2d en publiceert het op GitHub Pages. Alleen handmatig te starten (Actions → Run workflow):
+# GitHub Pages werkt pas als de repo publiek is (of met GitHub Pro). De game draait nu in Docker op de eigen server.
 name: Deploy naar GitHub Pages
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:

@@ -24,7 +24,7 @@ Concise state for reloading into a fresh session. Details are in `WORKLIST.md`.
 - Part 4: `world/Friends.ts` (own spawner, independent of the course); kinds per world in `THEMES[*].friends`, drawn by `FriendRenderer` (parametric critters). `world.theme` is set from settings in `Game.applySettings()`.
 - `world.events.jumped/landed/bumped/scored/boosted/rainbowPiece/rainbowRide` are set per frame — the hook for sound/feedback later.
 - `createWorld(seed)` / `resetWorld(world, seed)` take an optional seed for reproducible tests.
-- Hosting: GitHub Pages via `.github/workflows/pages.yml` (Netlify removed: free credits ran out). Pages must be enabled once in the repo settings; the repo is private, so it needs to be public or on GitHub Pro.
+- Hosting: Docker on the owner's Docker VM in Proxmox (LAN only): `Dockerfile`, `docker/nginx.conf`, `docker-compose.yml`. Netlify removed (credits), GitHub Pages workflow manual-only (private repo). Tested: image builds, healthy, correct cache headers, game plays via LAN IP; no service worker on plain http (expected).
 - Typecheck and build pass; tested in Chromium (Playwright) with iPad viewports, not yet on a real device.
 
 - Flow: start (`ready`) → kiesscherm (`choose`: auto + wereld, Rijden!) → `playing` ⇄ `paused`; Opnieuw in de pauze gaat terug naar `choose`. Auto/wereld kiezen kan alleen op het kiesscherm (`Game.choose` checkt de state).
