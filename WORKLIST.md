@@ -9,7 +9,7 @@ Read at the start of every session; update when something is done or added.
 
 ## Next
 
-- [ ] Gameplay ideas (owner's list, 2026-10-16), built in order: 3.1 one moment per world. Art in code first; ChatGPT prompts afterwards
+- [ ] Replace the code-drawn new visuals (finish/garage, ducks, sheep, bounce pad, world moments, reaction bubbles) with ChatGPT sprites if wanted (prompts given 2026-10-16)
 - [ ] Check the new sprites on a real iPad (sharpness, size of friends next to the car)
 - [ ] Configurable auto-movement, difficulty and increasing speed
 
@@ -20,6 +20,7 @@ Read at the start of every session; update when something is done or added.
 
 ## Done
 
+- [x] Gameplay 3.1 one moment per world, all hit by jumping (the whole car counts, so any jump past it works): meadow dandelion fluff blows away, dino egg in the berm hatches a waving baby dino, space bubbles pop, candy cotton-candy cloud rains sweets; each gives a star. Nothing happens when driving past without jumping
 - [x] Gameplay 2.2 surprise scenes (2–3 per ride, each announced by the same kind of roadside sign, on obstacle-free road): ducks crossing (the car stops and waits), rainbow tunnel (sparkles + a star), a herd of sheep hopping off the road
 - [x] Gameplay 2.3 bounce pads: mint trampoline with springs and bouncing up-arrows; driving or landing on it gives a soft 260-high bounce with 'boing' and three stars along the arc; course leaves room for the long bounce. Mission card moved to the bottom-left (the high bounce reached the top-left card)
 - [x] Gameplay 2.1 one mission per ride (5 stars / jump over 3 / 1 rainbow piece / jump next to 2 friends / 1 turbo; only feasible ones, never the same twice): big card at the start that slides to the top-left with progress dots, confetti + sound when done, shown in the summary; missions counted in the book (+ sticker for 5). Jumping next to a friend now always makes it dance
