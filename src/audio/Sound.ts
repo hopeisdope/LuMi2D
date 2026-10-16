@@ -20,7 +20,9 @@ export type SoundName =
   | 'finish'
   | 'horn'
   | 'mission'
-  | 'boing';
+  | 'boing'
+  | 'quack'
+  | 'tunnel';
 
 type Wave = OscillatorType;
 
@@ -110,6 +112,15 @@ export class Sound {
         // Springkussen: veerkrachtig omhoog glijden.
         this.tone(t, 180, 0.32, 'sine', 0.3, 900);
         this.tone(t + 0.02, 360, 0.18, 'triangle', 0.1, 1400);
+        break;
+      case 'quack':
+        // Kwak-kwak: kort en neuzig, toonhoogte zakt.
+        this.tone(t, 520, 0.09, 'square', 0.12, 380);
+        this.tone(t + 0.14, 560, 0.1, 'square', 0.12, 400);
+        break;
+      case 'tunnel':
+        // Glinsterend door de regenboogtunnel.
+        this.arpeggio(t, [1047, 1319, 1568, 2093, 1568, 2093], 0.05, 'sine', 0.14);
         break;
       case 'hup':
         // Vriendje doet een sprongetje voor: zacht en hoog, anders dan de sprong van de auto.

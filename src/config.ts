@@ -141,6 +141,33 @@ export const BOUNCE_PHYSICS = {
   airTime: (2 * Math.sqrt(2 * JUMP_PHYSICS.gravity * BOUNCE.launchHeight)) / JUMP_PHYSICS.gravity,
 } as const;
 
+/**
+ * Verrassingstaferelen: eendjes die oversteken (de auto wacht even), een regenboogtunnel en een kudde schaapjes
+ * die opzij huppelt. Altijd met hetzelfde bordje vooraf en een stuk weg zonder obstakels.
+ */
+export const SCENES = {
+  /** Eerste tafereel na zoveel afstand, daarna steeds tussen minGap en maxGap verder. */
+  first: 5000,
+  minGap: 6000,
+  maxGap: 8500,
+  /** Stuk weg zonder obstakels vanaf het bordje. */
+  length: 1100,
+  /** Het tafereel staat zo ver na het bordje. */
+  eventOffset: 650,
+  ducks: {
+    /** Afstand van de auto tot de oversteekplek waarop de eendjes gaan lopen. */
+    triggerDistance: 900,
+    /** Duur (s) van de oversteek van één eendje; de kuikentjes lopen iets later. */
+    crossTime: 3.4,
+    stagger: 0.3,
+    count: 4,
+    /** De voorkant van de auto stopt zo ver vóór de oversteekplek. */
+    stopBefore: 150,
+  },
+  tunnel: { halfWidth: 160, height: 250 },
+  herd: { count: 4, spacing: 58, triggerDistance: 560, hopTime: 0.5, stagger: 0.15, berm: 10 },
+} as const;
+
 /** Turbo: tijdelijk sneller rijden en obstakels zonder hobbel wegknallen. */
 export const BOOST = {
   duration: 4,

@@ -1,9 +1,10 @@
-import { BOOST, ENEMIES, FRIENDS, MISSION, OBSTACLES, RAINBOW, RIDE, SPEED, WORLD } from '../config';
+import { BOOST, ENEMIES, FRIENDS, MISSION, OBSTACLES, RAINBOW, RIDE, SCENES, SPEED, WORLD } from '../config';
 import type { WorldState } from '../types';
 import { createCar, floatCar, requestJump, resetCar, updateCar } from './Car';
 import { createCollectiblePool, createPlatformPool, resetCollectibles, updateCollectibles } from './Collectibles';
 import { createObstaclePool, resetObstacles, updateObstacles } from './Obstacles';
 import { createPadPool, resetPads, updatePads } from './Pads';
+import { resetScene, updateScene } from './Scenes';
 import { createFriendPool, reactFriends, resetFriends, updateFriends } from './Friends';
 import { startMission, updateMission } from './Mission';
 import { createRandom, randomSeed } from './random';
@@ -29,6 +30,8 @@ export function createWorld(seed: number = randomSeed()): WorldState {
     platforms: createPlatformPool(),
     collectibles: createCollectiblePool(),
     pads: createPadPool(),
+    scene: { active: false, kind: 'ducks', x: 0, triggerTime: -1, passTime: -1 },
+    nextSceneAt: SCENES.first,
     boostTimer: 0,
     shieldTimer: 0,
     rainbowPieces: 0,
@@ -65,6 +68,8 @@ export function createWorld(seed: number = randomSeed()): WorldState {
       friendDemo: false,
       cleared: false,
       bounced: false,
+      sceneStart: false,
+      scenePass: false,
       friendJump: false,
       missionDone: false,
       finished: false,
@@ -99,6 +104,7 @@ export function resetWorld(world: WorldState, seed: number = randomSeed()): void
   resetObstacles(world);
   resetCollectibles(world);
   resetPads(world);
+  resetScene(world);
   resetFriends(world);
 }
 
@@ -121,6 +127,8 @@ function clearEvents(world: WorldState): void {
   world.events.friendDemo = false;
   world.events.cleared = false;
   world.events.bounced = false;
+  world.events.sceneStart = false;
+  world.events.scenePass = false;
   world.events.friendJump = false;
   world.events.missionDone = false;
   world.events.finished = false;
@@ -148,6 +156,8 @@ export function updateWorld(world: WorldState, dt: number): void {
     world.speed = Math.max(world.targetSpeed, world.speed - accel * dt);
   }
   if (world.ridePhase !== 'riding') brakeToGarage(world);
+  // Verrassing: bv. wachten op overstekende eendjes (remt alleen, versnelt nooit).
+  updateScene(world);
 
   if (world.rainbowRide > 0) {
     floatCar(world.car, world.speed, dt, WORLD.groundY - RAINBOW.rideHeight, world.time);

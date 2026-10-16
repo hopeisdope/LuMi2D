@@ -205,6 +205,12 @@ export class Game {
     if (e.finished) this.sound.play('finish');
     if (e.parked) this.sound.play('horn');
     if (e.missionDone) this.sound.play('mission');
+    if (e.sceneStart || e.scenePass) {
+      const kind = this.world.scene.kind;
+      if (kind === 'ducks') this.sound.play('quack');
+      else if (kind === 'herd') this.sound.play('hup');
+      else this.sound.play('tunnel');
+    }
   }
 
   private readonly render = (): void => {
