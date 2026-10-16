@@ -21,7 +21,10 @@ export type IconName =
   | 'thumb'
   | 'exclaim'
   | 'note'
-  | 'arrowDown';
+  | 'arrowDown'
+  | 'book'
+  | 'flag'
+  | 'rainbow';
 
 export function drawIcon(
   ctx: CanvasRenderingContext2D,
@@ -219,6 +222,44 @@ export function drawIcon(
       ctx.beginPath();
       ctx.arc(cx, cy + s * 0.7, s * 0.19, 0, Math.PI * 2);
       ctx.fill();
+      break;
+    case 'book':
+      // Open boekje: twee bladzijden met een rug in het midden.
+      ctx.beginPath();
+      ctx.moveTo(cx - s * 0.05, cy - s * 0.55);
+      ctx.quadraticCurveTo(cx - s * 0.45, cy - s * 0.8, cx - s * 0.9, cy - s * 0.6);
+      ctx.lineTo(cx - s * 0.9, cy + s * 0.6);
+      ctx.quadraticCurveTo(cx - s * 0.45, cy + s * 0.4, cx - s * 0.05, cy + s * 0.65);
+      ctx.closePath();
+      ctx.moveTo(cx + s * 0.05, cy - s * 0.55);
+      ctx.quadraticCurveTo(cx + s * 0.45, cy - s * 0.8, cx + s * 0.9, cy - s * 0.6);
+      ctx.lineTo(cx + s * 0.9, cy + s * 0.6);
+      ctx.quadraticCurveTo(cx + s * 0.45, cy + s * 0.4, cx + s * 0.05, cy + s * 0.65);
+      ctx.closePath();
+      ctx.fill();
+      break;
+    case 'flag':
+      // Vlaggetje (finish/rit) aan een stok.
+      ctx.lineWidth = s * 0.16;
+      ctx.beginPath();
+      ctx.moveTo(cx - s * 0.55, cy + s * 0.85);
+      ctx.lineTo(cx - s * 0.55, cy - s * 0.8);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(cx - s * 0.5, cy - s * 0.8);
+      ctx.quadraticCurveTo(cx + s * 0.1, cy - s * 0.95, cx + s * 0.8, cy - s * 0.6);
+      ctx.lineTo(cx + s * 0.8, cy + s * 0.05);
+      ctx.quadraticCurveTo(cx + s * 0.1, cy - s * 0.3, cx - s * 0.5, cy - s * 0.1);
+      ctx.closePath();
+      ctx.fill();
+      break;
+    case 'rainbow':
+      ctx.lineWidth = s * 0.2;
+      for (let i = 0; i < 3; i++) {
+        ctx.beginPath();
+        ctx.arc(cx, cy + s * 0.45, s * (0.85 - i * 0.28), Math.PI, Math.PI * 2);
+        ctx.stroke();
+      }
       break;
     case 'arrowDown':
       ctx.lineWidth = s * 0.32;

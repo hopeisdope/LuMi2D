@@ -30,6 +30,7 @@ export function createWorld(seed: number = randomSeed()): WorldState {
     shieldTimer: 0,
     rainbowPieces: 0,
     rainbowRide: 0,
+    rainbowRides: 0,
     theme: 'meadow',
     friends: createFriendPool(),
     nextFriendAt: FRIENDS.firstDistance,
@@ -70,6 +71,7 @@ export function resetWorld(world: WorldState, seed: number = randomSeed()): void
   world.cleanJumps = 0;
   world.lastJumpTime = -1;
   world.lastLandTime = -1;
+  world.rainbowRides = 0;
   world.random = createRandom(seed);
   clearEvents(world);
   resetCar(world.car);
@@ -141,6 +143,7 @@ export function updateWorld(world: WorldState, dt: number): void {
 
   // Vriendjes in beeld reageren op wat het kind doet.
   const e = world.events;
+  if (e.rainbowRide) world.rainbowRides++;
   if (e.rainbowPiece || e.rainbowRide || e.boosted) reactFriends(world, 'dance');
   else if (e.bumped) reactFriends(world, 'surprised');
   else if (e.scored) reactFriends(world, 'thumbs');

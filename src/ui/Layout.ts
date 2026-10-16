@@ -23,6 +23,8 @@ export class Layout {
   readonly resume: Button = { id: 'resume', label: 'Verder', icon: 'play', rect: rect() };
   readonly restart: Button = { id: 'restart', label: 'Opnieuw', icon: 'restart', rect: rect() };
   readonly settings: Button = { id: 'settings', label: 'Instellingen', rect: rect() };
+  /** Startscherm: opent het rittenboekje. */
+  readonly book: Button = { id: 'book', label: 'Rittenboekje', rect: rect() };
   readonly toggleObstacles: Button = { id: 'toggleObstacles', label: 'Pionnen & stenen', rect: rect() };
   readonly toggleEnemies: Button = { id: 'toggleEnemies', label: 'Egels', rect: rect() };
   readonly toggleSound: Button = { id: 'toggleSound', label: 'Geluid', rect: rect() };
@@ -45,6 +47,7 @@ export class Layout {
     // Startscherm: logo, uitnodiging, startknop; tandwiel rechtsboven.
     set(this.start.rect, cx - bw / 2, 250, bw, bh);
     set(this.settings.rect, view.width - size - margin, margin, size, size);
+    set(this.book.rect, margin, margin, size, size);
 
     // Kiesscherm: auto's, werelden en een grote Rijden!-knop; terugknop linksboven.
     placeRow(this.carCards, cx, 100);
