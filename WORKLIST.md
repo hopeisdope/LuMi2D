@@ -9,6 +9,7 @@ Read at the start of every session; update when something is done or added.
 
 ## Next
 
+- [ ] Gameplay ideas (owner's list, 2026-10-16), built in order: 1.2 friend demonstrates jumps, 1.3 ride book; 2.1 mission per ride, 2.2 surprise scenes, 2.3 bounce pads, 2.4 finish (rides of ~75 s); 3.1 one moment per world. Art in code first; ChatGPT prompts afterwards
 - [ ] Check the new sprites on a real iPad (sharpness, size of friends next to the car)
 - [ ] Configurable auto-movement, difficulty and increasing speed
 
@@ -19,6 +20,7 @@ Read at the start of every session; update when something is done or added.
 
 ## Done
 
+- [x] Gameplay 1.1 action feedback: jump lines, landing dust, dizzy stars after a bump, sparkle on collect; friends in view react (thumbs on a star, surprised on a bump, dance on rainbow/turbo)
 - [x] Review LUMI-003 (DOM/screen-reader UI, re-enable zoom) declined on purpose; reasoning in `CLAUDE.md` → Conventions
 - [x] nginx 1.27 (unsupported) → 1.30 stable; Dependabot for base images and Actions; update command pulls base images (review LUMI-004)
 - [x] Service worker caches the page only when it is successful HTML; regression test `scripts/test-offline.mjs` (review LUMI-001)

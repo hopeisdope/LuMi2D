@@ -1,3 +1,5 @@
+import { roundRectPath } from './shapes';
+
 /**
  * Eenvoudige vectoriconen voor kinderen die nog niet kunnen lezen.
  * Elk icoon wordt gecentreerd op (cx, cy) getekend binnen een vierkant van `size`.
@@ -15,7 +17,10 @@ export type IconName =
   | 'hand'
   | 'back'
   | 'car'
-  | 'world';
+  | 'world'
+  | 'thumb'
+  | 'exclaim'
+  | 'note';
 
 export function drawIcon(
   ctx: CanvasRenderingContext2D,
@@ -190,6 +195,43 @@ export function drawIcon(
       ctx.fill();
       break;
     }
+    case 'thumb':
+      // Duim omhoog: handpalm met een dikke duim erboven en drie gebogen vingers (losse blokjes = vuist).
+      ctx.beginPath();
+      roundRectPath(ctx, cx - s * 0.7, cy - s * 0.15, s * 0.6, s * 0.95, s * 0.18);
+      ctx.fill();
+      ctx.beginPath();
+      roundRectPath(ctx, cx - s * 0.62, cy - s * 0.9, s * 0.42, s * 0.95, s * 0.21);
+      ctx.fill();
+      for (let i = 0; i < 3; i++) {
+        ctx.beginPath();
+        roundRectPath(ctx, cx - s * 0.2, cy - s * 0.12 + i * s * 0.32, s * 0.85, s * 0.26, s * 0.13);
+        ctx.fill();
+      }
+      break;
+    case 'exclaim':
+      ctx.lineWidth = s * 0.34;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - s * 0.75);
+      ctx.lineTo(cx, cy + s * 0.25);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(cx, cy + s * 0.7, s * 0.19, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    case 'note':
+      // Muzieknootje met vlaggetje.
+      ctx.beginPath();
+      ctx.ellipse(cx - s * 0.25, cy + s * 0.5, s * 0.3, s * 0.22, -0.4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.lineWidth = s * 0.14;
+      ctx.beginPath();
+      ctx.moveTo(cx + s * 0.02, cy + s * 0.45);
+      ctx.lineTo(cx + s * 0.02, cy - s * 0.8);
+      ctx.quadraticCurveTo(cx + s * 0.6, cy - s * 0.55, cx + s * 0.55, cy - s * 0.1);
+      ctx.stroke();
+      break;
   }
   ctx.restore();
 }
+

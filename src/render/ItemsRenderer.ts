@@ -1,4 +1,4 @@
-import { COLLECTIBLES, COLORS, PLATFORMS, RAINBOW } from '../config';
+import { COLLECTIBLES, COLORS, FEEDBACK, PLATFORMS, RAINBOW } from '../config';
 import type { Collectible, WorldState } from '../types';
 import { roundRectPath, starPath } from './shapes';
 
@@ -49,6 +49,7 @@ export class ItemsRenderer {
       let alpha = 1;
       let lift = 0;
       if (c.collected) {
+        this.sparkle(sx, c.y, (world.time - c.collectedTime) / FEEDBACK.sparkleTime);
         const t = (world.time - c.collectedTime) / COLLECT_TIME;
         if (t >= 1) continue;
         scale = 1 + t * 0.8;
@@ -59,6 +60,23 @@ export class ItemsRenderer {
       const bob = c.collected ? 0 : Math.sin(world.time * 4 + c.x * 0.01) * 5;
       this.drawCollectible(c, sx, c.y + bob - lift, scale, alpha, world.time);
     }
+  }
+
+  /** Glinsterplof: een ring sterretjes die uit elkaar spat (t van 0 tot 1). */
+  private sparkle(x: number, y: number, t: number): void {
+    if (t >= 1) return;
+    const { ctx } = this;
+    ctx.save();
+    ctx.globalAlpha = 1 - t;
+    ctx.fillStyle = '#ffffff';
+    const r = 14 + t * 42;
+    for (let i = 0; i < 7; i++) {
+      const a = (i * Math.PI * 2) / 7 + t;
+      ctx.beginPath();
+      starPath(ctx, x + Math.cos(a) * r, y + Math.sin(a) * r, 7 * (1 - t * 0.5), 3);
+      ctx.fill();
+    }
+    ctx.restore();
   }
 
   private drawCollectible(c: Collectible, x: number, y: number, scale: number, alpha: number, time: number): void {

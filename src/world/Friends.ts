@@ -1,11 +1,11 @@
-import { FRIENDS, OBSTACLES } from '../config';
+import { FEEDBACK, FRIENDS, OBSTACLES } from '../config';
 import { THEMES } from '../themes';
-import type { Friend, WorldState } from '../types';
+import type { Friend, FriendReaction, WorldState } from '../types';
 
 export function createFriendPool(): Friend[] {
   const pool: Friend[] = [];
   for (let i = 0; i < FRIENDS.poolSize; i++) {
-    pool.push({ active: false, kind: 'bunny', x: 0, gift: 'none', cheerTime: -1, giftTime: -1 });
+    pool.push({ active: false, kind: 'bunny', x: 0, gift: 'none', cheerTime: -1, giftTime: -1, reaction: 'none', reactionTime: -1 });
   }
   return pool;
 }
@@ -29,6 +29,8 @@ function spawnFriend(world: WorldState, x: number): void {
       giftRoll < FRIENDS.giftChance * FRIENDS.surpriseShare ? 'surprise' : giftRoll < FRIENDS.giftChance ? 'star' : 'none';
     f.cheerTime = -1;
     f.giftTime = -1;
+    f.reaction = 'none';
+    f.reactionTime = -1;
     return;
   }
 }
@@ -62,5 +64,22 @@ export function updateFriends(world: WorldState): void {
       world.lastScoreTime = world.time;
       world.events.friendGift = true;
     }
+  }
+}
+
+/** Volgorde bij gelijktijdige reacties: een dansje gaat voor verbazing, verbazing voor een duimpje. */
+const PRIORITY: Readonly<Record<FriendReaction, number>> = { none: 0, thumbs: 1, surprised: 2, dance: 3 };
+
+/** Vriendjes in beeld reageren op een actie; een lopende reactie wordt alleen door een belangrijkere vervangen. */
+export function reactFriends(world: WorldState, reaction: FriendReaction): void {
+  const car = world.car;
+  const pool = world.friends;
+  for (let i = 0; i < pool.length; i++) {
+    const f = pool[i];
+    if (!f.active || f.x < car.x - FEEDBACK.reactBehind || f.x > car.x + FEEDBACK.reactAhead) continue;
+    const running = f.reactionTime >= 0 && world.time - f.reactionTime < FEEDBACK.reactionTime;
+    if (running && PRIORITY[f.reaction] > PRIORITY[reaction]) continue;
+    f.reaction = reaction;
+    f.reactionTime = world.time;
   }
 }
