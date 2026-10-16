@@ -31,6 +31,13 @@ Concise state for reloading into a fresh session. Details are in `WORKLIST.md`.
   - Rides end: `RIDE.length` 24 000 units, `world.ridePhase` riding → finishing → parked, `FinishRenderer`
     (arch, garage), state `finished` with `RideSummary` ("Nog een keer" / "Kiezen"); progress road at the bottom.
   - Missions: `src/world/Mission.ts`, one per ride, card bottom-left (top-left collided with high bounces).
+  - Endless mode (setting `endless`, 4th toggle, default off): `world.finishX = Infinity`, so no finish/garage and
+    no progress road; after a mission succeeds a new one starts after `MISSION.nextDelay`. Stop via pause → Opnieuw
+    (the ride goes into the book; `world.missionsDone` counts every mission).
+  - Rainbow tunnel: back pass draws the whole arch, front pass the right half with its foot in the grass in front of
+    the road (same trick as the finish arch), so the car drives under it.
+  - Obstacles ~30% bigger (`OBSTACLES.kinds`, hedgehog in `ENEMIES.kinds`) with a thick navy outline
+    (`COLORS.obstacleOutline`), lighter rock; `hitboxInset` 13 keeps the jump about as forgiving as before.
   - Sprites for garage, pad, egg, cotton candy, ducks and sheep (after PR #32); drawn code stays as fallback.
   - Bounce pads (`world/Pads.ts`, 260 high), surprise scenes (`world/Scenes.ts`: ducks/tunnel/herd with a sign),
     world moments (`world/Moments.ts`: fluff/egg/bubble/cotton candy; the whole car height counts as hit).

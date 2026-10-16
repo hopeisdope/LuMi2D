@@ -25,6 +25,8 @@ export function createWorld(seed: number = randomSeed()): WorldState {
     lastScoreTime: -1,
     obstaclesEnabled: OBSTACLES.enabled,
     enemiesEnabled: ENEMIES.enabled,
+    endless: false,
+    missionsDone: 0,
     obstacles: createObstaclePool(),
     nextObstacleAt: OBSTACLES.firstDistance,
     random: createRandom(seed),
@@ -44,7 +46,7 @@ export function createWorld(seed: number = randomSeed()): WorldState {
     finishTime: -1,
     parkedTime: -1,
     finishFriends: false,
-    mission: { kind: 'stars', target: MISSION.targets.stars, count: 0, doneTime: -1 },
+    mission: { kind: 'stars', target: MISSION.targets.stars, count: 0, doneTime: -1, startTime: 0, startScore: 0 },
     theme: 'meadow',
     friends: createFriendPool(),
     nextFriendAt: FRIENDS.firstDistance,
@@ -78,7 +80,7 @@ export function createWorld(seed: number = randomSeed()): WorldState {
   };
 }
 
-/** Nieuwe ronde. De instellingen (obstakels/vijanden aan/uit, wereld) blijven behouden. */
+/** Nieuwe ronde. De instellingen (obstakels/vijanden aan/uit, oneindig, wereld) blijven behouden. */
 export function resetWorld(world: WorldState, seed: number = randomSeed()): void {
   world.speed = 0;
   world.targetSpeed = SPEED.base;
@@ -90,7 +92,9 @@ export function resetWorld(world: WorldState, seed: number = randomSeed()): void
   world.lastJumpTime = -1;
   world.lastLandTime = -1;
   world.rainbowRides = 0;
-  world.finishX = RIDE.length;
+  world.missionsDone = 0;
+  // Oneindig rijden: de finish komt nooit (alles wat ernaar kijkt, vergelijkt alleen met finishX).
+  world.finishX = world.endless ? Infinity : RIDE.length;
   world.ridePhase = 'riding';
   world.finishTime = -1;
   world.parkedTime = -1;

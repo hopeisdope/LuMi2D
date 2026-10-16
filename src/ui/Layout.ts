@@ -28,6 +28,7 @@ export class Layout {
   readonly toggleObstacles: Button = { id: 'toggleObstacles', label: 'Pionnen & stenen', rect: rect() };
   readonly toggleEnemies: Button = { id: 'toggleEnemies', label: 'Egels', rect: rect() };
   readonly toggleSound: Button = { id: 'toggleSound', label: 'Geluid', rect: rect() };
+  readonly toggleEndless: Button = { id: 'toggleEndless', label: 'Oneindig rijden', rect: rect() };
   readonly done: Button = { id: 'done', label: 'Klaar', icon: 'check', rect: rect() };
   /** Kiesscherm: start de ronde met de gekozen auto en wereld. */
   readonly go: Button = { id: 'go', label: 'Rijden!', icon: 'play', rect: rect() };
@@ -70,14 +71,15 @@ export class Layout {
     set(this.resume.rect, cx - bw / 2, 180, bw, bh);
     set(this.restart.rect, cx - bw / 2, 290, bw, bh);
 
-    // Instellingenscherm: drie aan/uit-rijen en een Klaar-knop.
+    // Instellingenscherm: vier aan/uit-rijen en een Klaar-knop.
     const row = UI.settingsRow;
     const rowX = cx - row.width / 2;
     const top = UI.settingsTop;
     set(this.toggleObstacles.rect, rowX, top, row.width, row.height);
     set(this.toggleEnemies.rect, rowX, top + (row.height + row.gap), row.width, row.height);
     set(this.toggleSound.rect, rowX, top + 2 * (row.height + row.gap), row.width, row.height);
-    set(this.done.rect, cx - bw / 2, top + 3 * (row.height + row.gap) + 20, bw, bh);
+    set(this.toggleEndless.rect, rowX, top + 3 * (row.height + row.gap), row.width, row.height);
+    set(this.done.rect, cx - bw / 2, top + 4 * (row.height + row.gap) + 6, bw, bh);
   }
 }
 

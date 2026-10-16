@@ -10,6 +10,7 @@ export const DEFAULT_SETTINGS: Readonly<Settings> = {
   obstacles: true,
   enemies: true,
   sound: true,
+  endless: false,
   car: 'classic',
   theme: 'meadow',
 };
@@ -30,6 +31,7 @@ export function loadSettings(): Settings {
     if (typeof d.obstacles === 'boolean') settings.obstacles = d.obstacles;
     if (typeof d.enemies === 'boolean') settings.enemies = d.enemies;
     if (typeof d.sound === 'boolean') settings.sound = d.sound;
+    if (typeof d.endless === 'boolean') settings.endless = d.endless;
     if (typeof d.car === 'string' && (CAR_IDS as readonly string[]).includes(d.car)) settings.car = d.car as CarId;
     if (typeof d.theme === 'string' && (THEME_IDS as readonly string[]).includes(d.theme)) {
       settings.theme = d.theme as ThemeId;

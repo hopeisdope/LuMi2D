@@ -9,6 +9,8 @@ export interface Settings {
   obstacles: boolean;
   enemies: boolean;
   sound: boolean;
+  /** Oneindig rijden: geen finish en geen garage. */
+  endless: boolean;
   car: CarId;
   theme: ThemeId;
 }
@@ -59,6 +61,10 @@ export interface Mission {
   count: number;
   /** Wereldtijd waarop de opdracht lukte; -1 = nog niet. */
   doneTime: number;
+  /** Wereldtijd waarop de opdracht begon (het kaartje komt dan groot in beeld). */
+  startTime: number;
+  /** Sterren bij de start van de opdracht (een sterrenopdracht telt vanaf daar). */
+  startScore: number;
 }
 
 /** Rijden, na de finish uitrijden naar de garage, of geparkeerd. */
@@ -259,6 +265,10 @@ export interface WorldState {
   obstaclesEnabled: boolean;
   /** Bewegende vijanden aan/uit (instellingenscherm). */
   enemiesEnabled: boolean;
+  /** Oneindig rijden (instellingenscherm): geen finish, na elke gelukte opdracht volgt een nieuwe. */
+  endless: boolean;
+  /** Aantal gelukte opdrachten in deze rit (voor het rittenboekje). */
+  missionsDone: number;
   /** Vaste pool met obstakels; inactieve objecten worden hergebruikt. */
   obstacles: Obstacle[];
   /** Afstand waarop het volgende obstakel verschijnt. */
@@ -368,6 +378,7 @@ export interface Button {
     | 'toggleObstacles'
     | 'toggleEnemies'
     | 'toggleSound'
+    | 'toggleEndless'
     | 'done'
     | 'go'
     | 'back'

@@ -117,6 +117,7 @@ export class UIRenderer {
         this.toggleRow(layout.toggleObstacles, settings.obstacles, 'cone');
         this.toggleRow(layout.toggleEnemies, settings.enemies, 'hedgehog');
         this.toggleRow(layout.toggleSound, settings.sound, settings.sound ? 'soundOn' : 'soundOff');
+        this.toggleRow(layout.toggleEndless, settings.endless, 'infinity');
         this.button(layout.done);
         break;
       case 'choose':
@@ -134,7 +135,7 @@ export class UIRenderer {
         if (showJumpHint) this.jumpHint(cx, view.height * 0.3, time);
         this.scoreCounter(world);
         this.rainbowMeter(world, cx, 46);
-        this.rideProgress(world, cx, view.height - 26);
+        if (!world.endless) this.rideProgress(world, cx, view.height - 26);
         this.missionHud(world, cx, settings, time);
         this.iconButton(layout.pause, 'pause');
         break;
@@ -286,7 +287,7 @@ export class UIRenderer {
   private missionHud(world: WorldState, cx: number, settings: Settings, time: number): void {
     const m = world.mission;
     const w = this.missionCardWidth(m);
-    const k = Math.min(1, Math.max(0, (world.time - MISSION.introTime) / MISSION.slideTime));
+    const k = Math.min(1, Math.max(0, (world.time - m.startTime - MISSION.introTime) / MISSION.slideTime));
     const ease = k * k * (3 - 2 * k);
     const scale = MISSION_CARD.introScale + (MISSION_CARD.hudScale - MISSION_CARD.introScale) * ease;
     // Eindplek: linksonder, rekening houdend met de schaal (het kaartje schaalt rond zijn midden).
