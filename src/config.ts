@@ -242,6 +242,18 @@ export const SCORE = {
 
 /** Ritten en het rittenboekje. */
 export const RIDE = {
+  /** Lengte van een rit tot de finish: ~75 s op basissnelheid (SPEED.base). */
+  length: 24000,
+  /** Zo ver vóór de finish komen er geen obstakels, platforms of regenboogstukjes meer. */
+  clearBeforeFinish: 700,
+  /** Geen nieuwe regenboogstukjes zo dicht bij de finish (een regenboogrit moet vóór de finish klaar zijn). */
+  noRainbowBeforeFinish: 2600,
+  /** Na de finish rijdt de auto uit en parkeert zo ver verderop in de garage. */
+  garageDistance: 700,
+  /** Remvertraging naar de garage (eenheden/s²): vanaf basissnelheid ~600 eenheden remweg. */
+  brake: 85,
+  /** Zo lang (s) na het parkeren verschijnt het overzicht. */
+  summaryDelay: 1.2,
   /** Een rit telt mee in het boekje als hij minstens zo lang (s) duurde. */
   minTime: 20,
   /** Wereld-eenheden per "kilometer" in het boekje (een rit van ~75 s is dan ~2,4 km). */
@@ -315,6 +327,8 @@ export const UI = {
   /** Kaartjes van de auto- en wereldkiezer. */
   pickerCard: { width: 140, height: 92, gap: 28 },
   menuButton: { width: 280, height: 84, gap: 24 },
+  /** Knoppen in het overzicht na de finish ("Nog een keer" is lang); twee passen naast elkaar op 720 breed. */
+  summaryButtonWidth: 320,
 } as const;
 
 /** Uiterlijk van de te kiezen auto's. Alleen het uiterlijk verschilt; rijden en springen is gelijk. */

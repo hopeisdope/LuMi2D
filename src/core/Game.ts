@@ -1,10 +1,11 @@
 import type { Sound } from '../audio/Sound';
+import { RIDE } from '../config';
 import type { InputManager } from '../input/InputManager';
 import type { Renderer } from '../render/Renderer';
 import type { Screen } from '../render/Screen';
 import { loadProgress, newLedger, recordRide, saveProgress } from '../settings/Progress';
 import { CAR_IDS, loadSettings, saveSettings, THEME_IDS } from '../settings/Settings';
-import type { GameState, InputAction, Settings, Vec2, WorldState } from '../types';
+import type { GameState, InputAction, RideSummary, Settings, Vec2, WorldState } from '../types';
 import { hitCard, hitTest, Layout } from '../ui/Layout';
 import { createWorld, jump, resetWorld, updateWorld } from '../world/World';
 import { GameLoop } from './GameLoop';
@@ -26,6 +27,8 @@ export class Game {
   /** Rittenboekje (localStorage) en wat er van de huidige rit al in staat. */
   private readonly progress = loadProgress();
   private readonly ledger = newLedger();
+  /** Overzicht van de laatst uitgereden rit. */
+  private readonly summary: RideSummary = { stars: 0, record: false, stickers: [], shownAt: 0 };
 
   constructor(
     private readonly screen: Screen,
@@ -59,7 +62,7 @@ export class Game {
    * achtergrond de gekozen wereld en auto rustig laat zien.
    */
   openChooser(): void {
-    if (this.state !== 'ready' && this.state !== 'paused') return;
+    if (this.state !== 'ready' && this.state !== 'paused' && this.state !== 'finished') return;
     resetWorld(this.world);
     this.input.clear();
     this.state = 'choose';
@@ -67,11 +70,22 @@ export class Game {
 
   /** Start de ronde met de gekozen auto en wereld; daarna liggen die vast tot de volgende ronde. */
   start(): void {
-    if (this.state !== 'choose') return;
+    if (this.state !== 'choose' && this.state !== 'finished') return;
     resetWorld(this.world);
     Object.assign(this.ledger, newLedger());
     this.input.clear();
     this.state = 'playing';
+  }
+
+  /** Na het parkeren: rit in het boekje en het overzicht tonen. */
+  private finishRide(): void {
+    const previousBest = this.progress.bestStars;
+    this.summary.stickers = recordRide(this.progress, this.ledger, this.world);
+    saveProgress(this.progress);
+    this.summary.stars = this.world.score;
+    this.summary.record = this.world.score > previousBest && this.world.score > 0;
+    this.summary.shownAt = this.ambientTime;
+    this.state = 'finished';
   }
 
   /** Schrijft de lopende rit (tot nu toe) in het rittenboekje en bewaart het. */
@@ -160,7 +174,9 @@ export class Game {
       updateWorld(this.world, dt);
       this.playWorldSounds();
       this.ambientTime += dt;
-    } else if (this.state === 'ready' || this.state === 'settings' || this.state === 'book' || this.state === 'choose') {
+      const w = this.world;
+      if (w.ridePhase === 'parked' && w.time - w.parkedTime >= RIDE.summaryDelay) this.finishRide();
+    } else if (this.state !== 'paused') {
       this.ambientTime += dt;
     }
   };
@@ -178,10 +194,12 @@ export class Game {
     if (e.friendGift) this.sound.play('gift');
     else if (e.friendCheer) this.sound.play('cheer');
     if (e.friendDemo) this.sound.play('hup');
+    if (e.finished) this.sound.play('finish');
+    if (e.parked) this.sound.play('horn');
   }
 
   private readonly render = (): void => {
-    this.renderer.render(this.state, this.world, this.layout, this.ambientTime, this.settings, this.progress);
+    this.renderer.render(this.state, this.world, this.layout, this.ambientTime, this.settings, this.progress, this.summary);
   };
 
   private readonly handleAction = (action: InputAction): void => {
@@ -190,6 +208,7 @@ export class Game {
         if (this.state === 'settings') this.closeSettings();
         else if (this.state === 'book') this.closeBook();
         else if (this.state === 'choose') this.backToStart();
+        else if (this.state === 'finished') this.openChooser();
         else this.togglePause();
         break;
       case 'jump':
@@ -202,6 +221,7 @@ export class Game {
         else if (this.state === 'book') this.closeBook();
         else if (this.state === 'playing') jump(this.world);
         else if (this.state === 'paused') this.resume();
+        else if (this.state === 'finished') this.start();
         break;
       case 'tap':
         this.handleTap(action.x, action.y);
@@ -255,6 +275,13 @@ export class Game {
           this.sound.play('tap');
           this.pause();
         } else jump(this.world);
+        break;
+      case 'finished':
+        // Nog een keer (zelfde auto en wereld) of naar het kiesscherm.
+        if (hitTest(this.layout.again.rect, p.x, p.y, 0)) this.start();
+        else if (hitTest(this.layout.chooseAgain.rect, p.x, p.y, 0)) this.openChooser();
+        else break;
+        this.sound.play('tap');
         break;
       case 'paused':
         if (hitTest(this.layout.resume.rect, p.x, p.y, 0)) this.resume();

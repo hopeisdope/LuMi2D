@@ -9,7 +9,7 @@ Read at the start of every session; update when something is done or added.
 
 ## Next
 
-- [ ] Gameplay ideas (owner's list, 2026-10-16), built in order: 2.1 mission per ride, 2.2 surprise scenes, 2.3 bounce pads, 2.4 finish (rides of ~75 s); 3.1 one moment per world. Art in code first; ChatGPT prompts afterwards
+- [ ] Gameplay ideas (owner's list, 2026-10-16), built in order: 2.1 mission per ride, 2.3 bounce pads, 2.2 surprise scenes; 3.1 one moment per world. Art in code first; ChatGPT prompts afterwards
 - [ ] Check the new sprites on a real iPad (sharpness, size of friends next to the car)
 - [ ] Configurable auto-movement, difficulty and increasing speed
 
@@ -20,6 +20,7 @@ Read at the start of every session; update when something is done or added.
 
 ## Done
 
+- [x] Gameplay 2.4 finish: rides end after 24 000 units (~75 s); clear road before the finish, checkered arch with confetti and fanfare, cheering friends, the car brakes into a garage and the door closes; summary with stars, record crown and new stickers; "Nog een keer" / "Kiezen"; progress bar to the flag at the bottom
 - [x] Gameplay 1.3 ride book (book button on the start screen): best ride stars, rides, distance in "km", rainbow rides, 8 milestone stickers; counts ≤ 10 shown as rows of pictures; saved in `lumi2d.progress.v1` when a ride ends or the app is hidden, without double counting
 - [x] Gameplay 1.2 friends demonstrate: while the child is still learning, a friend stands behind each obstacle, points at it (arrow) and hops with a tap-hand at the moment to tap (+ soft 'hup'); stops after 3 clean jumps in a row, restarts after a bump. Simulated taps 0.1–0.7 s after the demo all clear the obstacle
 - [x] Gameplay 1.1 action feedback: jump lines, landing dust, dizzy stars after a bump, sparkle on collect; friends in view react (thumbs on a star, surprised on a bump, dance on rainbow/turbo)

@@ -41,10 +41,24 @@ export interface Progress {
 }
 
 /**
- * Toestanden: start ⇄ instellingen, start ⇄ rittenboekje, start → kiezen (auto + wereld) → spelen ⇄ pauze.
- * Een nieuwe ronde begint altijd via het kiesscherm.
+ * Toestanden: start ⇄ instellingen, start ⇄ rittenboekje, start → kiezen (auto + wereld) → spelen ⇄ pauze,
+ * spelen → klaar (overzicht na de finish) → opnieuw spelen of kiezen.
  */
-export type GameState = 'ready' | 'settings' | 'book' | 'choose' | 'playing' | 'paused';
+export type GameState = 'ready' | 'settings' | 'book' | 'choose' | 'playing' | 'paused' | 'finished';
+
+/** Rijden, na de finish uitrijden naar de garage, of geparkeerd. */
+export type RidePhase = 'riding' | 'finishing' | 'parked';
+
+/** Wat het overzicht na de finish laat zien. */
+export interface RideSummary {
+  stars: number;
+  /** Meer sterren dan ooit in één rit. */
+  record: boolean;
+  /** In deze rit verdiende stickers. */
+  stickers: StickerId[];
+  /** Sfeertijd waarop het overzicht verscheen (voor de animaties). */
+  shownAt: number;
+}
 
 export interface Vec2 {
   x: number;
@@ -217,6 +231,14 @@ export interface WorldState {
   rainbowPieces: number;
   /** Aantal regenboogritten in deze ronde (voor het rittenboekje). */
   rainbowRides: number;
+  /** Plek van de finishlijn; de garage staat RIDE.garageDistance verder. */
+  finishX: number;
+  ridePhase: RidePhase;
+  /** Wereldtijd van de finish en van het parkeren; -1 = nog niet. */
+  finishTime: number;
+  parkedTime: number;
+  /** De juichende vriendjes bij de finish staan er al. */
+  finishFriends: boolean;
   /** Resterende tijd (s) van de regenboogrit; 0 = geen rit. */
   rainbowRide: number;
   /** Gekozen wereld: bepaalt welke vriendjes er langs de weg staan. */
@@ -261,10 +283,14 @@ export interface WorldEvents {
   friendGift: boolean;
   /** Een vriendje doet een sprongetje voor. */
   friendDemo: boolean;
+  /** Over de finishlijn gereden. */
+  finished: boolean;
+  /** In de garage gestopt. */
+  parked: boolean;
 }
 
 /** Icoon naast de tekst van een knop (voor kinderen die nog niet lezen). */
-export type ButtonIcon = 'play' | 'restart' | 'check';
+export type ButtonIcon = 'play' | 'restart' | 'check' | 'car';
 
 /** Een knop in de canvas-UI. */
 export interface Button {
@@ -281,7 +307,9 @@ export interface Button {
     | 'toggleSound'
     | 'done'
     | 'go'
-    | 'back';
+    | 'back'
+    | 'again'
+    | 'chooseAgain';
   rect: Rect;
   label: string;
 }

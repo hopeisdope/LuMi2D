@@ -24,7 +24,8 @@ export type IconName =
   | 'arrowDown'
   | 'book'
   | 'flag'
-  | 'rainbow';
+  | 'rainbow'
+  | 'crown';
 
 export function drawIcon(
   ctx: CanvasRenderingContext2D,
@@ -260,6 +261,19 @@ export function drawIcon(
         ctx.arc(cx, cy + s * 0.45, s * (0.85 - i * 0.28), Math.PI, Math.PI * 2);
         ctx.stroke();
       }
+      break;
+    case 'crown':
+      // Kroontje: record.
+      ctx.beginPath();
+      ctx.moveTo(cx - s * 0.85, cy + s * 0.55);
+      ctx.lineTo(cx - s * 0.85, cy - s * 0.45);
+      ctx.lineTo(cx - s * 0.42, cy);
+      ctx.lineTo(cx, cy - s * 0.7);
+      ctx.lineTo(cx + s * 0.42, cy);
+      ctx.lineTo(cx + s * 0.85, cy - s * 0.45);
+      ctx.lineTo(cx + s * 0.85, cy + s * 0.55);
+      ctx.closePath();
+      ctx.fill();
       break;
     case 'arrowDown':
       ctx.lineWidth = s * 0.32;

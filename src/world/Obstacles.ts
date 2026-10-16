@@ -1,4 +1,4 @@
-import { BUMP, CAR_HITBOX, COACH, ENEMIES, OBSTACLES, PLATFORMS, RAINBOW, WORLD } from '../config';
+import { BUMP, CAR_HITBOX, COACH, ENEMIES, OBSTACLES, PLATFORMS, RAINBOW, RIDE, WORLD } from '../config';
 import type { Obstacle, ObstacleKind, WorldState } from '../types';
 import { canSpawnRainbowPiece, spawnPlatformWithBoost, spawnRainbowPiece } from './Collectibles';
 import { spawnCoach } from './Friends';
@@ -83,6 +83,11 @@ function spawnAhead(world: WorldState): void {
 
   while (car.x + OBSTACLES.spawnAhead >= world.nextObstacleAt) {
     const x0 = world.nextObstacleAt;
+    if (x0 > world.finishX - RIDE.clearBeforeFinish) {
+      // Vrije weg naar de finish.
+      world.nextObstacleAt = Infinity;
+      return;
+    }
     const gap = OBSTACLES.minGap + world.random() * (OBSTACLES.maxGap - OBSTACLES.minGap);
     const roll = world.random();
 
@@ -90,7 +95,8 @@ function spawnAhead(world: WorldState): void {
       world.nextObstacleAt = x0 + PLATFORMS.width + gap;
       continue;
     }
-    if (roll < PLATFORMS.chance + RAINBOW.chance && canSpawnRainbowPiece(world)) {
+    const rainbowAllowed = x0 < world.finishX - RIDE.noRainbowBeforeFinish;
+    if (roll < PLATFORMS.chance + RAINBOW.chance && rainbowAllowed && canSpawnRainbowPiece(world)) {
       spawnRainbowPiece(world, x0);
       world.nextObstacleAt = x0 + gap;
       continue;

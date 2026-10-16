@@ -1,4 +1,4 @@
-import { COACH, FEEDBACK, FRIENDS, OBSTACLES } from '../config';
+import { COACH, FEEDBACK, FRIENDS, OBSTACLES, RIDE } from '../config';
 import { THEMES } from '../themes';
 import type { Friend, FriendReaction, WorldState } from '../types';
 
@@ -71,9 +71,17 @@ export function spawnCoach(world: WorldState, obstacleIndex: number): void {
  */
 export function updateFriends(world: WorldState): void {
   const car = world.car;
-  while (car.x + OBSTACLES.spawnAhead >= world.nextFriendAt) {
+  while (car.x + OBSTACLES.spawnAhead >= world.nextFriendAt && world.nextFriendAt < world.finishX - FRIENDS.minGap / 2) {
     spawnFriend(world, world.nextFriendAt);
     world.nextFriendAt += FRIENDS.minGap + world.random() * (FRIENDS.maxGap - FRIENDS.minGap);
+  }
+  if (!world.finishFriends && car.x + OBSTACLES.spawnAhead >= world.finishX) {
+    // Twee vriendjes juichen: vóór de finishboog en na de garage.
+    world.finishFriends = true;
+    for (const x of [world.finishX - 260, world.finishX + RIDE.garageDistance + 230]) {
+      const f = spawnFriend(world, x);
+      if (f) f.gift = 'none';
+    }
   }
 
   const pool = world.friends;

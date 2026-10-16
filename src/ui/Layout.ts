@@ -33,6 +33,9 @@ export class Layout {
   readonly go: Button = { id: 'go', label: 'Rijden!', icon: 'play', rect: rect() };
   /** Kiesscherm: terug naar het startscherm. */
   readonly back: Button = { id: 'back', label: 'Terug', rect: rect() };
+  /** Overzicht na de finish: nog een rit met dezelfde auto en wereld, of opnieuw kiezen. */
+  readonly again: Button = { id: 'again', label: 'Nog een keer', icon: 'restart', rect: rect() };
+  readonly chooseAgain: Button = { id: 'chooseAgain', label: 'Kiezen', icon: 'car', rect: rect() };
 
   /** Auto-kiezer op het kiesscherm (volgorde = CAR_IDS). */
   readonly carCards: Rect[] = rects(PICKER_COUNT);
@@ -57,6 +60,11 @@ export class Layout {
 
     // Tijdens het spelen: pauzeknop rechtsboven.
     set(this.pause.rect, view.width - size - margin, margin, size, size);
+
+    // Overzicht na de finish: twee (iets bredere) knoppen naast elkaar.
+    const ww = UI.summaryButtonWidth;
+    set(this.again.rect, cx - ww - UI.menuButton.gap / 2, 410, ww, bh);
+    set(this.chooseAgain.rect, cx + UI.menuButton.gap / 2, 410, ww, bh);
 
     // Pauzescherm: Verder en Opnieuw onder elkaar.
     set(this.resume.rect, cx - bw / 2, 180, bw, bh);
