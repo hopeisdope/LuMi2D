@@ -30,8 +30,12 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          const copy = response.clone();
-          caches.open(CACHE).then((cache) => cache.put('./', copy));
+          // Alleen een geslaagde HTML-pagina bewaren: een foutpagina mag de offline-versie niet vervangen.
+          const type = response.headers.get('content-type') ?? '';
+          if (response.ok && type.includes('text/html')) {
+            const copy = response.clone();
+            caches.open(CACHE).then((cache) => cache.put('./', copy));
+          }
           return response;
         })
         .catch(() => caches.match('./').then((r) => r || caches.match('./index.html'))),

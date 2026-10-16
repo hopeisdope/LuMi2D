@@ -26,6 +26,7 @@ Concise state for reloading into a fresh session. Details are in `WORKLIST.md`.
 - `world.events.jumped/landed/bumped/scored/boosted/rainbowPiece/rainbowRide` are set per frame — the hook for sound/feedback later.
 - `createWorld(seed)` / `resetWorld(world, seed)` take an optional seed for reproducible tests.
 - Hosting: running on the Docker VM at `/opt/LuMi2D`, port from `.env` (`LUMI2D_PORT=8080`). Docker on the owner's Docker VM in Proxmox (LAN only): `Dockerfile`, `docker/nginx.conf`, `docker-compose.yml`. Netlify removed (credits), GitHub Pages workflow manual-only (private repo). Tested: image builds, healthy, correct cache headers, game plays via LAN IP; no service worker on plain http (expected).
+- Review of PR #15 handled (2026-10-16): CI workflow (`ci.yml`, merge only when green — can't be required on a private Free repo), service worker caches only successful HTML (`scripts/test-offline.mjs`), nginx 1.30 + Dependabot, update with `docker compose build --pull`; LUMI-003 declined (see `CLAUDE.md`).
 - Typecheck and build pass; tested in Chromium (Playwright) with iPad viewports, not yet on a real device.
 
 - Flow: start (`ready`) → kiesscherm (`choose`: auto + wereld, Rijden!) → `playing` ⇄ `paused`; Opnieuw in de pauze gaat terug naar `choose`. Auto/wereld kiezen kan alleen op het kiesscherm (`Game.choose` checkt de state).

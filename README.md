@@ -36,7 +36,8 @@ docker compose up -d --build        # bouwt de game en start nginx op poort 8080
 ```
 
 Daarna spelen via `http://<ip-van-de-server>:8080` (andere poort: `LUMI2D_PORT=9000 docker compose up -d --build`).
-Bijwerken naar de nieuwste versie: `git pull && docker compose up -d --build`.
+Bijwerken naar de nieuwste versie: `git pull && docker compose build --pull && docker compose up -d`
+(`--pull` haalt ook beveiligingsupdates van de basis-images op).
 
 Let op: via gewoon `http://` op een netwerkadres staat de browser geen service worker toe. Het spel werkt dan
 volledig, alleen niet offline. Wil je offline spelen, zet er dan een reverse proxy met HTTPS voor
