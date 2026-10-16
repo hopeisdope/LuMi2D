@@ -10,7 +10,7 @@ Read `WORKLIST.md` first. Keep `HANDOFF.md` current at the end of long sessions.
 
 ## Stack
 - TypeScript (strict), HTML5 Canvas 2D, Vite as dev server/build tool. Node 22.
-- No game engine or framework, no external assets (images, sounds, fonts).
+- No game engine or framework. No external assets except the sprites in `public/sprites/` (no sounds, no fonts).
 - Structure: `config.ts` (constants), `types.ts`, `core/` (loop, state machine),
   `input/` (raw events → `InputAction`), `world/` (pure game logic),
   `render/` (read-only drawing), `ui/` (button layout + hit-tests),
@@ -51,6 +51,11 @@ GitHub Pages workflow (`.github/workflows/pages.yml`) is kept but manual-only (n
 - Storage: only `localStorage` key `lumi2d.settings.v1` for settings (toggles, car, world) via `src/settings/Settings.ts`;
   always validate on load and fall back to defaults. Never store anything personal or sensitive.
 - Sound is synthesized with Web Audio in `src/audio/Sound.ts` (no audio files); it unlocks on the first tap.
+- Sprites (cars, wheels, friends) are generated artwork: raw PNGs go in `art-incoming/` (git-ignored, not committed),
+  `python3 scripts/process-sprites.py` (Pillow) trims/resizes them into `public/sprites/` and writes
+  `src/render/spriteData.ts` (sizes, wheel positions; generated, don't edit). Renderers draw a sprite only when it
+  has loaded (`ready()` in `src/render/sprites.ts`) and otherwise fall back to the drawn shapes — keep that fallback.
+  Friend sheets hold three poses side by side: idle, wave, cheer.
 - PWA: `public/manifest.webmanifest`, icons in `public/icons/` (regenerate with `scripts/generate-icons.mjs`),
   service worker generated at build time from `sw-template.js` by the plugin in `vite.config.ts` (production only).
 

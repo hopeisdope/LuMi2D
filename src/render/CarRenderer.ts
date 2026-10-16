@@ -1,9 +1,11 @@
-import { BUMP, CAR, COLORS, JUMP, JUMP_PHYSICS, WORLD, type CarStyle } from '../config';
+import { BUMP, CAR, COLORS, JUMP, JUMP_PHYSICS, SPRITES, WORLD, type CarStyle } from '../config';
 import type { Car } from '../types';
 import { roundRectPath } from './shapes';
+import { CAR_SPRITES } from './spriteData';
+import { CAR_IMAGES, WHEEL_IMAGES, ready } from './sprites';
 
 /**
- * Tekent de auto met eenvoudige vormen, in de gekozen stijl.
+ * Tekent de auto in de gekozen stijl: met het plaatje als dat geladen is, anders met eenvoudige vormen.
  * (screenX, car.y) = midden-onderkant van de wielen. Leest alleen state.
  */
 export class CarRenderer {
@@ -52,6 +54,10 @@ export class CarRenderer {
    * Ook gebruikt voor de auto-kiezer, met een eigen schaal.
    */
   drawBody(style: CarStyle, w: number, h: number, r: number, wheelAngle: number, bob = 0): void {
+    if (ready(CAR_IMAGES[style.id])) {
+      this.drawSprite(style, w, wheelAngle, bob);
+      return;
+    }
     switch (style.shape) {
       case 'classic':
         this.classic(style, w, h, r, bob);
@@ -70,6 +76,39 @@ export class CarRenderer {
     const inset = style.shape === 'jeep' ? 0.2 : 0.22;
     this.drawWheel(-w / 2 + w * inset, -wheelR, wheelR, wheelAngle);
     this.drawWheel(w / 2 - w * inset, -wheelR, wheelR, wheelAngle);
+  }
+
+  /**
+   * Autoplaatje op breedte w, met de onderkant van de banden op y = 0. De carrosserie veert mee (bob),
+   * de draaiende wielen blijven op de weg en vallen over de wielen in het plaatje.
+   */
+  private drawSprite(style: CarStyle, w: number, wheelAngle: number, bob: number): void {
+    const { ctx } = this;
+    const sprite = CAR_SPRITES[style.id];
+    const s = w / sprite.width;
+    const front = sprite.wheels[0];
+    const back = sprite.wheels[1];
+    // Oorsprong (midden-onderkant van de wielen) in plaatjespixels.
+    const ox = (front[0] + back[0]) / 2;
+    const oy = Math.max(front[1], back[1]) + sprite.wheelR;
+
+    ctx.save();
+    ctx.scale(s, s);
+    ctx.translate(-ox, -oy);
+    ctx.drawImage(CAR_IMAGES[style.id], 0, bob / s, sprite.width, sprite.height);
+    const wheel = WHEEL_IMAGES[style.id];
+    if (ready(wheel)) {
+      const d = sprite.wheelR * 2 * SPRITES.wheelCover;
+      for (let i = 0; i < 2; i++) {
+        const c = i === 0 ? front : back;
+        ctx.save();
+        ctx.translate(c[0], c[1]);
+        ctx.rotate(wheelAngle);
+        ctx.drawImage(wheel, -d / 2, -d / 2, d, d);
+        ctx.restore();
+      }
+    }
+    ctx.restore();
   }
 
   private classic(s: CarStyle, w: number, h: number, r: number, bob: number): void {

@@ -1,6 +1,8 @@
-import { COLORS, FRIENDS, WORLD } from '../config';
+import { COLORS, FRIENDS, SPRITES, WORLD } from '../config';
 import type { Friend, FriendKind, WorldState } from '../types';
 import { roundRectPath, starPath } from './shapes';
+import { FRIEND_SPRITES } from './spriteData';
+import { FRIEND_IMAGES, ready } from './sprites';
 
 interface FriendStyle {
   body: string;
@@ -21,14 +23,17 @@ const STYLES: Readonly<Record<FriendKind, FriendStyle>> = {
   alien: { body: '#9ccc65', belly: '#dcedc8', ears: 'antenna', oneEye: true, accent: '#ff4081' },
   robot: { body: '#b0bec5', belly: '#eceff1', ears: 'antenna', boxy: true, accent: '#29b6f6' },
   unicorn: { body: '#ffffff', belly: '#fce4ec', ears: 'horn', accent: '#ff80ab' },
-  kitty: { body: '#f8bbd0', belly: '#fff0f5', ears: 'cat', accent: '#ec407a' },
+  cupcake: { body: '#8d5a3b', belly: '#b9f6ca', ears: 'round', accent: '#e53935' },
 };
 
 /** Kleuren van de confetti bij een verrassing. */
 const CONFETTI = ['#e53935', '#ffd93b', '#29a9f0', '#43c04a', '#9c4dcc', '#ff9800'];
 const CONFETTI_COUNT = 26;
 
-/** Vriendjes in de berm met zwaaien, juichen en cadeau-animaties. Leest alleen state. */
+/**
+ * Vriendjes in de berm met zwaaien, juichen en cadeau-animaties: met het plaatje als dat geladen is,
+ * anders met eenvoudige vormen. Leest alleen state.
+ */
 export class FriendRenderer {
   constructor(private readonly ctx: CanvasRenderingContext2D) {}
 
@@ -38,7 +43,7 @@ export class FriendRenderer {
       const f = world.friends[i];
       if (!f.active) continue;
       const sx = carScreenX + (f.x - world.car.x);
-      if (sx < -80 || sx > viewWidth + 80) continue;
+      if (sx < -100 || sx > viewWidth + 100) continue;
       this.drawFriend(f, sx, WORLD.groundY - 4, world.time);
     }
   }
@@ -82,12 +87,47 @@ export class FriendRenderer {
     const hop = cheering ? Math.abs(Math.sin(since * 9)) * 14 : Math.sin(time * 2 + f.x) * 1.5;
     const y = groundY - hop;
 
+    const img = FRIEND_IMAGES[f.kind];
+    const sprite = ready(img);
+
     // Schaduw
     ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
     ctx.beginPath();
-    ctx.ellipse(x, groundY, 20, 4, 0, 0, Math.PI * 2);
+    ctx.ellipse(x, groundY, sprite ? SPRITES.friendShadow : 20, 4, 0, 0, Math.PI * 2);
     ctx.fill();
 
+    let halfWidth = 20;
+    if (sprite) {
+      // Rustig staan; bij het juichen wisselen zwaaien en juichen elkaar af.
+      const pose = cheering ? 1 + (Math.floor(since / SPRITES.friendPoseTime) % 2) : 0;
+      halfWidth = this.drawSprite(img, f.kind, pose, x, y);
+    } else {
+      this.drawShapes(s, x, y, time, cheering);
+    }
+
+    // Cadeau dat nog gegeven wordt: klein pakje of sterretje naast het vriendje.
+    if (f.gift !== 'none' && f.giftTime < 0) {
+      ctx.save();
+      ctx.translate(x + halfWidth + 4, groundY - 14 + Math.sin(time * 4) * 2);
+      ctx.scale(0.6, 0.6);
+      if (f.gift === 'surprise') this.present();
+      else this.star(16);
+      ctx.restore();
+    }
+  }
+
+  /** Eén houding uit het plaatje, voeten op (x, y). Geeft de halve breedte terug (voor het cadeautje ernaast). */
+  private drawSprite(img: HTMLImageElement, kind: FriendKind, pose: number, x: number, y: number): number {
+    const sprite = FRIEND_SPRITES[kind];
+    const h = SPRITES.friendHeight;
+    const w = (sprite.cellWidth / sprite.cellHeight) * h;
+    this.ctx.drawImage(img, pose * sprite.cellWidth, 0, sprite.cellWidth, sprite.cellHeight, x - w / 2, y - h, w, h);
+    return w / 2;
+  }
+
+  /** Getekende versie (als het plaatje er niet is), voeten op (x, y). */
+  private drawShapes(s: FriendStyle, x: number, y: number, time: number, cheering: boolean): void {
+    const { ctx } = this;
     ctx.save();
     ctx.translate(x, y);
 
@@ -172,16 +212,6 @@ export class FriendRenderer {
       ctx.stroke();
     }
     ctx.restore();
-
-    // Cadeau dat nog gegeven wordt: klein pakje of sterretje naast het vriendje.
-    if (f.gift !== 'none' && f.giftTime < 0) {
-      ctx.save();
-      ctx.translate(x + 24, groundY - 14 + Math.sin(time * 4) * 2);
-      ctx.scale(0.6, 0.6);
-      if (f.gift === 'surprise') this.present();
-      else this.star(16);
-      ctx.restore();
-    }
   }
 
   /** Arm vanaf de schouder; hoek vanaf recht omlaag, positief = naar buiten (π = recht omhoog). */

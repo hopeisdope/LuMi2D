@@ -20,3 +20,6 @@ __pycache__/
 *.db
 *.sqlite
 *.sqlite3
+
+# Raw generated artwork (large originals; processed into public/sprites/)
+art-incoming/

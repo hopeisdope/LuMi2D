@@ -170,6 +170,18 @@ export const FRIENDS = {
   confettiTime: 1.2,
 } as const;
 
+/** Plaatjes uit public/sprites/ (de maten in pixels staan in src/render/spriteData.ts). */
+export const SPRITES = {
+  /** Draaiend wiel iets groter dan het getekende wiel in het autoplaatje, zodat dat er helemaal onder valt. */
+  wheelCover: 1.08,
+  /** Hoogte van een vriendje (vak van één houding). */
+  friendHeight: 96,
+  /** Breedte van de schaduw onder een vriendje. */
+  friendShadow: 26,
+  /** Tijd (s) per houding bij het juichen: zwaaien en juichen wisselen elkaar af. */
+  friendPoseTime: 0.18,
+} as const;
+
 /** Wat er gebeurt bij een botsing: geen game over, alleen een vriendelijke hobbel. */
 export const BUMP = {
   /** Duur (s) van het wiebelen; zo lang kan de auto niet opnieuw botsen. */
