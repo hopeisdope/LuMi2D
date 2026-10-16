@@ -15,8 +15,8 @@ const CONFETTI_COLORS = ['#e53935', '#ffd93b', '#29a9f0', '#43c04a', '#9c4dcc', 
 const DOOR_TIME = 0.7;
 
 /**
- * Finishboog, confetti en de garage aan het eind van een rit. De boog en de binnenkant van de garage
- * staan achter de auto; de voorgevel van de garage ervoor, zodat de auto echt naar binnen rijdt. Leest alleen state.
+ * Finishboog, confetti en de garage aan het eind van een rit. De garage staat achter de auto: de auto rijdt
+ * de deuropening in en de roldeur gaat vóór hem dicht. Leest alleen state.
  */
 export class FinishRenderer {
   /** Plek van het garageplaatje en de deuropening (eenheden), elk frame opnieuw ingevuld: geen allocaties. */
@@ -43,7 +43,10 @@ export class FinishRenderer {
     g.oh = oh * s;
   }
 
-  /** Achter de auto: finishboog met geblokte lijn op de weg, binnenkant van de garage. */
+  /**
+   * Achter de auto: finishboog met geblokte lijn op de weg en de hele garage. De auto rijdt vóór de garage
+   * langs de deuropening in; daarna gaat de roldeur (vóór de auto) dicht.
+   */
   renderBack(world: WorldState, carScreenX: number, viewWidth: number): void {
     const { ctx } = this;
     const fx = carScreenX + (world.finishX - world.car.x);
@@ -76,24 +79,21 @@ export class FinishRenderer {
     }
 
     const gx = carScreenX + (world.finishX + RIDE.garageDistance - world.car.x);
-    if (gx > -300 && gx < viewWidth + 300 && ready(PROP_IMAGES.garage)) {
-      // Donkere binnenkant precies in de deuropening van het plaatje.
+    if (gx < -300 || gx > viewWidth + 300) return;
+    if (ready(PROP_IMAGES.garage)) {
+      // Donkere binnenkant precies in de deuropening, daarover het plaatje (de opening is doorzichtig).
       this.placeGarage(gx, ground);
       const g = this.garage;
       ctx.fillStyle = '#3d3a4f';
       ctx.fillRect(g.ox, g.oy, g.ow, g.oh);
-    } else if (gx > -300 && gx < viewWidth + 300) {
-      // Donkere binnenkant: de auto staat hier straks voor.
-      ctx.fillStyle = '#3d3a4f';
-      ctx.fillRect(gx - GARAGE.opening / 2 - 2, ground - GARAGE.openingHeight - 2, GARAGE.opening + 4, GARAGE.openingHeight + 2);
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
-      ctx.fillRect(gx - GARAGE.opening / 2, ground - 12, GARAGE.opening, 12);
+      ctx.drawImage(PROP_IMAGES.garage, g.left, g.top, g.width, g.height);
+    } else {
+      this.drawnGarage(gx, ground);
     }
   }
 
-  /** Vóór de auto: confetti bij de finish, voorgevel en roldeur van de garage. */
+  /** Vóór de auto: confetti bij de finish en de roldeur die achter de geparkeerde auto dichtgaat. */
   renderFront(world: WorldState, carScreenX: number, viewWidth: number): void {
-    const { ctx } = this;
     const ground = WORLD.groundY;
 
     if (world.finishTime >= 0) {
@@ -101,16 +101,27 @@ export class FinishRenderer {
       if (t < CONFETTI_TIME) this.confetti(carScreenX + (world.finishX - world.car.x), ground - ARCH.height, t);
     }
 
+    if (world.parkedTime < 0) return;
     const gx = carScreenX + (world.finishX + RIDE.garageDistance - world.car.x);
     if (gx < -300 || gx > viewWidth + 300) return;
+    const t = world.time - world.parkedTime;
     if (ready(PROP_IMAGES.garage)) {
       this.placeGarage(gx, ground);
       const g = this.garage;
-      ctx.drawImage(PROP_IMAGES.garage, g.left, g.top, g.width, g.height);
-      if (world.parkedTime >= 0) this.door(g.ox, g.oy, g.ow, g.oh, world.time - world.parkedTime);
-      return;
+      this.door(g.ox, g.oy, g.ow, g.oh, t);
+    } else {
+      this.door(gx - GARAGE.opening / 2, ground - GARAGE.openingHeight, GARAGE.opening, GARAGE.openingHeight, t);
     }
+  }
+
+  /** Getekende garage (als het plaatje er niet is): donkere binnenkant, muren, dak en raampje. */
+  private drawnGarage(gx: number, ground: number): void {
+    const { ctx } = this;
     const half = GARAGE.opening / 2;
+    ctx.fillStyle = '#3d3a4f';
+    ctx.fillRect(gx - half - 2, ground - GARAGE.openingHeight - 2, GARAGE.opening + 4, GARAGE.openingHeight + 2);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+    ctx.fillRect(gx - half, ground - 12, GARAGE.opening, 12);
     const wallTop = ground - GARAGE.openingHeight - GARAGE.lintel;
     // Muren naast en boven de opening.
     ctx.fillStyle = '#f4e1c1';
@@ -138,11 +149,6 @@ export class FinishRenderer {
     ctx.arc(gx, wallTop - GARAGE.roof * 0.42, 15, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
-
-    // Roldeur gaat dicht nadat de auto geparkeerd is.
-    if (world.parkedTime >= 0) {
-      this.door(gx - half, ground - GARAGE.openingHeight, GARAGE.opening, GARAGE.openingHeight, world.time - world.parkedTime);
-    }
   }
 
   /** Roldeur die in DOOR_TIME van boven naar beneden over de opening (x, y, w, h) zakt. */

@@ -324,6 +324,8 @@ export const RIDE = {
   noRainbowBeforeFinish: 2600,
   /** Na de finish rijdt de auto uit en parkeert zo ver verderop in de garage. */
   garageDistance: 700,
+  /** Het juichende vriendje bij de garage staat zo ver rechts van de deuropening: voorbij de rechtermuur. */
+  garageFriendOffset: 340,
   /** Remvertraging naar de garage (eenheden/s²): vanaf basissnelheid ~600 eenheden remweg. */
   brake: 85,
   /** Zo lang (s) na het parkeren verschijnt het overzicht. */

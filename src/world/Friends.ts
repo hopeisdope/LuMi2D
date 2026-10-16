@@ -58,7 +58,7 @@ export function updateFriends(world: WorldState): void {
   if (!world.finishFriends && car.x + OBSTACLES.spawnAhead >= world.finishX) {
     // Twee vriendjes juichen: vóór de finishboog en na de garage.
     world.finishFriends = true;
-    for (const x of [world.finishX - 260, world.finishX + RIDE.garageDistance + 230]) {
+    for (const x of [world.finishX - 260, world.finishX + RIDE.garageDistance + RIDE.garageFriendOffset]) {
       const f = spawnFriend(world, x);
       if (f) f.gift = 'none';
     }
