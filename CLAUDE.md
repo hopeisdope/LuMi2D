@@ -26,7 +26,10 @@ node scripts/test-offline.mjs       # after a build: service worker keeps the of
 ```
 
 Test hosting: Docker on the owner's own server (Docker VM in Proxmox, LAN only): `Dockerfile` (Node build → nginx),
-`docker/nginx.conf`, `docker-compose.yml`. Update there with `git pull && docker compose up -d --build`; default port 8080.
+`docker/nginx.conf`, `docker-compose.yml`. Update there with `git pull && docker compose build --pull && docker compose up -d`
+(`--pull` also fetches patched base images); default port 8080. Runtime image: `nginx:1.30-alpine` (stable line);
+Dependabot (`.github/dependabot.yml`) opens PRs for base-image and Actions updates — merge them when CI is green, except nginx mainline
+(odd minor such as 1.31): close those and stay on the stable (even) line.
 On plain `http://<lan-ip>` there is no service worker (not a secure context): the game works, offline mode doesn't.
 GitHub Pages workflow (`.github/workflows/pages.yml`) is kept but manual-only (needs a public repo or GitHub Pro).
 
