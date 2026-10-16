@@ -1,14 +1,28 @@
 import { BRAND, LOGO_COLORS, PALETTE, TYPOGRAPHY, UI_STYLE } from '../brand/brand';
-import { BOOST, CARS, COLORS, RAINBOW, RIDE, UI } from '../config';
+import { BOOST, CARS, COLORS, MISSION, RAINBOW, RIDE, UI } from '../config';
 import { STICKERS } from '../settings/Progress';
 import { CAR_IDS, THEME_IDS } from '../settings/Settings';
 import { THEMES, type Theme } from '../themes';
-import type { Button, GameState, ObstacleKind, Progress, Rect, RideSummary, Settings, StickerId, Viewport, WorldState } from '../types';
+import type {
+  Button,
+  GameState,
+  Mission,
+  ObstacleKind,
+  Progress,
+  Rect,
+  RideSummary,
+  Settings,
+  StickerId,
+  Viewport,
+  WorldState,
+} from '../types';
 import type { Layout } from '../ui/Layout';
 import { CarRenderer } from './CarRenderer';
 import { drawIcon, type IconName } from './icons';
 import type { ObstacleRenderer } from './ObstacleRenderer';
 import { roundRectPath, starPath } from './shapes';
+import { FRIEND_SPRITES } from './spriteData';
+import { FRIEND_IMAGES, ready } from './sprites';
 
 const font = (size: number): string => `${TYPOGRAPHY.weight} ${size}px ${TYPOGRAPHY.fontFamily}`;
 const LOGO_FONT = font(TYPOGRAPHY.size.logo);
@@ -34,11 +48,15 @@ const STICKER_LOOK: Readonly<Record<StickerId, { icon: IconName | 'star'; badge?
   rainbows10: { icon: 'rainbow', badge: '10' },
   distance50: { icon: 'car', badge: '50' },
   allWorlds: { icon: 'world' },
+  missions5: { icon: 'check', badge: '5' },
 };
 /** Tot zoveel tonen we een aantal als rijtje plaatjes in plaats van als getal. */
 const TALLY_MAX = 10;
 const BOOK_TILE = { width: 160, height: 140, gap: 16, top: 104 } as const;
 const STICKER_R = 38;
+/** Opdrachtkaartje: plekje linksboven onder de sterrenteller, en hoe groot het aan het begin in beeld staat. */
+const MISSION_CARD = { x: 20, y: 96, height: 60, introScale: 2, introY: 250 } as const;
+const CONFETTI_COLORS = ['#e53935', '#ffd93b', '#29a9f0', '#43c04a', '#9c4dcc', '#ff9800'];
 
 /** Letters van het logo, één keer opgesplitst. */
 const LOGO_LETTERS: readonly string[] = Array.from(BRAND.name);
@@ -114,11 +132,12 @@ export class UIRenderer {
         this.scoreCounter(world);
         this.rainbowMeter(world, cx, 46);
         this.rideProgress(world, cx, view.height - 26);
+        this.missionHud(world, cx, settings, time);
         this.iconButton(layout.pause, 'pause');
         break;
       case 'finished':
         this.dim(view);
-        this.rideSummary(cx, summary, time);
+        this.rideSummary(cx, summary, settings, time);
         this.button(layout.again);
         this.button(layout.chooseAgain);
         break;
@@ -257,6 +276,119 @@ export class UIRenderer {
     }
   }
 
+  /**
+   * Opdracht van deze rit: eerst groot in het midden, dan schuift hij naar linksboven. Bij succes: confetti
+   * rond het kaartje en een vinkje.
+   */
+  private missionHud(world: WorldState, cx: number, settings: Settings, time: number): void {
+    const m = world.mission;
+    const w = this.missionCardWidth(m);
+    const k = Math.min(1, Math.max(0, (world.time - MISSION.introTime) / MISSION.slideTime));
+    const ease = k * k * (3 - 2 * k);
+    const scale = MISSION_CARD.introScale + (1 - MISSION_CARD.introScale) * ease;
+    const x = cx - w / 2 + (MISSION_CARD.x - (cx - w / 2)) * ease;
+    const y = MISSION_CARD.introY + (MISSION_CARD.y - MISSION_CARD.introY) * ease;
+    this.missionCard(m, x, y, scale, settings, time);
+    if (m.doneTime >= 0) {
+      const t = world.time - m.doneTime;
+      if (t < MISSION.celebrateTime) this.burst(x + w / 2, y + MISSION_CARD.height / 2, t / MISSION.celebrateTime);
+    }
+  }
+
+  private missionCardWidth(m: Mission): number {
+    return 70 + Math.max(1, m.target) * 20;
+  }
+
+  /** Kaartje met het plaatje van de opdracht en bolletjes voor de voortgang; (x, y) = linksboven, schaal rond het midden. */
+  private missionCard(m: Mission, x: number, y: number, scale: number, settings: Settings, time: number): void {
+    const { ctx } = this;
+    const w = this.missionCardWidth(m);
+    const h = MISSION_CARD.height;
+    const done = m.doneTime >= 0;
+    ctx.save();
+    ctx.translate(x + w / 2, y + h / 2);
+    ctx.scale(scale, scale);
+    ctx.translate(-w / 2, -h / 2);
+    ctx.fillStyle = done ? PALETTE.yellow : UI_STYLE.panel;
+    ctx.strokeStyle = done ? PALETTE.orangeDark : UI_STYLE.text.outline;
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    roundRectPath(ctx, 0, 0, w, h, 16);
+    ctx.fill();
+    ctx.stroke();
+    this.missionPicture(m, 34, h / 2, settings, time);
+    for (let i = 0; i < m.target; i++) {
+      const px = 72 + i * 20;
+      ctx.fillStyle = i < m.count ? PALETTE.green : 'rgba(30, 60, 110, 0.18)';
+      ctx.beginPath();
+      ctx.arc(px, h / 2, 7.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    if (done) {
+      ctx.fillStyle = PALETTE.green;
+      ctx.beginPath();
+      ctx.arc(w - 4, 4, 15, 0, Math.PI * 2);
+      ctx.fill();
+      drawIcon(ctx, 'check', w - 4, 4, 18, PALETTE.white);
+    }
+    ctx.restore();
+  }
+
+  /** Plaatje bij een opdracht, gecentreerd op (x, y), ~44 groot. */
+  private missionPicture(m: Mission, x: number, y: number, settings: Settings, time: number): void {
+    const { ctx } = this;
+    switch (m.kind) {
+      case 'stars':
+        this.bigStar(x, y, 20);
+        break;
+      case 'jumpOver':
+        // Pionnetje met een boogje erover.
+        this.obstacleIcons.drawIcon('cone', x, y + 8, 28);
+        ctx.strokeStyle = UI_STYLE.text.outline;
+        ctx.lineWidth = 3.5;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.arc(x, y + 8, 20, Math.PI * 1.1, Math.PI * 1.9);
+        ctx.stroke();
+        break;
+      case 'rainbowPiece':
+        this.colorRainbow(x, y + 10, 20);
+        break;
+      case 'friendJump': {
+        // Het eerste vriendje van de gekozen wereld, juichend.
+        const kind = THEMES[settings.theme].friends[0];
+        const img = FRIEND_IMAGES[kind];
+        if (ready(img)) {
+          const sprite = FRIEND_SPRITES[kind];
+          const h = 46;
+          const w = (sprite.cellWidth / sprite.cellHeight) * h;
+          const hop = Math.abs(Math.sin(time * 5)) * 3;
+          ctx.drawImage(img, 2 * sprite.cellWidth, 0, sprite.cellWidth, sprite.cellHeight, x - w / 2, y - h / 2 - hop, w, h);
+        } else {
+          drawIcon(ctx, 'note', x, y, 34, UI_STYLE.text.outline);
+        }
+        break;
+      }
+      case 'turbo':
+        drawIcon(ctx, 'bolt', x, y, 38, PALETTE.orange);
+        break;
+    }
+  }
+
+  /** Confetti die uit het midden wegspat (t van 0 tot 1); vaste patronen, geen random per frame. */
+  private burst(x: number, y: number, t: number): void {
+    const { ctx } = this;
+    ctx.save();
+    ctx.globalAlpha = 1 - t;
+    for (let i = 0; i < 18; i++) {
+      const a = (i / 18) * Math.PI * 2;
+      const r = 20 + t * (70 + (i % 3) * 20);
+      ctx.fillStyle = CONFETTI_COLORS[i % CONFETTI_COLORS.length];
+      ctx.fillRect(x + Math.cos(a) * r - 4, y + Math.sin(a) * r + t * t * 40 - 3, 8, 6);
+    }
+    ctx.restore();
+  }
+
   /** Onderin: een weggetje waarop een autootje naar het finishvlaggetje rijdt. */
   private rideProgress(world: WorldState, cx: number, cy: number): void {
     const { ctx } = this;
@@ -284,12 +416,12 @@ export class UIRenderer {
    * Overzicht na de finish: sterren van deze rit, een kroontje bij een record en de nieuwe stickers
    * (die één voor één opspringen).
    */
-  private rideSummary(cx: number, summary: RideSummary, time: number): void {
+  private rideSummary(cx: number, summary: RideSummary, settings: Settings, time: number): void {
     const { ctx } = this;
     const t = time - summary.shownAt;
     this.iconText('flag', 'Klaar!', cx, 72, HEADING_FONT, true);
     const hasStickers = summary.stickers.length > 0;
-    const sy = hasStickers ? 185 : 235;
+    const sy = hasStickers ? 160 : 185;
     const pop = 1 + Math.max(0, Math.sin(Math.min(1, t * 2) * Math.PI)) * 0.25;
     ctx.save();
     ctx.translate(cx - 60, sy);
@@ -314,16 +446,21 @@ export class UIRenderer {
       drawIcon(ctx, 'crown', 0, 2, 40, PALETTE.orangeDark);
       ctx.restore();
     }
+    // De opdracht van deze rit (met vinkje als hij lukte; anders gewoon hoe ver het kind kwam).
+    const m = summary.mission;
+    const mw = this.missionCardWidth(m);
+    this.missionCard(m, cx - mw / 2, sy + 62, 1.25, settings, time);
+    const stickerY = 340;
     for (let i = 0; i < summary.stickers.length; i++) {
       const k = Math.min(1, Math.max(0, (t - 0.6 - i * 0.35) / 0.3));
       if (k <= 0) continue;
       const x = cx + (i - (summary.stickers.length - 1) / 2) * 96;
-      const scale = k < 1 ? k * 1.2 : 1;
+      const scale = (k < 1 ? k * 1.2 : 1) * 0.85;
       ctx.save();
-      ctx.translate(x, 300);
+      ctx.translate(x, stickerY);
       ctx.scale(scale, scale);
-      ctx.translate(-x, -300);
-      this.sticker(summary.stickers[i], x, 300, true, time + i);
+      ctx.translate(-x, -stickerY);
+      this.sticker(summary.stickers[i], x, stickerY, true, time + i);
       ctx.restore();
     }
   }
@@ -545,17 +682,18 @@ export class UIRenderer {
       }
     }
 
-    // Stickers: twee rijen van vier op een eigen paneel; nog niet verdiend = grijs.
-    const spacing = 104;
+    // Stickers: rijen van vijf (gecentreerd) op een eigen paneel; nog niet verdiend = grijs.
+    const spacing = 100;
+    const perRow = 5;
     ctx.fillStyle = UI_STYLE.panel;
     ctx.beginPath();
-    roundRectPath(ctx, cx - 2 * spacing - 8, 264, 4 * spacing + 16, 196, UI_STYLE.button.radius);
+    roundRectPath(ctx, cx - (perRow / 2) * spacing - 8, 264, perRow * spacing + 16, 196, UI_STYLE.button.radius);
     ctx.fill();
     for (let i = 0; i < STICKERS.length; i++) {
       const id = STICKERS[i].id;
-      const col = i % 4;
-      const row = Math.floor(i / 4);
-      const x = cx + (col - 1.5) * spacing;
+      const row = Math.floor(i / perRow);
+      const inRow = Math.min(perRow, STICKERS.length - row * perRow);
+      const x = cx + ((i % perRow) - (inRow - 1) / 2) * spacing;
       const y = 312 + row * 96;
       this.sticker(id, x, y, progress.stickers.includes(id), time + i);
     }

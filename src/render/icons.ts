@@ -25,7 +25,8 @@ export type IconName =
   | 'book'
   | 'flag'
   | 'rainbow'
-  | 'crown';
+  | 'crown'
+  | 'bolt';
 
 export function drawIcon(
   ctx: CanvasRenderingContext2D,
@@ -261,6 +262,18 @@ export function drawIcon(
         ctx.arc(cx, cy + s * 0.45, s * (0.85 - i * 0.28), Math.PI, Math.PI * 2);
         ctx.stroke();
       }
+      break;
+    case 'bolt':
+      // Bliksem: turbo.
+      ctx.beginPath();
+      ctx.moveTo(cx + s * 0.2, cy - s * 0.9);
+      ctx.lineTo(cx - s * 0.55, cy + s * 0.12);
+      ctx.lineTo(cx - s * 0.05, cy + s * 0.12);
+      ctx.lineTo(cx - s * 0.25, cy + s * 0.9);
+      ctx.lineTo(cx + s * 0.55, cy - s * 0.22);
+      ctx.lineTo(cx + s * 0.05, cy - s * 0.22);
+      ctx.closePath();
+      ctx.fill();
       break;
     case 'crown':
       // Kroontje: record.

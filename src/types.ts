@@ -22,7 +22,8 @@ export type StickerId =
   | 'firstRainbow'
   | 'rainbows10'
   | 'distance50'
-  | 'allWorlds';
+  | 'allWorlds'
+  | 'missions5';
 
 /** Persoonlijke voortgang (localStorage), alleen tellers: niets persoonlijks. */
 export interface Progress {
@@ -35,6 +36,8 @@ export interface Progress {
   distance: number;
   /** Aantal regenboogritten. */
   rainbows: number;
+  /** Gelukte opdrachten. */
+  missions: number;
   /** Werelden waarin al gereden is. */
   worlds: ThemeId[];
   stickers: StickerId[];
@@ -46,6 +49,18 @@ export interface Progress {
  */
 export type GameState = 'ready' | 'settings' | 'book' | 'choose' | 'playing' | 'paused' | 'finished';
 
+/** Opdracht voor één rit: sterren, over obstakels springen, regenboogstukje, springen bij een vriendje, turbo. */
+export type MissionKind = 'stars' | 'jumpOver' | 'rainbowPiece' | 'friendJump' | 'turbo';
+
+export interface Mission {
+  kind: MissionKind;
+  /** Hoeveel er nodig is (klein: geen hoge scores). */
+  target: number;
+  count: number;
+  /** Wereldtijd waarop de opdracht lukte; -1 = nog niet. */
+  doneTime: number;
+}
+
 /** Rijden, na de finish uitrijden naar de garage, of geparkeerd. */
 export type RidePhase = 'riding' | 'finishing' | 'parked';
 
@@ -56,6 +71,8 @@ export interface RideSummary {
   record: boolean;
   /** In deze rit verdiende stickers. */
   stickers: StickerId[];
+  /** De opdracht van deze rit (met hoe ver het kind kwam). */
+  mission: Mission;
   /** Sfeertijd waarop het overzicht verscheen (voor de animaties). */
   shownAt: number;
 }
@@ -239,6 +256,8 @@ export interface WorldState {
   parkedTime: number;
   /** De juichende vriendjes bij de finish staan er al. */
   finishFriends: boolean;
+  /** Opdracht van deze rit. */
+  mission: Mission;
   /** Resterende tijd (s) van de regenboogrit; 0 = geen rit. */
   rainbowRide: number;
   /** Gekozen wereld: bepaalt welke vriendjes er langs de weg staan. */
@@ -283,6 +302,12 @@ export interface WorldEvents {
   friendGift: boolean;
   /** Een vriendje doet een sprongetje voor. */
   friendDemo: boolean;
+  /** Over een obstakel gesprongen (zonder botsing). */
+  cleared: boolean;
+  /** Gesprongen vlak bij een vriendje (dat danst dan mee). */
+  friendJump: boolean;
+  /** De opdracht is gelukt. */
+  missionDone: boolean;
   /** Over de finishlijn gereden. */
   finished: boolean;
   /** In de garage gestopt. */

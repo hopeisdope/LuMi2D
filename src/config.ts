@@ -240,6 +240,20 @@ export const SCORE = {
   popDuration: 0.9,
 } as const;
 
+/** Opdracht per rit: klein en altijd haalbaar; nooit een hoge score. */
+export const MISSION = {
+  /** Zo lang (s) staat de opdracht groot in beeld aan het begin van de rit. */
+  introTime: 2.6,
+  /** Daarna schuift hij in zoveel seconden naar zijn plekje linksboven. */
+  slideTime: 0.5,
+  /** Springen telt als "bij een vriendje" binnen deze afstand. */
+  friendJumpDistance: 160,
+  /** Hoeveel er nodig is per soort. Sterren: minder als er niets is om overheen te springen. */
+  targets: { stars: 5, starsEasy: 3, jumpOver: 3, rainbowPiece: 1, friendJump: 2, turbo: 1 },
+  /** Duur (s) van de confetti als de opdracht lukt. */
+  celebrateTime: 1.4,
+} as const;
+
 /** Ritten en het rittenboekje. */
 export const RIDE = {
   /** Lengte van een rit tot de finish: ~75 s op basissnelheid (SPEED.base). */

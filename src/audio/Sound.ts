@@ -18,7 +18,8 @@ export type SoundName =
   | 'cheer'
   | 'hup'
   | 'finish'
-  | 'horn';
+  | 'horn'
+  | 'mission';
 
 type Wave = OscillatorType;
 
@@ -98,6 +99,11 @@ export class Sound {
         // Toet-toet: geparkeerd in de garage.
         this.tone(t, 392, 0.12, 'square', 0.1);
         this.tone(t + 0.18, 392, 0.16, 'square', 0.1);
+        break;
+      case 'mission':
+        // Opdracht gelukt: vrolijk loopje omhoog met een glinster erachteraan.
+        this.arpeggio(t, [659, 784, 988, 1319], 0.08, 'triangle', 0.24);
+        this.tone(t + 0.34, 1568, 0.25, 'sine', 0.16);
         break;
       case 'hup':
         // Vriendje doet een sprongetje voor: zacht en hoog, anders dan de sprong van de auto.
