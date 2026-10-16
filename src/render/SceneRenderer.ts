@@ -1,7 +1,9 @@
 import { PALETTE } from '../brand/brand';
-import { RAINBOW, SCENES, WORLD } from '../config';
+import { RAINBOW, SCENES, SPRITES, WORLD } from '../config';
 import type { SceneKind, WorldState } from '../types';
 import { roundRectPath, starPath } from './shapes';
+import { SCENE_DUCKS_SPRITE, SCENE_SHEEP_SPRITE } from './spriteData';
+import { drawFrame, PROP_IMAGES, ready } from './sprites';
 
 /** Kleuren van de regenboogtunnel (van buiten naar binnen). */
 const TUNNEL_COLORS = ['#e53935', '#ff9800', '#ffd93b', '#43c04a', '#29a9f0', '#9c4dcc'];
@@ -55,7 +57,14 @@ export class SceneRenderer {
         const k = t < 0 ? 0 : Math.min(1, Math.max(0, (t - i * d.stagger) / d.crossTime));
         const y = ground + 72 - k * 82;
         const walking = k > 0 && k < 1;
-        this.duck(spot + (i - 1.5) * 30, y, i === 0 ? 1 : 0.65, walking ? world.time * 10 + i : 0, i === 0);
+        if (ready(PROP_IMAGES.ducks)) {
+          // Vel: moeder (beeld 0/1) en kuiken (2/3), twee loopbeelden die afwisselen tijdens het lopen.
+          const step = walking ? Math.floor(world.time / SPRITES.walkFrameTime + i) % 2 : 0;
+          const frame = (i === 0 ? 0 : 2) + step;
+          drawFrame(this.ctx, PROP_IMAGES.ducks, SCENE_DUCKS_SPRITE, frame, spot + (i - 1.5) * 34, y, SPRITES.duckHeight);
+        } else {
+          this.duck(spot + (i - 1.5) * 30, y, i === 0 ? 1 : 0.65, walking ? world.time * 10 + i : 0, i === 0);
+        }
       }
     } else {
       // Schaapjes op de weg; als de auto nadert huppelen ze één voor één de berm in.
@@ -65,7 +74,13 @@ export class SceneRenderer {
         const hop = Math.sin(k * Math.PI) * 40;
         const y = ground + 8 - k * (8 + h.berm) - hop;
         const idle = k >= 1 ? Math.abs(Math.sin(world.time * 3 + i)) * 3 : 0;
-        this.sheep(spot + i * h.spacing + k * 14, y - idle, world.time + i);
+        if (ready(PROP_IMAGES.sheep)) {
+          // Staan (beeld 0) of huppelen (beeld 1).
+          const frame = k > 0 && k < 1 ? 1 : 0;
+          drawFrame(this.ctx, PROP_IMAGES.sheep, SCENE_SHEEP_SPRITE, frame, spot + i * h.spacing + k * 14, y - idle, SPRITES.sheepHeight);
+        } else {
+          this.sheep(spot + i * h.spacing + k * 14, y - idle, world.time + i);
+        }
       }
     }
   }
@@ -109,7 +124,9 @@ export class SceneRenderer {
     roundRectPath(ctx, -40, -34, 80, 68, 14);
     ctx.fill();
     ctx.stroke();
-    if (kind === 'ducks') this.duck(0, 22, 0.75, 0, true);
+    if (kind === 'ducks' && ready(PROP_IMAGES.ducks)) drawFrame(ctx, PROP_IMAGES.ducks, SCENE_DUCKS_SPRITE, 0, 0, 28, 54);
+    else if (kind === 'herd' && ready(PROP_IMAGES.sheep)) drawFrame(ctx, PROP_IMAGES.sheep, SCENE_SHEEP_SPRITE, 0, 0, 26, 46);
+    else if (kind === 'ducks') this.duck(0, 22, 0.75, 0, true);
     else if (kind === 'herd') this.sheep(0, 22, 0);
     else {
       for (let i = 0; i < 4; i++) {

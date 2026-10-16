@@ -127,7 +127,7 @@ export const BOUNCE = {
   poolSize: 2,
   /** Kans per nieuw parcoursdeel op een springkussen. */
   chance: 0.1,
-  width: 96,
+  width: 120,
   height: 20,
   /** Hoogte van de top van de veersprong (een gewone sprong is JUMP.height). */
   launchHeight: 260,
@@ -265,6 +265,16 @@ export const SPRITES = {
   friendShadow: 26,
   /** Tijd (s) per houding bij het juichen: zwaaien en juichen wisselen elkaar af. */
   friendPoseTime: 0.18,
+  /** Getekende grootte (eenheden) van de spullen uit de gameplayronde. De garage volgt uit de breedte van de opening. */
+  padWidth: 140,
+  cottonHeight: 88,
+  /** Hoogte van een vak in het ei-vel (nestje, opengebroken nestje, babydino); de dino iets kleiner. */
+  eggHeight: 95,
+  dinoScale: 0.85,
+  duckHeight: 62,
+  sheepHeight: 58,
+  /** Wisseltijd (s) tussen de twee loopbeelden van de eendjes. */
+  walkFrameTime: 0.16,
 } as const;
 
 /** Wat er gebeurt bij een botsing: geen game over, alleen een vriendelijke hobbel. */
