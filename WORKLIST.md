@@ -21,6 +21,7 @@ Read at the start of every session; update when something is done or added.
 
 ## Done
 
+- [x] Issues #33 (friends kept clear of platforms, world moments and scenes), #35 (car drives under the finish banner: front pole in front of the road), #36 (car drives into the garage, door closes in front of it; garage friend past the right wall)
 - [x] Gameplay sprites (ChatGPT): garage (car drives into the transparent doorway, roller door closes over it), bounce pad (bigger: 140 wide, hit zone 120), dino egg/hatching baby dino, cotton candy, walking ducks, sheep standing/hopping, pictures on the scene signs; drawn versions stay as fallback
 - [x] Removed the friend demonstrating jumps (1.2): too busy according to the owner. The "Tik om te springen!" hint at the start stays
 - [x] Gameplay 3.1 one moment per world, all hit by jumping (the whole car counts, so any jump past it works): meadow dandelion fluff blows away, dino egg in the berm hatches a waving baby dino, space bubbles pop, candy cotton-candy cloud rains sweets; each gives a star. Nothing happens when driving past without jumping
