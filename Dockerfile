@@ -1,6 +1,6 @@
 # LuMi2d als container: eerst bouwen met Node, daarna serveren met een kleine nginx.
 # Node op Debian (glibc) i.p.v. Alpine: TypeScript 7 en Vite 8 gebruiken native binaries.
-FROM node:22-slim AS build
+FROM node:25-slim AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
