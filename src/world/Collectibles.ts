@@ -24,7 +24,7 @@ export function resetCollectibles(world: WorldState): void {
   world.rainbowRide = 0;
 }
 
-function spawnCollectible(world: WorldState, kind: CollectibleKind, x: number, y: number, colorIndex = 0): boolean {
+export function spawnCollectible(world: WorldState, kind: CollectibleKind, x: number, y: number, colorIndex = 0): boolean {
   const pool = world.collectibles;
   for (let i = 0; i < pool.length; i++) {
     const c = pool[i];

@@ -192,6 +192,7 @@ export class Game {
   private playWorldSounds(): void {
     const e = this.world.events;
     if (e.bumped) this.sound.play('bump');
+    else if (e.bounced) this.sound.play('boing');
     else if (e.jumped) this.sound.play('jump');
     else if (e.landed) this.sound.play('land');
     if (e.scored) this.sound.play('star');

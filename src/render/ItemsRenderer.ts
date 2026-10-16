@@ -1,5 +1,5 @@
-import { COLLECTIBLES, COLORS, FEEDBACK, PLATFORMS, RAINBOW } from '../config';
-import type { Collectible, WorldState } from '../types';
+import { BOUNCE, COLLECTIBLES, COLORS, FEEDBACK, PLATFORMS, RAINBOW, WORLD } from '../config';
+import type { Collectible, Pad, WorldState } from '../types';
 import { roundRectPath, starPath } from './shapes';
 
 /** Duur (s) van de verdwijn-animatie na het pakken. */
@@ -37,6 +37,73 @@ export class ItemsRenderer {
         ctx.fill();
       }
     }
+  }
+
+  /** Springkussens: altijd met stuiterende pijltjes omhoog, zodat duidelijk is dat je er hoog op springt. */
+  renderPads(world: WorldState, carScreenX: number, viewWidth: number): void {
+    for (let i = 0; i < world.pads.length; i++) {
+      const p = world.pads[i];
+      if (!p.active) continue;
+      const sx = carScreenX + (p.x - world.car.x);
+      if (sx < -80 || sx > viewWidth + 80) continue;
+      this.drawPad(p, sx, world.time);
+    }
+  }
+
+  private drawPad(p: Pad, x: number, time: number): void {
+    const { ctx } = this;
+    const ground = WORLD.groundY;
+    const half = BOUNCE.width / 2;
+    // Indeuken na gebruik: de mat zakt even in en veert terug.
+    const since = p.usedTime < 0 ? Infinity : time - p.usedTime;
+    const dip = since < 0.35 ? Math.sin((since / 0.35) * Math.PI) * 8 : 0;
+    const top = ground - BOUNCE.height + dip;
+
+    // Pootjes en veren.
+    ctx.strokeStyle = COLORS.padFrame;
+    ctx.lineWidth = 5;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(x - half + 6, top + 4);
+    ctx.lineTo(x - half + 2, ground);
+    ctx.moveTo(x + half - 6, top + 4);
+    ctx.lineTo(x + half - 2, ground);
+    ctx.stroke();
+    ctx.strokeStyle = COLORS.padSpring;
+    ctx.lineWidth = 3;
+    for (let k = -1; k <= 1; k++) {
+      const sx = x + k * half * 0.5;
+      ctx.beginPath();
+      ctx.moveTo(sx, top + 6);
+      for (let z = 1; z <= 4; z++) ctx.lineTo(sx + (z % 2 === 0 ? -5 : 5), top + 6 + ((ground - top - 6) * z) / 4);
+      ctx.stroke();
+    }
+    // Mat.
+    ctx.fillStyle = COLORS.padMat;
+    ctx.beginPath();
+    roundRectPath(ctx, x - half, top - 4, BOUNCE.width, 12, 6);
+    ctx.fill();
+    ctx.fillStyle = COLORS.padMatLight;
+    ctx.beginPath();
+    roundRectPath(ctx, x - half + 6, top - 3, BOUNCE.width - 12, 4, 2);
+    ctx.fill();
+
+    // Pijltjes omhoog die zacht stuiteren (niet meer na gebruik).
+    if (p.usedTime >= 0) return;
+    const bounce = Math.abs(Math.sin(time * 5)) * 8;
+    ctx.strokeStyle = COLORS.padArrow;
+    ctx.lineWidth = 6;
+    ctx.lineJoin = 'round';
+    for (let a = 0; a < 2; a++) {
+      const y = top - 22 - a * 16 - bounce;
+      ctx.globalAlpha = a === 0 ? 1 : 0.7;
+      ctx.beginPath();
+      ctx.moveTo(x - 14, y + 8);
+      ctx.lineTo(x, y - 4);
+      ctx.lineTo(x + 14, y + 8);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
   }
 
   renderCollectibles(world: WorldState, carScreenX: number, viewWidth: number): void {

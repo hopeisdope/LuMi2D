@@ -9,7 +9,7 @@ Read at the start of every session; update when something is done or added.
 
 ## Next
 
-- [ ] Gameplay ideas (owner's list, 2026-10-16), built in order: 2.3 bounce pads, 2.2 surprise scenes; 3.1 one moment per world. Art in code first; ChatGPT prompts afterwards
+- [ ] Gameplay ideas (owner's list, 2026-10-16), built in order: 2.2 surprise scenes; 3.1 one moment per world. Art in code first; ChatGPT prompts afterwards
 - [ ] Check the new sprites on a real iPad (sharpness, size of friends next to the car)
 - [ ] Configurable auto-movement, difficulty and increasing speed
 
@@ -20,6 +20,7 @@ Read at the start of every session; update when something is done or added.
 
 ## Done
 
+- [x] Gameplay 2.3 bounce pads: mint trampoline with springs and bouncing up-arrows; driving or landing on it gives a soft 260-high bounce with 'boing' and three stars along the arc; course leaves room for the long bounce. Mission card moved to the bottom-left (the high bounce reached the top-left card)
 - [x] Gameplay 2.1 one mission per ride (5 stars / jump over 3 / 1 rainbow piece / jump next to 2 friends / 1 turbo; only feasible ones, never the same twice): big card at the start that slides to the top-left with progress dots, confetti + sound when done, shown in the summary; missions counted in the book (+ sticker for 5). Jumping next to a friend now always makes it dance
 - [x] Gameplay 2.4 finish: rides end after 24 000 units (~75 s); clear road before the finish, checkered arch with confetti and fanfare, cheering friends, the car brakes into a garage and the door closes; summary with stars, record crown and new stickers; "Nog een keer" / "Kiezen"; progress bar to the flag at the bottom
 - [x] Gameplay 1.3 ride book (book button on the start screen): best ride stars, rides, distance in "km", rainbow rides, 8 milestone stickers; counts ≤ 10 shown as rows of pictures; saved in `lumi2d.progress.v1` when a ride ends or the app is hidden, without double counting
