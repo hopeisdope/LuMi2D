@@ -19,6 +19,7 @@ Read at the start of every session; update when something is done or added.
 
 ## Done
 
+- [x] Review LUMI-003 (DOM/screen-reader UI, re-enable zoom) declined on purpose; reasoning in `CLAUDE.md` → Conventions
 - [x] nginx 1.27 (unsupported) → 1.30 stable; Dependabot for base images and Actions; update command pulls base images (review LUMI-004)
 - [x] Service worker caches the page only when it is successful HTML; regression test `scripts/test-offline.mjs` (review LUMI-001)
 - [x] CI workflow on PRs and pushes to main (npm ci, typecheck, build); merge only when green (review LUMI-002)

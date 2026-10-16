@@ -53,6 +53,10 @@ GitHub Pages workflow (`.github/workflows/pages.yml`) is kept but manual-only (n
 - Input goes through `InputManager` as abstract actions; new controls (e.g. jump) are new action types.
 - Use delta time for all movement; avoid allocations in the update/render loop.
 - Touch-first: no hover or mouse-only controls; large tap targets for children.
+- Accessibility scope (deliberate decision, review LUMI-003, 2026-10-16): the UI stays canvas-only and browser zoom stays
+  disabled. Players are toddlers who can't read, tapping fast with several fingers; pinch/double-tap zoom would hijack
+  play, and a timing-based jump game isn't meaningfully playable with a screen reader. Keyboard jump (Space/Enter/↑/W)
+  exists. Revisit only if the audience changes.
 - Every text, button and instruction gets an icon or picture (`src/render/icons.ts`) for children who can't read yet.
 - Storage: only `localStorage` key `lumi2d.settings.v1` for settings (toggles, car, world) via `src/settings/Settings.ts`;
   always validate on load and fall back to defaults. Never store anything personal or sensitive.
