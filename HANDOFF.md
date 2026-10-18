@@ -46,7 +46,7 @@ Concise state for reloading into a fresh session. Details are in `WORKLIST.md`.
     else obstacle; scenes and the finish clear zone take precedence.
 - `world.events.jumped/landed/bumped/scored/boosted/rainbowPiece/rainbowRide` are set per frame — the hook for sound/feedback later.
 - `createWorld(seed)` / `resetWorld(world, seed)` take an optional seed for reproducible tests.
-- Hosting: running on the Docker VM at `/opt/LuMi2D`, port from `.env` (`LUMI2D_PORT=8080`). Docker on the owner's Docker VM in Proxmox (LAN only): `Dockerfile`, `docker/nginx.conf`, `docker-compose.yml`. Netlify removed (credits), GitHub Pages workflow manual-only (private repo). Tested: image builds, healthy, correct cache headers, game plays via LAN IP; no service worker on plain http (expected).
+- Hosting: GitHub Pages only (Docker removed 2026-10-18). `pages.yml` deploys on every push to `main`; repo must be public (or GitHub Pro) and Pages source set to GitHub Actions.
 - Review of PR #15 handled (2026-10-16): CI workflow (`ci.yml`, merge only when green — can't be required on a private Free repo), service worker caches only successful HTML (`scripts/test-offline.mjs`), nginx 1.30 + Dependabot, update with `docker compose build --pull`; LUMI-003 declined (see `CLAUDE.md`).
 - Typecheck, build and `scripts/test-offline.mjs` pass; features tested in Chromium (Playwright) with iPad viewports via
   the dev build's `window.game` (state can be staged), not yet on a real device.

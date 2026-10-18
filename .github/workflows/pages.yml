@@ -1,8 +1,10 @@
-# Bouwt LuMi2d en publiceert het op GitHub Pages. Alleen handmatig te starten (Actions → Run workflow):
-# GitHub Pages werkt pas als de repo publiek is (of met GitHub Pro). De game draait nu in Docker op de eigen server.
+# Bouwt LuMi2d en publiceert het op GitHub Pages bij elke push naar main (ook handmatig te starten via Actions).
+# Eenmalig nodig: Settings → Pages → Source: "GitHub Actions". Pages vereist een publieke repo (of GitHub Pro).
 name: Deploy naar GitHub Pages
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -24,6 +26,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm run typecheck
       - run: npm run build
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

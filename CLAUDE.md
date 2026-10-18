@@ -25,17 +25,14 @@ npm run typecheck && npm run build   # no test framework yet; typecheck + produc
 node scripts/test-offline.mjs       # after a build: service worker keeps the offline game when the server errors (needs Playwright)
 ```
 
-Test hosting: Docker on the owner's own server (Docker VM in Proxmox, LAN only): `Dockerfile` (Node build → nginx),
-`docker/nginx.conf`, `docker-compose.yml`. Update there with `git pull && docker compose build --pull && docker compose up -d`
-(`--pull` also fetches patched base images); default port 8080. Runtime image: `nginx:1.30-alpine` (stable line);
-Dependabot (`.github/dependabot.yml`) opens PRs for base-image and Actions updates — merge them when CI is green, except nginx mainline
-(odd minor such as 1.31): close those and stay on the stable (even) line.
-On plain `http://<lan-ip>` there is no service worker (not a secure context): the game works, offline mode doesn't.
-GitHub Pages workflow (`.github/workflows/pages.yml`) is kept but manual-only (needs a public repo or GitHub Pro).
+Hosting: GitHub Pages only (`https://hopeisdope.github.io/LuMi2D/`). `.github/workflows/pages.yml` runs typecheck +
+build and deploys on every push to `main` (also manual via workflow_dispatch). `base: './'` keeps the `/LuMi2D/` subpath working.
+Pages needs a public repo (or GitHub Pro) and Settings → Pages → Source: "GitHub Actions". Pages serves over HTTPS, so the
+service worker (offline mode) works. Dependabot (`.github/dependabot.yml`) opens PRs for Actions updates — merge them when CI is green.
 
 ## Git workflow
 - Work on a feature branch, then always merge it into `main` when the work is done and checks pass
-  (open a PR and merge it; merge commit, no squash). No need to ask first — the server builds from `main`.
+  (open a PR and merge it; merge commit, no squash). No need to ask first — GitHub Pages deploys from `main`.
 - Merge only after the `CI` check (`.github/workflows/ci.yml`: typecheck + build) is green: `gh pr checks <n> --watch`.
   Required status checks can't be enforced on a private repo without GitHub Pro, so this is a working rule.
 - After merging, sync the local `main`.

@@ -5,6 +5,7 @@ Read at the start of every session; update when something is done or added.
 ## Now
 
 - [ ] Tune jump height/airtime and obstacle sizes/gaps (`JUMP`, `OBSTACLES` in `config.ts`) with children on a real iPad — jump window widened to ~0.7 s, check if that feels right
+- [ ] Enable GitHub Pages (repo public or GitHub Pro; Settings → Pages → Source: GitHub Actions) and play via `https://hopeisdope.github.io/LuMi2D/` on the iPad
 - [ ] Test on a real iPad and iPad mini in Safari: smoothness (headless Chromium without GPU can't measure this), touch, sound, install via "Zet op beginscherm", offline
 
 ## Next
@@ -14,13 +15,12 @@ Read at the start of every session; update when something is done or added.
 
 ## Open questions
 
-- Dependabot PRs #17–#22 are open: node 22 → 25 (not LTS; close or retarget to 24), GitHub Actions major bumps (CI and the manual Pages workflow)
-
-- Offline mode on the LAN needs HTTPS (reverse proxy with a certificate); is that wanted later?
+- Dependabot PRs #17–#22 are open: node 22 → 25 (not LTS; close or retarget to 24), GitHub Actions major bumps (CI and the Pages workflow)
 
 
 ## Done
 
+- [x] Hosting fully on GitHub: Docker removed (Dockerfile, nginx, compose, Dependabot docker updates), Pages workflow deploys automatically on push to `main` (typecheck + build)
 - [x] README: detailed feature overview and design rules, to brief ChatGPT for new feature ideas
 - [x] Endless mode is the default (older saved settings get it too, once)
 - [x] Endless mode toggle (no finish, missions keep coming), car drives under the rainbow tunnel, obstacles bigger with a thick outline (a toddler missed some)

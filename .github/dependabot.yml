@@ -1,12 +1,6 @@
-# Wekelijks een PR bij nieuwe versies van de basis-images (Dockerfile) en van de GitHub Actions.
-# Elke PR gaat door de CI-check. Let op: Dependabot stelt ook nginx-mainline voor (oneven minor, bv. 1.31);
-# die PR's sluiten, alleen stabiele reeksen (even minor: 1.30, 1.32) mergen.
+# Wekelijks een PR bij nieuwe versies van de GitHub Actions. Elke PR gaat door de CI-check.
 version: 2
 updates:
-  - package-ecosystem: docker
-    directory: /
-    schedule:
-      interval: weekly
   - package-ecosystem: github-actions
     directory: /
     schedule:
