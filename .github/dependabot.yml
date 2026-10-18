@@ -1,0 +1,7 @@
+# Wekelijks een PR bij nieuwe versies van de GitHub Actions. Elke PR gaat door de CI-check.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

@@ -25,6 +25,8 @@ export const LOOP = {
 export const WORLD = {
   /** Y-positie van de grondlijn (bovenkant weg). */
   groundY: 430,
+  /** Diepte van de weg op het scherm: daaronder begint het gras vóór de weg. */
+  roadHeight: 46,
 } as const;
 
 export const CAR = {
@@ -79,12 +81,15 @@ export const OBSTACLES = {
   /** Obstakels zo ver achter de auto worden opgeruimd. */
   despawnBehind: 800,
   /** Vergevingsgezinde botsing: zoveel eenheden van elke kant van het obstakel tellen niet mee. */
-  hitboxInset: 10,
-  /** Afmetingen per soort; laag genoeg om er makkelijk overheen te springen. */
+  hitboxInset: 13,
+  /**
+   * Afmetingen per soort: groot genoeg om ze op tijd te zien (met dikke rand, zie ObstacleRenderer), laag genoeg om
+   * er makkelijk overheen te springen.
+   */
   kinds: {
-    cone: { width: 40, height: 44 },
-    rock: { width: 56, height: 30 },
-    crate: { width: 44, height: 38 },
+    cone: { width: 52, height: 58 },
+    rock: { width: 72, height: 40 },
+    crate: { width: 58, height: 50 },
   },
 } as const;
 
@@ -102,7 +107,7 @@ export const ENEMIES = {
    */
   extraGap: 250,
   kinds: {
-    hedgehog: { width: 58, height: 36 },
+    hedgehog: { width: 74, height: 46 },
   },
 } as const;
 
@@ -117,6 +122,76 @@ export const PLATFORMS = {
   chance: 0.12,
   /** Hoe ver de auto over de rand mag hangen en toch blijft staan of landt (vergevingsgezind). */
   edgeMargin: 30,
+} as const;
+
+/**
+ * Springkussens (altijd aan: ze zijn nooit gevaarlijk). Erop rijden of landen geeft een zachte sprong die
+ * hoger is dan een gewone; langs de boog hangen sterren.
+ */
+export const BOUNCE = {
+  poolSize: 2,
+  /** Kans per nieuw parcoursdeel op een springkussen. */
+  chance: 0.1,
+  width: 120,
+  height: 20,
+  /** Hoogte van de top van de veersprong (een gewone sprong is JUMP.height). */
+  launchHeight: 260,
+  /** Sterren langs de boog, op deze fracties van de luchttijd. */
+  starTimes: [0.3, 0.5, 0.7],
+} as const;
+
+/** Afgeleide veersprong: v = √(2·g·h), luchttijd t = 2v/g (zelfde zwaartekracht als springen). */
+export const BOUNCE_PHYSICS = {
+  velocity: Math.sqrt(2 * JUMP_PHYSICS.gravity * BOUNCE.launchHeight),
+  airTime: (2 * Math.sqrt(2 * JUMP_PHYSICS.gravity * BOUNCE.launchHeight)) / JUMP_PHYSICS.gravity,
+} as const;
+
+/**
+ * Eén eigen spelmoment per wereld, altijd door/over te springen: paardenbloempluis (weide), een ei dat uitkomt
+ * (dino), zwevende bellen (ruimte) en een suikerspinwolkje (zoetroze). Raken geeft een verrassing en een ster;
+ * eronderdoor of erlangs rijden doet niets.
+ */
+export const MOMENTS = {
+  poolSize: 3,
+  /** Kans per nieuw parcoursdeel. */
+  chance: 0.12,
+  /**
+   * Hoogte van het midden boven de weg: alleen met een sprong te raken. Het hele autootje telt mee, dus op deze
+   * hoogte raakt elke sprong die er langskomt (vanaf ~57 hoog, ook op de top van de sprong op 190).
+   */
+  height: { meadow: 175, dino: 0, space: 185, candy: 180 },
+  radius: 30,
+  /** Ei in de berm: de auto moet in de lucht zijn binnen deze afstand van het nestje. */
+  eggReach: 100,
+  /** Duur (s) van de verrassing na het raken. */
+  effectTime: 1.4,
+} as const;
+
+/**
+ * Verrassingstaferelen: eendjes die oversteken (de auto wacht even), een regenboogtunnel en een kudde schaapjes
+ * die opzij huppelt. Altijd met hetzelfde bordje vooraf en een stuk weg zonder obstakels.
+ */
+export const SCENES = {
+  /** Eerste tafereel na zoveel afstand, daarna steeds tussen minGap en maxGap verder. */
+  first: 5000,
+  minGap: 6000,
+  maxGap: 8500,
+  /** Stuk weg zonder obstakels vanaf het bordje. */
+  length: 1100,
+  /** Het tafereel staat zo ver na het bordje. */
+  eventOffset: 650,
+  ducks: {
+    /** Afstand van de auto tot de oversteekplek waarop de eendjes gaan lopen. */
+    triggerDistance: 900,
+    /** Duur (s) van de oversteek van één eendje; de kuikentjes lopen iets later. */
+    crossTime: 3.4,
+    stagger: 0.3,
+    count: 4,
+    /** De voorkant van de auto stopt zo ver vóór de oversteekplek. */
+    stopBefore: 150,
+  },
+  tunnel: { halfWidth: 160, height: 250 },
+  herd: { count: 4, spacing: 58, triggerDistance: 560, hopTime: 0.5, stagger: 0.15, berm: 10 },
 } as const;
 
 /** Turbo: tijdelijk sneller rijden en obstakels zonder hobbel wegknallen. */
@@ -164,10 +239,49 @@ export const FRIENDS = {
   /** Deel van de cadeaus dat een verrassing is (confetti + extra sterren) i.p.v. één ster. */
   surpriseShare: 0.3,
   surpriseStars: 3,
+  /** Vrije ruimte tussen een vriendje en een platform, spelmoment of verrassingstafereel (zodat ze niet overlappen). */
+  clearance: 90,
   /** Duur (s) van het zwaaien/juichen en van de cadeau-animaties. */
   cheerTime: 2,
   giftFlightTime: 0.6,
   confettiTime: 1.2,
+} as const;
+
+/** Korte beelden bij elke actie, en reacties van de vriendjes daarop. Tijden in seconden. */
+export const FEEDBACK = {
+  /** Veerstreepjes onder de auto bij het afzetten. */
+  jumpLinesTime: 0.3,
+  /** Stofwolkjes bij de landing. */
+  dustTime: 0.45,
+  /** Glinsterplof bij het pakken van iets. */
+  sparkleTime: 0.5,
+  /** Vriendjes binnen deze afstand (achter tot vóór de auto, in beeld) reageren op wat het kind doet. */
+  reactBehind: 200,
+  reactAhead: 650,
+  /** Duur van een reactie (duimpje, verbaasd, dansje). */
+  reactionTime: 1.2,
+} as const;
+
+/** Plaatjes uit public/sprites/ (de maten in pixels staan in src/render/spriteData.ts). */
+export const SPRITES = {
+  /** Draaiend wiel iets groter dan het getekende wiel in het autoplaatje, zodat dat er helemaal onder valt. */
+  wheelCover: 1.08,
+  /** Hoogte van een vriendje (vak van één houding). */
+  friendHeight: 96,
+  /** Breedte van de schaduw onder een vriendje. */
+  friendShadow: 26,
+  /** Tijd (s) per houding bij het juichen: zwaaien en juichen wisselen elkaar af. */
+  friendPoseTime: 0.18,
+  /** Getekende grootte (eenheden) van de spullen uit de gameplayronde. De garage volgt uit de breedte van de opening. */
+  padWidth: 140,
+  cottonHeight: 88,
+  /** Hoogte van een vak in het ei-vel (nestje, opengebroken nestje, babydino); de dino iets kleiner. */
+  eggHeight: 95,
+  dinoScale: 0.85,
+  duckHeight: 62,
+  sheepHeight: 58,
+  /** Wisseltijd (s) tussen de twee loopbeelden van de eendjes. */
+  walkFrameTime: 0.16,
 } as const;
 
 /** Wat er gebeurt bij een botsing: geen game over, alleen een vriendelijke hobbel. */
@@ -191,6 +305,44 @@ export const CAR_HITBOX = {
 export const SCORE = {
   /** Duur (s) van de ster die boven de auto opstijgt. */
   popDuration: 0.9,
+} as const;
+
+/** Opdracht per rit: klein en altijd haalbaar; nooit een hoge score. */
+export const MISSION = {
+  /** Zo lang (s) staat de opdracht groot in beeld aan het begin van de rit. */
+  introTime: 2.6,
+  /** Daarna schuift hij in zoveel seconden naar zijn plekje linksboven. */
+  slideTime: 0.5,
+  /** Springen telt als "bij een vriendje" binnen deze afstand. */
+  friendJumpDistance: 160,
+  /** Hoeveel er nodig is per soort. Sterren: minder als er niets is om overheen te springen. */
+  targets: { stars: 5, starsEasy: 3, jumpOver: 3, rainbowPiece: 1, friendJump: 2, turbo: 1 },
+  /** Duur (s) van de confetti als de opdracht lukt. */
+  celebrateTime: 1.4,
+  /** Oneindig rijden: zo lang (s) na een gelukte opdracht komt de volgende (na de confetti). */
+  nextDelay: 4,
+} as const;
+
+/** Ritten en het rittenboekje. */
+export const RIDE = {
+  /** Lengte van een rit tot de finish: ~75 s op basissnelheid (SPEED.base). */
+  length: 24000,
+  /** Zo ver vóór de finish komen er geen obstakels, platforms of regenboogstukjes meer. */
+  clearBeforeFinish: 700,
+  /** Geen nieuwe regenboogstukjes zo dicht bij de finish (een regenboogrit moet vóór de finish klaar zijn). */
+  noRainbowBeforeFinish: 2600,
+  /** Na de finish rijdt de auto uit en parkeert zo ver verderop in de garage. */
+  garageDistance: 700,
+  /** Het juichende vriendje bij de garage staat zo ver rechts van de deuropening: voorbij de rechtermuur. */
+  garageFriendOffset: 340,
+  /** Remvertraging naar de garage (eenheden/s²): vanaf basissnelheid ~600 eenheden remweg. */
+  brake: 85,
+  /** Zo lang (s) na het parkeren verschijnt het overzicht. */
+  summaryDelay: 1.2,
+  /** Een rit telt mee in het boekje als hij minstens zo lang (s) duurde. */
+  minTime: 20,
+  /** Wereld-eenheden per "kilometer" in het boekje (een rit van ~75 s is dan ~2,4 km). */
+  unitsPerKm: 10000,
 } as const;
 
 /** Instelbare voortbeweging; later uit te breiden met moeilijkheidsgraad. */
@@ -228,11 +380,14 @@ export const COLORS = {
   carWheel: '#222222',
   carHub: '#d0d0d0',
   carLight: '#fff59d',
+  /** Dikke donkere rand om obstakels en egels, zodat ze uitspringen tegen weg en gras. */
+  obstacleOutline: PALETTE.navy,
+  obstacleOutlineWidth: 5,
   cone: PALETTE.orange,
   coneDark: PALETTE.orangeDark,
   coneStripe: PALETTE.white,
-  rock: '#8d8d99',
-  rockLight: '#b4b4c0',
+  rock: '#b4b4c6',
+  rockLight: '#dcdce6',
   crate: '#d9a35b',
   crateDark: '#9c6a2c',
   hedgehog: '#7a5230',
@@ -248,18 +403,26 @@ export const COLORS = {
   boostBolt: PALETTE.yellow,
   star: PALETTE.yellow,
   starOutline: PALETTE.orangeDark,
+  /** Springkussen: fel mint, anders dan alle obstakels. */
+  padMat: '#1de9b6',
+  padMatLight: '#a7ffeb',
+  padSpring: '#cfd8dc',
+  padFrame: PALETTE.navy,
+  padArrow: PALETTE.white,
 } as const;
 
 /** Posities en afmetingen van UI-elementen op het virtuele 2D-scherm. */
 export const UI = {
   pauseButton: { size: 72, margin: 20 },
   score: { margin: 22, starSize: 30 },
-  settingsRow: { width: 480, height: 74, gap: 14 },
+  settingsRow: { width: 540, height: 64, gap: 10 },
   /** Bovenkant van de eerste instellingenrij. */
-  settingsTop: 104,
+  settingsTop: 86,
   /** Kaartjes van de auto- en wereldkiezer. */
-  pickerCard: { width: 140, height: 100, gap: 18 },
+  pickerCard: { width: 140, height: 92, gap: 28 },
   menuButton: { width: 280, height: 84, gap: 24 },
+  /** Knoppen in het overzicht na de finish ("Nog een keer" is lang); twee passen naast elkaar op 720 breed. */
+  summaryButtonWidth: 320,
 } as const;
 
 /** Uiterlijk van de te kiezen auto's. Alleen het uiterlijk verschilt; rijden en springen is gelijk. */

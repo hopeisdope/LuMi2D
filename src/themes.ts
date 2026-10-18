@@ -111,6 +111,6 @@ export const THEMES: Readonly<Record<ThemeId, Theme>> = {
     decor: 'candy',
     decorA: '#ff4f9a',
     decorB: '#7ad3ff',
-    friends: ['unicorn', 'kitty'],
+    friends: ['unicorn', 'cupcake'],
   },
 };

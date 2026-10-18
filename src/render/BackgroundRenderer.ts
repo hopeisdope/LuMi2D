@@ -31,7 +31,7 @@ const STARS: ReadonlyArray<{ x: number; y: number; r: number }> = (() => {
 })();
 
 const ROAD_TOP = WORLD.groundY;
-const ROAD_HEIGHT = 46;
+const ROAD_HEIGHT = WORLD.roadHeight;
 const DASH_LENGTH = 50;
 const DASH_PERIOD = 110;
 const DECOR_PERIOD = 170;

@@ -1,3 +1,5 @@
+import { roundRectPath } from './shapes';
+
 /**
  * Eenvoudige vectoriconen voor kinderen die nog niet kunnen lezen.
  * Elk icoon wordt gecentreerd op (cx, cy) getekend binnen een vierkant van `size`.
@@ -15,7 +17,16 @@ export type IconName =
   | 'hand'
   | 'back'
   | 'car'
-  | 'world';
+  | 'world'
+  | 'thumb'
+  | 'exclaim'
+  | 'note'
+  | 'book'
+  | 'flag'
+  | 'rainbow'
+  | 'crown'
+  | 'bolt'
+  | 'infinity';
 
 export function drawIcon(
   ctx: CanvasRenderingContext2D,
@@ -190,6 +201,117 @@ export function drawIcon(
       ctx.fill();
       break;
     }
+    case 'thumb':
+      // Duim omhoog: handpalm met een dikke duim erboven en drie gebogen vingers (losse blokjes = vuist).
+      ctx.beginPath();
+      roundRectPath(ctx, cx - s * 0.7, cy - s * 0.15, s * 0.6, s * 0.95, s * 0.18);
+      ctx.fill();
+      ctx.beginPath();
+      roundRectPath(ctx, cx - s * 0.62, cy - s * 0.9, s * 0.42, s * 0.95, s * 0.21);
+      ctx.fill();
+      for (let i = 0; i < 3; i++) {
+        ctx.beginPath();
+        roundRectPath(ctx, cx - s * 0.2, cy - s * 0.12 + i * s * 0.32, s * 0.85, s * 0.26, s * 0.13);
+        ctx.fill();
+      }
+      break;
+    case 'exclaim':
+      ctx.lineWidth = s * 0.34;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - s * 0.75);
+      ctx.lineTo(cx, cy + s * 0.25);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(cx, cy + s * 0.7, s * 0.19, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    case 'book':
+      // Open boekje: twee bladzijden met een rug in het midden.
+      ctx.beginPath();
+      ctx.moveTo(cx - s * 0.05, cy - s * 0.55);
+      ctx.quadraticCurveTo(cx - s * 0.45, cy - s * 0.8, cx - s * 0.9, cy - s * 0.6);
+      ctx.lineTo(cx - s * 0.9, cy + s * 0.6);
+      ctx.quadraticCurveTo(cx - s * 0.45, cy + s * 0.4, cx - s * 0.05, cy + s * 0.65);
+      ctx.closePath();
+      ctx.moveTo(cx + s * 0.05, cy - s * 0.55);
+      ctx.quadraticCurveTo(cx + s * 0.45, cy - s * 0.8, cx + s * 0.9, cy - s * 0.6);
+      ctx.lineTo(cx + s * 0.9, cy + s * 0.6);
+      ctx.quadraticCurveTo(cx + s * 0.45, cy + s * 0.4, cx + s * 0.05, cy + s * 0.65);
+      ctx.closePath();
+      ctx.fill();
+      break;
+    case 'flag':
+      // Vlaggetje (finish/rit) aan een stok.
+      ctx.lineWidth = s * 0.16;
+      ctx.beginPath();
+      ctx.moveTo(cx - s * 0.55, cy + s * 0.85);
+      ctx.lineTo(cx - s * 0.55, cy - s * 0.8);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(cx - s * 0.5, cy - s * 0.8);
+      ctx.quadraticCurveTo(cx + s * 0.1, cy - s * 0.95, cx + s * 0.8, cy - s * 0.6);
+      ctx.lineTo(cx + s * 0.8, cy + s * 0.05);
+      ctx.quadraticCurveTo(cx + s * 0.1, cy - s * 0.3, cx - s * 0.5, cy - s * 0.1);
+      ctx.closePath();
+      ctx.fill();
+      break;
+    case 'infinity':
+      // Liggende acht: oneindig doorrijden.
+      ctx.lineWidth = s * 0.22;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.bezierCurveTo(cx + s * 0.35, cy - s * 0.6, cx + s * 0.95, cy - s * 0.5, cx + s * 0.95, cy);
+      ctx.bezierCurveTo(cx + s * 0.95, cy + s * 0.5, cx + s * 0.35, cy + s * 0.6, cx, cy);
+      ctx.bezierCurveTo(cx - s * 0.35, cy - s * 0.6, cx - s * 0.95, cy - s * 0.5, cx - s * 0.95, cy);
+      ctx.bezierCurveTo(cx - s * 0.95, cy + s * 0.5, cx - s * 0.35, cy + s * 0.6, cx, cy);
+      ctx.stroke();
+      break;
+    case 'rainbow':
+      ctx.lineWidth = s * 0.2;
+      for (let i = 0; i < 3; i++) {
+        ctx.beginPath();
+        ctx.arc(cx, cy + s * 0.45, s * (0.85 - i * 0.28), Math.PI, Math.PI * 2);
+        ctx.stroke();
+      }
+      break;
+    case 'bolt':
+      // Bliksem: turbo.
+      ctx.beginPath();
+      ctx.moveTo(cx + s * 0.2, cy - s * 0.9);
+      ctx.lineTo(cx - s * 0.55, cy + s * 0.12);
+      ctx.lineTo(cx - s * 0.05, cy + s * 0.12);
+      ctx.lineTo(cx - s * 0.25, cy + s * 0.9);
+      ctx.lineTo(cx + s * 0.55, cy - s * 0.22);
+      ctx.lineTo(cx + s * 0.05, cy - s * 0.22);
+      ctx.closePath();
+      ctx.fill();
+      break;
+    case 'crown':
+      // Kroontje: record.
+      ctx.beginPath();
+      ctx.moveTo(cx - s * 0.85, cy + s * 0.55);
+      ctx.lineTo(cx - s * 0.85, cy - s * 0.45);
+      ctx.lineTo(cx - s * 0.42, cy);
+      ctx.lineTo(cx, cy - s * 0.7);
+      ctx.lineTo(cx + s * 0.42, cy);
+      ctx.lineTo(cx + s * 0.85, cy - s * 0.45);
+      ctx.lineTo(cx + s * 0.85, cy + s * 0.55);
+      ctx.closePath();
+      ctx.fill();
+      break;
+    case 'note':
+      // Muzieknootje met vlaggetje.
+      ctx.beginPath();
+      ctx.ellipse(cx - s * 0.25, cy + s * 0.5, s * 0.3, s * 0.22, -0.4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.lineWidth = s * 0.14;
+      ctx.beginPath();
+      ctx.moveTo(cx + s * 0.02, cy + s * 0.45);
+      ctx.lineTo(cx + s * 0.02, cy - s * 0.8);
+      ctx.quadraticCurveTo(cx + s * 0.6, cy - s * 0.55, cx + s * 0.55, cy - s * 0.1);
+      ctx.stroke();
+      break;
   }
   ctx.restore();
 }
+

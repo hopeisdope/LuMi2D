@@ -1,4 +1,4 @@
-import { COLORS, RAINBOW, SCORE } from '../config';
+import { BUMP, COLORS, FEEDBACK, RAINBOW, SCORE } from '../config';
 import type { WorldState } from '../types';
 import { starPath } from './shapes';
 
@@ -74,6 +74,7 @@ export class EffectsRenderer {
   }
 
   render(world: WorldState, carScreenX: number): void {
+    this.actions(world, carScreenX);
     if (world.lastScoreTime < 0) return;
     const t = world.time - world.lastScoreTime;
     if (t < 0 || t > SCORE.popDuration) return;
@@ -97,5 +98,76 @@ export class EffectsRenderer {
     ctx.fill();
     ctx.stroke();
     ctx.restore();
+  }
+
+  /** Veerstreepjes bij het afzetten, stofwolkjes bij de landing en draaiende sterretjes na een botsing. */
+  private actions(world: WorldState, carScreenX: number): void {
+    const { ctx } = this;
+    const car = world.car;
+
+    if (world.lastJumpTime >= 0) {
+      const t = (world.time - world.lastJumpTime) / FEEDBACK.jumpLinesTime;
+      if (t < 1) {
+        // Drie streepjes die vanaf de afzetplek naar beneden en opzij wegspringen.
+        const x = carScreenX + (world.lastJumpX - car.x);
+        const y = world.lastJumpY;
+        ctx.save();
+        ctx.globalAlpha = 1 - t;
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 5;
+        ctx.lineCap = 'round';
+        for (let i = -1; i <= 1; i++) {
+          const a = Math.PI / 2 + i * 0.7;
+          const r0 = 10 + t * 24;
+          ctx.beginPath();
+          ctx.moveTo(x + Math.cos(a) * r0 * 2, y - 6 + Math.sin(a) * r0 * 0.4);
+          ctx.lineTo(x + Math.cos(a) * (r0 + 16) * 2, y - 6 + Math.sin(a) * (r0 + 16) * 0.4);
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+    }
+
+    if (world.lastLandTime >= 0) {
+      const t = (world.time - world.lastLandTime) / FEEDBACK.dustTime;
+      if (t < 1) {
+        // Stofwolkjes bij beide wielen die naar buiten rollen.
+        const x = carScreenX + (world.lastLandX - car.x);
+        const y = world.lastLandY - 6;
+        ctx.save();
+        ctx.globalAlpha = 0.85 * (1 - t);
+        ctx.fillStyle = '#f4ead8';
+        for (let side = -1; side <= 1; side += 2) {
+          for (let i = 0; i < 3; i++) {
+            const dx = side * (car.width * 0.3 + t * (22 + i * 16));
+            const r = 5 + t * 9 + i * 2;
+            ctx.beginPath();
+            ctx.arc(x + dx, y - i * 5 - t * 8, r, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+        ctx.restore();
+      }
+    }
+
+    if (car.bumpTimer > 0) {
+      // Duizelig: drie sterretjes draaien rond boven het dak.
+      const k = car.bumpTimer / BUMP.duration;
+      const cy = car.y - car.height * 1.35;
+      ctx.save();
+      ctx.globalAlpha = Math.min(1, k * 2);
+      ctx.fillStyle = COLORS.star;
+      ctx.strokeStyle = COLORS.starOutline;
+      ctx.lineWidth = 2.5;
+      ctx.lineJoin = 'round';
+      for (let i = 0; i < 3; i++) {
+        const a = world.time * 7 + (i * Math.PI * 2) / 3;
+        ctx.beginPath();
+        starPath(ctx, carScreenX + Math.cos(a) * 34, cy + Math.sin(a) * 9, 9, 4);
+        ctx.fill();
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
   }
 }

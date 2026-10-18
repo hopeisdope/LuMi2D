@@ -2,6 +2,11 @@ import type { CarId, Settings, ThemeId } from '../types';
 
 /** Versie in de sleutel: bij een incompatibele wijziging een nieuwe versie gebruiken. */
 const STORAGE_KEY = 'lumi2d.settings.v1';
+/**
+ * Revisie van de opgeslagen velden binnen dezelfde sleutel. Oneindig rijden werd vanaf revisie 2 de standaard:
+ * een `endless` die eerder is opgeslagen (toen nog standaard uit) telt daarom niet mee.
+ */
+const REVISION = 2;
 
 export const CAR_IDS: readonly CarId[] = ['classic', 'racer', 'jeep', 'bubble'];
 export const THEME_IDS: readonly ThemeId[] = ['meadow', 'dino', 'space', 'candy'];
@@ -10,6 +15,7 @@ export const DEFAULT_SETTINGS: Readonly<Settings> = {
   obstacles: true,
   enemies: true,
   sound: true,
+  endless: true,
   car: 'classic',
   theme: 'meadow',
 };
@@ -30,6 +36,7 @@ export function loadSettings(): Settings {
     if (typeof d.obstacles === 'boolean') settings.obstacles = d.obstacles;
     if (typeof d.enemies === 'boolean') settings.enemies = d.enemies;
     if (typeof d.sound === 'boolean') settings.sound = d.sound;
+    if (typeof d.endless === 'boolean' && d.rev === REVISION) settings.endless = d.endless;
     if (typeof d.car === 'string' && (CAR_IDS as readonly string[]).includes(d.car)) settings.car = d.car as CarId;
     if (typeof d.theme === 'string' && (THEME_IDS as readonly string[]).includes(d.theme)) {
       settings.theme = d.theme as ThemeId;
@@ -43,7 +50,7 @@ export function loadSettings(): Settings {
 /** Bewaart de instellingen; fouten (vol, geblokkeerd) worden genegeerd: het spel werkt dan gewoon door. */
 export function saveSettings(settings: Settings): void {
   try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...settings, rev: REVISION }));
   } catch {
     // Niet kunnen opslaan is geen probleem voor het spelen.
   }

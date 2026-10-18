@@ -23,14 +23,20 @@ export class Layout {
   readonly resume: Button = { id: 'resume', label: 'Verder', icon: 'play', rect: rect() };
   readonly restart: Button = { id: 'restart', label: 'Opnieuw', icon: 'restart', rect: rect() };
   readonly settings: Button = { id: 'settings', label: 'Instellingen', rect: rect() };
+  /** Startscherm: opent het rittenboekje. */
+  readonly book: Button = { id: 'book', label: 'Rittenboekje', rect: rect() };
   readonly toggleObstacles: Button = { id: 'toggleObstacles', label: 'Pionnen & stenen', rect: rect() };
   readonly toggleEnemies: Button = { id: 'toggleEnemies', label: 'Egels', rect: rect() };
   readonly toggleSound: Button = { id: 'toggleSound', label: 'Geluid', rect: rect() };
+  readonly toggleEndless: Button = { id: 'toggleEndless', label: 'Oneindig rijden', rect: rect() };
   readonly done: Button = { id: 'done', label: 'Klaar', icon: 'check', rect: rect() };
   /** Kiesscherm: start de ronde met de gekozen auto en wereld. */
   readonly go: Button = { id: 'go', label: 'Rijden!', icon: 'play', rect: rect() };
   /** Kiesscherm: terug naar het startscherm. */
   readonly back: Button = { id: 'back', label: 'Terug', rect: rect() };
+  /** Overzicht na de finish: nog een rit met dezelfde auto en wereld, of opnieuw kiezen. */
+  readonly again: Button = { id: 'again', label: 'Nog een keer', icon: 'restart', rect: rect() };
+  readonly chooseAgain: Button = { id: 'chooseAgain', label: 'Kiezen', icon: 'car', rect: rect() };
 
   /** Auto-kiezer op het kiesscherm (volgorde = CAR_IDS). */
   readonly carCards: Rect[] = rects(PICKER_COUNT);
@@ -45,28 +51,35 @@ export class Layout {
     // Startscherm: logo, uitnodiging, startknop; tandwiel rechtsboven.
     set(this.start.rect, cx - bw / 2, 250, bw, bh);
     set(this.settings.rect, view.width - size - margin, margin, size, size);
+    set(this.book.rect, margin, margin, size, size);
 
     // Kiesscherm: auto's, werelden en een grote Rijden!-knop; terugknop linksboven.
     placeRow(this.carCards, cx, 100);
-    placeRow(this.worldCards, cx, 252);
-    set(this.go.rect, cx - bw / 2, 376, bw, bh);
+    placeRow(this.worldCards, cx, 276);
+    set(this.go.rect, cx - bw / 2, 392, bw, bh);
     set(this.back.rect, margin, margin, size, size);
 
     // Tijdens het spelen: pauzeknop rechtsboven.
     set(this.pause.rect, view.width - size - margin, margin, size, size);
 
+    // Overzicht na de finish: twee (iets bredere) knoppen naast elkaar.
+    const ww = UI.summaryButtonWidth;
+    set(this.again.rect, cx - ww - UI.menuButton.gap / 2, 410, ww, bh);
+    set(this.chooseAgain.rect, cx + UI.menuButton.gap / 2, 410, ww, bh);
+
     // Pauzescherm: Verder en Opnieuw onder elkaar.
     set(this.resume.rect, cx - bw / 2, 180, bw, bh);
     set(this.restart.rect, cx - bw / 2, 290, bw, bh);
 
-    // Instellingenscherm: drie aan/uit-rijen en een Klaar-knop.
+    // Instellingenscherm: vier aan/uit-rijen en een Klaar-knop.
     const row = UI.settingsRow;
     const rowX = cx - row.width / 2;
     const top = UI.settingsTop;
     set(this.toggleObstacles.rect, rowX, top, row.width, row.height);
     set(this.toggleEnemies.rect, rowX, top + (row.height + row.gap), row.width, row.height);
     set(this.toggleSound.rect, rowX, top + 2 * (row.height + row.gap), row.width, row.height);
-    set(this.done.rect, cx - bw / 2, top + 3 * (row.height + row.gap) + 20, bw, bh);
+    set(this.toggleEndless.rect, rowX, top + 3 * (row.height + row.gap), row.width, row.height);
+    set(this.done.rect, cx - bw / 2, top + 4 * (row.height + row.gap) + 6, bw, bh);
   }
 }
 

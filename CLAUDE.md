@@ -10,7 +10,7 @@ Read `WORKLIST.md` first. Keep `HANDOFF.md` current at the end of long sessions.
 
 ## Stack
 - TypeScript (strict), HTML5 Canvas 2D, Vite as dev server/build tool. Node 22.
-- No game engine or framework, no external assets (images, sounds, fonts).
+- No game engine or framework. No external assets except the sprites in `public/sprites/` (no sounds, no fonts).
 - Structure: `config.ts` (constants), `types.ts`, `core/` (loop, state machine),
   `input/` (raw events → `InputAction`), `world/` (pure game logic),
   `render/` (read-only drawing), `ui/` (button layout + hit-tests),
@@ -22,15 +22,19 @@ Read `WORKLIST.md` first. Keep `HANDOFF.md` current at the end of long sessions.
 ```bash
 npm install && npm run dev   # Vite dev server on port 5173 (--host, reachable from iPad on LAN)
 npm run typecheck && npm run build   # no test framework yet; typecheck + production build are the checks
+node scripts/test-offline.mjs       # after a build: service worker keeps the offline game when the server errors (needs Playwright)
 ```
 
 Hosting: GitHub Pages only (`https://hopeisdope.github.io/LuMi2D/`). `.github/workflows/pages.yml` runs typecheck +
 build and deploys on every push to `main` (also manual via workflow_dispatch). `base: './'` keeps the `/LuMi2D/` subpath working.
-Pages needs a public repo (or GitHub Pro) and Settings → Pages → Source: "GitHub Actions".
+Pages needs a public repo (or GitHub Pro) and Settings → Pages → Source: "GitHub Actions". Pages serves over HTTPS, so the
+service worker (offline mode) works. Dependabot (`.github/dependabot.yml`) opens PRs for Actions updates — merge them when CI is green.
 
 ## Git workflow
 - Work on a feature branch, then always merge it into `main` when the work is done and checks pass
   (open a PR and merge it; merge commit, no squash). No need to ask first — GitHub Pages deploys from `main`.
+- Merge only after the `CI` check (`.github/workflows/ci.yml`: typecheck + build) is green: `gh pr checks <n> --watch`.
+  Required status checks can't be enforced on a private repo without GitHub Pro, so this is a working rule.
 - After merging, sync the local `main`.
 
 ## Conventions
@@ -46,10 +50,24 @@ Pages needs a public repo (or GitHub Pro) and Settings → Pages → Source: "Gi
 - Input goes through `InputManager` as abstract actions; new controls (e.g. jump) are new action types.
 - Use delta time for all movement; avoid allocations in the update/render loop.
 - Touch-first: no hover or mouse-only controls; large tap targets for children.
+- Accessibility scope (deliberate decision, review LUMI-003, 2026-10-16): the UI stays canvas-only and browser zoom stays
+  disabled. Players are toddlers who can't read, tapping fast with several fingers; pinch/double-tap zoom would hijack
+  play, and a timing-based jump game isn't meaningfully playable with a screen reader. Keyboard jump (Space/Enter/↑/W)
+  exists. Revisit only if the audience changes.
 - Every text, button and instruction gets an icon or picture (`src/render/icons.ts`) for children who can't read yet.
-- Storage: only `localStorage` key `lumi2d.settings.v1` for settings (toggles, car, world) via `src/settings/Settings.ts`;
-  always validate on load and fall back to defaults. Never store anything personal or sensitive.
+- Storage: only two `localStorage` keys — `lumi2d.settings.v1` for settings (toggles, car, world) via
+  `src/settings/Settings.ts`, and `lumi2d.progress.v1` for the ride book (counters + stickers) via
+  `src/settings/Progress.ts`. Always validate every field on load and fall back to defaults. Never store anything
+  personal or sensitive. A ride is written to the book in increments (`RideLedger`), so recording on app hide and
+  again at the end never counts anything twice.
 - Sound is synthesized with Web Audio in `src/audio/Sound.ts` (no audio files); it unlocks on the first tap.
+- Sprites (cars, wheels, friends, and the garage, bounce pad, egg, cotton candy, ducks and sheep) are generated artwork: raw PNGs go in `art-incoming/` (git-ignored, not committed),
+  `python3 scripts/process-sprites.py` (Pillow) trims/resizes them into `public/sprites/` and writes
+  `src/render/spriteData.ts` (sizes, wheel positions; generated, don't edit). Renderers draw a sprite only when it
+  has loaded (`ready()` in `src/render/sprites.ts`) and otherwise fall back to the drawn shapes — keep that fallback.
+  Friend sheets hold three poses side by side: idle, wave, cheer. Other sheets (`moment-egg`, `scene-ducks`,
+  `scene-sheep`) keep relative sizes between frames; draw them with `drawFrame()`. The garage sprite's transparent
+  doorway is detected by the script (`GARAGE_SPRITE.opening`).
 - PWA: `public/manifest.webmanifest`, icons in `public/icons/` (regenerate with `scripts/generate-icons.mjs`),
   service worker generated at build time from `sw-template.js` by the plugin in `vite.config.ts` (production only).
 

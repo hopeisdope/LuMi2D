@@ -1,6 +1,23 @@
-import { BUMP, CAR_HITBOX, ENEMIES, OBSTACLES, PLATFORMS, RAINBOW, WORLD } from '../config';
+import {
+  BOUNCE,
+  BUMP,
+  CAR_HITBOX,
+  ENEMIES,
+  FRIENDS,
+  MOMENTS,
+  OBSTACLES,
+  PLATFORMS,
+  RAINBOW,
+  RIDE,
+  SCENES,
+  WORLD,
+} from '../config';
 import type { Obstacle, ObstacleKind, WorldState } from '../types';
 import { canSpawnRainbowPiece, spawnPlatformWithBoost, spawnRainbowPiece } from './Collectibles';
+import { friendBetween } from './Friends';
+import { spawnMoment } from './Moments';
+import { bounceDistance, spawnPad } from './Pads';
+import { trySpawnScene } from './Scenes';
 
 /** Stilstaande obstakelsoorten. */
 const STATIC_KINDS = ['cone', 'rock', 'crate'] as const;
@@ -80,15 +97,42 @@ function spawnAhead(world: WorldState): void {
 
   while (car.x + OBSTACLES.spawnAhead >= world.nextObstacleAt) {
     const x0 = world.nextObstacleAt;
+    if (x0 > world.finishX - RIDE.clearBeforeFinish) {
+      // Vrije weg naar de finish.
+      world.nextObstacleAt = Infinity;
+      return;
+    }
     const gap = OBSTACLES.minGap + world.random() * (OBSTACLES.maxGap - OBSTACLES.minGap);
+    // Platforms, spelmomenten en taferelen niet waar al een vriendje staat (anders overlappen ze).
+    const m = FRIENDS.clearance;
+    const sceneLength = friendBetween(world, x0 - m, x0 + SCENES.length) ? 0 : trySpawnScene(world, x0);
+    if (sceneLength > 0) {
+      // Verrassingstafereel: een stuk vrije weg, daarna de gewone tussenruimte.
+      world.nextObstacleAt = x0 + sceneLength + gap;
+      continue;
+    }
     const roll = world.random();
 
-    if (roll < PLATFORMS.chance && spawnPlatformWithBoost(world, x0)) {
+    const platformFree = !friendBetween(world, x0 - m, x0 + PLATFORMS.width + m);
+    if (roll < PLATFORMS.chance && platformFree && spawnPlatformWithBoost(world, x0)) {
       world.nextObstacleAt = x0 + PLATFORMS.width + gap;
       continue;
     }
-    if (roll < PLATFORMS.chance + RAINBOW.chance && canSpawnRainbowPiece(world)) {
+    const rainbowAllowed = x0 < world.finishX - RIDE.noRainbowBeforeFinish;
+    if (roll < PLATFORMS.chance + RAINBOW.chance && rainbowAllowed && canSpawnRainbowPiece(world)) {
       spawnRainbowPiece(world, x0);
+      world.nextObstacleAt = x0 + gap;
+      continue;
+    }
+    if (roll >= PLATFORMS.chance + RAINBOW.chance && roll < PLATFORMS.chance + RAINBOW.chance + BOUNCE.chance && spawnPad(world, x0)) {
+      // Na een springkussen: ruimte voor de lange veersprong en daarna de gewone tussenruimte.
+      world.nextObstacleAt = x0 + bounceDistance() + gap;
+      continue;
+    }
+    const momentFrom = PLATFORMS.chance + RAINBOW.chance + BOUNCE.chance;
+    const momentFree = !friendBetween(world, x0 - m - MOMENTS.radius, x0 + m + MOMENTS.radius);
+    if (roll >= momentFrom && roll < momentFrom + MOMENTS.chance && momentFree && spawnMoment(world, x0)) {
+      // Spelmoment van de wereld (geen obstakel): gewone tussenruimte tot het volgende deel.
       world.nextObstacleAt = x0 + gap;
       continue;
     }
@@ -140,6 +184,7 @@ export function updateObstacles(world: WorldState, dt: number): void {
     if (carLeft > right) {
       // Helemaal voorbij zonder botsing: ster verdiend.
       o.cleared = true;
+      world.events.cleared = true;
       world.score++;
       world.lastScoreTime = world.time;
       world.events.scored = true;
