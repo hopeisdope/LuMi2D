@@ -22,28 +22,14 @@ het ook zonder internet (na één keer online openen). Instellingen worden op he
 
 Iconen opnieuw maken na een wijziging van `public/icons/icon.svg`: `node scripts/generate-icons.mjs` (vereist Playwright).
 
-## Hosting (eigen server met Docker)
+## Hosting (GitHub Pages)
 
-De game draait als container op een eigen server, bijvoorbeeld een Docker-VM in Proxmox, en is dan alleen op het
-lokale netwerk te spelen.
+De game staat op GitHub Pages: https://hopeisdope.github.io/LuMi2D/
+Elke push naar `main` bouwt en publiceert automatisch via `.github/workflows/pages.yml`
+(handmatig opnieuw publiceren: Actions → "Deploy naar GitHub Pages" → Run workflow).
 
-Eerste keer (op de server; de repo is privé, dus klonen met een SSH-sleutel of een GitHub-token):
-
-```bash
-git clone git@github.com:hopeisdope/LuMi2D.git
-cd LuMi2D
-docker compose up -d --build        # bouwt de game en start nginx op poort 8080
-```
-
-Daarna spelen via `http://<ip-van-de-server>:8080` (andere poort: `LUMI2D_PORT=9000 docker compose up -d --build`).
-Bijwerken naar de nieuwste versie: `git pull && docker compose up -d --build`.
-
-Let op: via gewoon `http://` op een netwerkadres staat de browser geen service worker toe. Het spel werkt dan
-volledig, alleen niet offline. Wil je offline spelen, zet er dan een reverse proxy met HTTPS voor
-(bijvoorbeeld Nginx Proxy Manager, Caddy of Traefik).
-
-GitHub Pages kan later nog: de workflow `.github/workflows/pages.yml` is handmatig te starten zodra de repo
-publiek is (of met GitHub Pro).
+Eenmalig instellen: Settings → Pages → Source: **GitHub Actions**. GitHub Pages werkt alleen met een publieke repo
+(of met GitHub Pro). Pages draait via HTTPS, dus de service worker werkt en het spel is offline speelbaar.
 
 Bediening: tik om te starten, tik ergens op het scherm om te springen, pauzeknop rechtsboven.
 Spring over pionnen, stenen en kistjes: elk obstakel waar je overheen springt levert een ster op.
