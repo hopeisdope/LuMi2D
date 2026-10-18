@@ -189,9 +189,13 @@ export const SCENES = {
     count: 4,
     /** De voorkant van de auto stopt zo ver vóór de oversteekplek. */
     stopBefore: 150,
+    /** Startpunt: zo ver onder de grondlijn, in het gras vóór de weg. */
+    start: 72,
+    /** Eindpunt: zo ver boven de grondlijn, op de berm waar ook de vriendjes staan (hoger zweven ze in de heuvels). */
+    berm: 4,
   },
   tunnel: { halfWidth: 160, height: 250 },
-  herd: { count: 4, spacing: 58, triggerDistance: 560, hopTime: 0.5, stagger: 0.15, berm: 10 },
+  herd: { count: 4, spacing: 58, triggerDistance: 560, hopTime: 0.5, stagger: 0.15, berm: 4 },
 } as const;
 
 /** Turbo: tijdelijk sneller rijden en obstakels zonder hobbel wegknallen. */

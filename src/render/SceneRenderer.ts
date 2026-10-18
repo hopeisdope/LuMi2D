@@ -66,8 +66,9 @@ export class SceneRenderer {
       const d = SCENES.ducks;
       for (let i = 0; i < d.count; i++) {
         const k = t < 0 ? 0 : Math.min(1, Math.max(0, (t - i * d.stagger) / d.crossTime));
-        const y = ground + 72 - k * 82;
+        const y = ground + d.start - k * (d.start + d.berm);
         const walking = k > 0 && k < 1;
+        this.shadow(spot + (i - 1.5) * 34, y, i === 0 ? 20 : 13);
         if (ready(PROP_IMAGES.ducks)) {
           // Vel: moeder (beeld 0/1) en kuiken (2/3), twee loopbeelden die afwisselen tijdens het lopen.
           const step = walking ? Math.floor(world.time / SPRITES.walkFrameTime + i) % 2 : 0;
@@ -83,7 +84,9 @@ export class SceneRenderer {
       for (let i = 0; i < h.count; i++) {
         const k = t < 0 ? 0 : Math.min(1, Math.max(0, (t - i * h.stagger) / h.hopTime));
         const hop = Math.sin(k * Math.PI) * 40;
-        const y = ground + 8 - k * (8 + h.berm) - hop;
+        const feet = ground + 8 - k * (8 + h.berm);
+        const y = feet - hop;
+        this.shadow(spot + i * h.spacing + k * 14, feet, 22);
         const idle = k >= 1 ? Math.abs(Math.sin(world.time * 3 + i)) * 3 : 0;
         if (ready(PROP_IMAGES.sheep)) {
           // Staan (beeld 0) of huppelen (beeld 1).
@@ -121,6 +124,15 @@ export class SceneRenderer {
       ctx.fill();
     }
     ctx.restore();
+  }
+
+  /** Zachte schaduw onder de voeten, zodat eendjes en schaapjes op de grond staan. */
+  private shadow(x: number, y: number, rx: number): void {
+    const { ctx } = this;
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+    ctx.beginPath();
+    ctx.ellipse(x, y, rx, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
   }
 
   /** Bordje in de berm met het plaatje van wat er komt. */
