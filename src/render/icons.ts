@@ -22,6 +22,7 @@ export type IconName =
   | 'exclaim'
   | 'note'
   | 'book'
+  | 'home'
   | 'flag'
   | 'rainbow'
   | 'crown'
@@ -240,6 +241,27 @@ export function drawIcon(
       ctx.closePath();
       ctx.fill();
       break;
+    case 'home': {
+      // Huisje: puntdak met schoorsteen en een uitgespaard deurtje.
+      ctx.fillRect(cx + s * 0.4, cy - s * 0.78, s * 0.24, s * 0.5);
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - s * 0.9);
+      ctx.lineTo(cx + s * 0.95, cy - s * 0.05);
+      ctx.lineTo(cx + s * 0.68, cy - s * 0.05);
+      ctx.lineTo(cx + s * 0.68, cy + s * 0.85);
+      ctx.lineTo(cx - s * 0.68, cy + s * 0.85);
+      ctx.lineTo(cx - s * 0.68, cy - s * 0.05);
+      ctx.lineTo(cx - s * 0.95, cy - s * 0.05);
+      ctx.closePath();
+      // Deurtje: met 'evenodd' uitgespaard uit het huis.
+      ctx.moveTo(cx - s * 0.2, cy + s * 0.85);
+      ctx.lineTo(cx - s * 0.2, cy + s * 0.25);
+      ctx.lineTo(cx + s * 0.2, cy + s * 0.25);
+      ctx.lineTo(cx + s * 0.2, cy + s * 0.85);
+      ctx.closePath();
+      ctx.fill('evenodd');
+      break;
+    }
     case 'flag':
       // Vlaggetje (finish/rit) aan een stok.
       ctx.lineWidth = s * 0.16;

@@ -418,6 +418,11 @@ export const COLORS = {
 /** Posities en afmetingen van UI-elementen op het virtuele 2D-scherm. */
 export const UI = {
   pauseButton: { size: 72, margin: 20 },
+  /**
+   * Thuisknop (naar de spelletjesportal) linksboven op het startscherm, even groot als de andere hoekknoppen.
+   * `gap` houdt het rittenboekje eronder ver genoeg weg: de hit-tests (12 marge rondom) overlappen niet.
+   */
+  homeButton: { size: 72, margin: 20, gap: 32 },
   score: { margin: 22, starSize: 30 },
   settingsRow: { width: 540, height: 64, gap: 10 },
   /** Bovenkant van de eerste instellingenrij. */

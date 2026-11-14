@@ -104,6 +104,7 @@ export class UIRenderer {
         this.button(layout.start);
         this.iconButton(layout.settings, 'gear');
         this.iconButton(layout.book, 'book');
+        this.iconButton(layout.home, 'home');
         break;
       case 'book':
         this.dim(view);

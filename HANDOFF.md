@@ -1,4 +1,4 @@
-# Handoff — 2026-10-16
+# Handoff — 2026-11-14
 
 Concise state for reloading into a fresh session. Details are in `WORKLIST.md`.
 
@@ -51,6 +51,10 @@ Concise state for reloading into a fresh session. Details are in `WORKLIST.md`.
 - Typecheck, build and `scripts/test-offline.mjs` pass; features tested in Chromium (Playwright) with iPad viewports via
   the dev build's `window.game` (state can be staged), not yet on a real device.
 
+- Thuisknop (2026-11-14): huisje linksboven op het startscherm (`Layout.home`, maten `UI.homeButton`), boekje eronder.
+  Tik of Home-toets → InputAction `home` → `Game.goHome()` (alleen in `ready`): `recordRide()` en dan
+  `location.assign(location.origin + '/')` — bewust niet de Vite-base ('./' = /LuMi2D/ zelf). Test: `node scripts/test-home-button.mjs`
+  (na build; serveert dist onder /LuMi2D/ met een nep-portal op `/`, iPad-viewports met hasTouch).
 - Flow: start (`ready`) → kiesscherm (`choose`: auto + wereld, Rijden!) → `playing` ⇄ `paused`; Opnieuw in de pauze gaat terug naar `choose`. Auto/wereld kiezen kan alleen op het kiesscherm (`Game.choose` checkt de state).
 
 ## Watch out for
