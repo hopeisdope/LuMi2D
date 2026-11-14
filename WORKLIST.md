@@ -10,6 +10,7 @@ Read at the start of every session; update when something is done or added.
 
 ## Next
 
+- [ ] Check the home button on a real iPad, also from the installed PWA (leaving the `/LuMi2D/` scope opens the portal; offline the portal won't load)
 - [ ] Check the new sprites on a real iPad (sharpness, size of friends next to the car)
 - [ ] Configurable auto-movement, difficulty and increasing speed
 
@@ -20,6 +21,7 @@ Read at the start of every session; update when something is done or added.
 
 ## Done
 
+- [x] Thuisknop (huisje) linksboven op het startscherm, naar de spelletjesportal op `https://hopeisdope.github.io/` (`location.origin + '/'`); rittenboekje eronder. Alleen op het startscherm, nooit tijdens het rijden; nieuwe InputAction `home` (tik of Home-toets); lopende rit gaat eerst in het boekje (RideLedger, niets dubbel). Test: `scripts/test-home-button.mjs`
 - [x] Crossing ducks (and the sheep herd) no longer float above the road: they end on the berm line like the friends (`SCENES.ducks.berm`, `herd.berm` 4), with a soft shadow under each
 - [x] Hosting fully on GitHub: Docker removed (Dockerfile, nginx, compose, Dependabot docker updates), Pages workflow deploys automatically on push to `main` (typecheck + build)
 - [x] README: detailed feature overview and design rules, to brief ChatGPT for new feature ideas

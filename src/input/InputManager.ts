@@ -75,6 +75,10 @@ export class InputManager {
         event.preventDefault();
         this.push({ type: 'jump' });
         break;
+      case 'Home':
+        event.preventDefault();
+        this.push({ type: 'home' });
+        break;
       case 'Space':
       case 'Enter':
         event.preventDefault();

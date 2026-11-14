@@ -113,7 +113,9 @@ export type InputAction =
   | { type: 'tap'; x: number; y: number }
   | { type: 'jump' }
   | { type: 'togglePause' }
-  | { type: 'confirm' };
+  | { type: 'confirm' }
+  /** Naar de spelletjesportal (alleen vanaf het startscherm). */
+  | { type: 'home' };
 
 export interface Car {
   /** Wereldpositie (x groeit met de afgelegde afstand). */
@@ -375,6 +377,7 @@ export interface Button {
     | 'restart'
     | 'settings'
     | 'book'
+    | 'home'
     | 'toggleObstacles'
     | 'toggleEnemies'
     | 'toggleSound'

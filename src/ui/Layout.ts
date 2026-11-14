@@ -23,6 +23,8 @@ export class Layout {
   readonly resume: Button = { id: 'resume', label: 'Verder', icon: 'play', rect: rect() };
   readonly restart: Button = { id: 'restart', label: 'Opnieuw', icon: 'restart', rect: rect() };
   readonly settings: Button = { id: 'settings', label: 'Instellingen', rect: rect() };
+  /** Startscherm: naar de spelletjesportal (nooit tijdens het rijden). */
+  readonly home: Button = { id: 'home', label: 'Naar huis', rect: rect() };
   /** Startscherm: opent het rittenboekje. */
   readonly book: Button = { id: 'book', label: 'Rittenboekje', rect: rect() };
   readonly toggleObstacles: Button = { id: 'toggleObstacles', label: 'Pionnen & stenen', rect: rect() };
@@ -48,10 +50,13 @@ export class Layout {
     const cx = view.width / 2;
     const { size, margin } = UI.pauseButton;
 
-    // Startscherm: logo, uitnodiging, startknop; tandwiel rechtsboven.
+    // Startscherm: logo, uitnodiging, startknop; thuisknop linksboven met het boekje eronder (naast elkaar
+    // raakt het boekje op 4:3-schermen het logo), tandwiel rechtsboven.
     set(this.start.rect, cx - bw / 2, 250, bw, bh);
     set(this.settings.rect, view.width - size - margin, margin, size, size);
-    set(this.book.rect, margin, margin, size, size);
+    const home = UI.homeButton;
+    set(this.home.rect, home.margin, home.margin, home.size, home.size);
+    set(this.book.rect, margin, home.margin + home.size + home.gap, size, size);
 
     // Kiesscherm: auto's, werelden en een grote Rijden!-knop; terugknop linksboven.
     placeRow(this.carCards, cx, 100);

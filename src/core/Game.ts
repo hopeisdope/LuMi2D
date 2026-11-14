@@ -10,8 +10,12 @@ import { hitCard, hitTest, Layout } from '../ui/Layout';
 import { createWorld, jump, resetWorld, updateWorld } from '../world/World';
 import { GameLoop } from './GameLoop';
 
+/** Vaste actie voor een tik op de thuisknop (geen allocatie per tik). */
+const HOME_ACTION: InputAction = { type: 'home' };
+
 /**
- * Regisseert de game: toestandsmachine (ready ⇄ settings, ready ⇄ book, ready → choose → playing ⇄ paused, paused → choose),
+ * Regisseert de game: toestandsmachine (ready ⇄ settings, ready ⇄ book, ready → choose → playing ⇄ paused, paused → choose,
+ * ready → portal),
  * verwerkt input-acties en roept wereld-update en rendering aan.
  */
 export class Game {
@@ -27,6 +31,8 @@ export class Game {
   /** Rittenboekje (localStorage) en wat er van de huidige rit al in staat. */
   private readonly progress = loadProgress();
   private readonly ledger = newLedger();
+  /** Wordt true zodra we naar de portal navigeren: extra tikken doen dan niets meer. */
+  private leaving = false;
   /** Overzicht van de laatst uitgereden rit. */
   private readonly summary: RideSummary = {
     stars: 0,
@@ -122,6 +128,19 @@ export class Game {
   restart(): void {
     this.recordRide();
     this.openChooser();
+  }
+
+  /**
+   * Naar de spelletjesportal op de root van hetzelfde domein (https://hopeisdope.github.io/).
+   * Bewust `location.origin + '/'` en niet de Vite-base: './' of BASE_URL wijst naar /LuMi2D/ zelf.
+   * Alleen vanaf het startscherm, nooit tijdens het rijden. Een eventueel lopende rit gaat eerst in het
+   * boekje; `pagehide` schrijft daarna nog eens, maar de RideLedger zorgt dat niets dubbel telt.
+   */
+  goHome(): void {
+    if (this.state !== 'ready' || this.leaving) return;
+    this.leaving = true;
+    this.recordRide();
+    location.assign(location.origin + '/');
   }
 
   openBook(): void {
@@ -239,6 +258,9 @@ export class Game {
         else if (this.state === 'paused') this.resume();
         else if (this.state === 'finished') this.start();
         break;
+      case 'home':
+        this.goHome();
+        break;
       case 'tap':
         this.handleTap(action.x, action.y);
         break;
@@ -249,9 +271,11 @@ export class Game {
     const p = this.screen.toWorld(cssX, cssY, this.tapPoint);
     switch (this.state) {
       case 'ready':
-        // Tandwiel opent de instellingen, het boekje het rittenboekje; overal elders tikken gaat naar het kiesscherm.
+        // Tandwiel opent de instellingen, het boekje het rittenboekje, het huisje de portal;
+        // overal elders tikken gaat naar het kiesscherm.
         this.sound.play('tap');
-        if (hitTest(this.layout.settings.rect, p.x, p.y)) this.openSettings();
+        if (hitTest(this.layout.home.rect, p.x, p.y)) this.handleAction(HOME_ACTION);
+        else if (hitTest(this.layout.settings.rect, p.x, p.y)) this.openSettings();
         else if (hitTest(this.layout.book.rect, p.x, p.y)) this.openBook();
         else this.openChooser();
         break;
